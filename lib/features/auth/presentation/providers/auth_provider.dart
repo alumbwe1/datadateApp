@@ -1,30 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/datasources/auth_local_datasource.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../../../main.dart';
 
 // Data sources
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage();
 });
 
-final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
-  ref,
-) async {
-  return await SharedPreferences.getInstance();
-});
-
 final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
   final secureStorage = ref.watch(secureStorageProvider);
-  final sharedPrefs = ref.watch(sharedPreferencesProvider).value;
-
-  if (sharedPrefs == null) {
-    throw Exception('SharedPreferences not initialized');
-  }
+  final sharedPrefs = ref.watch(sharedPreferencesProvider);
 
   return AuthLocalDataSourceImpl(
     secureStorage: secureStorage,

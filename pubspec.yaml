@@ -58,6 +58,7 @@ dependencies:
   cached_network_image: ^3.4.1
   lottie: ^3.1.2
   flutter_card_swiper: ^7.0.1
+  smooth_page_indicator: ^1.2.0+3
   
   # Voice Calls
   agora_rtc_engine: ^6.3.2
