@@ -19,7 +19,7 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -39,7 +39,7 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
               ),
               const SizedBox(height: 32),
               _DatingGoalOption(
-                icon: Icons.coffee,
+                emoji: '☕',
                 title: 'Here to date',
                 description:
                     'I want to go on dates and have a good time. No labels.',
@@ -49,7 +49,7 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               _DatingGoalOption(
-                icon: Icons.chat_bubble,
+                emoji: '💬',
                 title: 'Open to chat',
                 description:
                     'I\'m here to chat and see where it goes. No pressure.',
@@ -59,7 +59,7 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               _DatingGoalOption(
-                icon: Icons.favorite,
+                emoji: '❤️',
                 title: 'Ready for a relationship',
                 description: 'I\'m looking for something that lasts. No games.',
                 isSelected: selectedGoal == 'relationship',
@@ -67,13 +67,14 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
                     .read(onboardingProvider.notifier)
                     .setDatingGoal('relationship'),
               ),
-              const Spacer(),
+              const SizedBox(height: 40),
               CustomButton(
                 text: 'Continue',
                 onPressed: selectedGoal != null
                     ? () => context.push('/onboarding/interests')
                     : null,
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -83,14 +84,14 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
 }
 
 class _DatingGoalOption extends StatelessWidget {
-  final IconData icon;
+  final String emoji;
   final String title;
   final String description;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _DatingGoalOption({
-    required this.icon,
+    required this.emoji,
     required this.title,
     required this.description,
     required this.isSelected,
@@ -101,14 +102,15 @@ class _DatingGoalOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.1)
-              : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
+              ? Theme.of(context).primaryColor.withOpacity(0.15)
+              : const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).primaryColor
@@ -119,17 +121,16 @@ class _DatingGoalOption extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
+                    ? Theme.of(context).primaryColor.withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
-                icon,
-                color: isSelected ? Colors.white : Colors.grey,
-                size: 28,
+              child: Center(
+                child: Text(emoji, style: const TextStyle(fontSize: 28)),
               ),
             ),
             const SizedBox(width: 16),
@@ -148,7 +149,7 @@ class _DatingGoalOption extends StatelessWidget {
                     description,
                     style: Theme.of(
                       context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                    ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                   ),
                 ],
               ),
@@ -157,6 +158,7 @@ class _DatingGoalOption extends StatelessWidget {
               value: true,
               groupValue: isSelected,
               onChanged: (_) => onTap(),
+              activeColor: Theme.of(context).primaryColor,
             ),
           ],
         ),

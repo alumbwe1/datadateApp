@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
 import '../providers/encounters_provider.dart';
@@ -33,23 +34,31 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
     final profiles = encountersState.profiles;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Encounters'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'DataDate',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+          ).copyWith(letterSpacing: -0.5),
+        ),
         actions: [
+          // IconButton(
+          //   icon: const Icon(Icons.refresh, color: Colors.black),
+          //   onPressed: () {
+          //     final user = ref.read(authProvider).user;
+          //     if (user != null) {
+          //       ref.read(encountersProvider.notifier).loadProfiles(user.gender);
+          //     }
+          //   },
+          // ),
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              final user = ref.read(authProvider).user;
-              if (user != null) {
-                ref.read(encountersProvider.notifier).loadProfiles(user.gender);
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.tune),
-            onPressed: () {
-              // Show filters
-            },
+            icon: const Icon(Icons.tune, color: Colors.black),
+            onPressed: () {},
           ),
         ],
       ),
@@ -60,7 +69,12 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(encountersState.error!),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    encountersState.error!,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
@@ -77,67 +91,93 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
               ),
             )
           : profiles.isEmpty
-          ? const Center(child: Text('No more profiles available'))
-          : Column(
-              children: [
-                Expanded(
-                  child: CardSwiper(
-                    controller: _controller,
-                    cardsCount: profiles.length,
-                    onSwipe: (previousIndex, currentIndex, direction) {
-                      final profile = profiles[previousIndex];
-
-                      if (direction == CardSwiperDirection.right) {
-                        ref
-                            .read(encountersProvider.notifier)
-                            .likeProfile(profile.id);
-                      } else if (direction == CardSwiperDirection.left) {
-                        ref
-                            .read(encountersProvider.notifier)
-                            .skipProfile(profile.id);
-                      }
-
-                      return true;
-                    },
-                    cardBuilder:
-                        (context, index, percentThresholdX, percentThresholdY) {
-                          return ProfileCard(profile: profiles[index]);
-                        },
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('🎉', style: TextStyle(fontSize: 80)),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'No more profiles',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Check back later for new matches',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            )
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
-                _buildActionButtons(),
-              ],
+                child: CardSwiper(
+                  controller: _controller,
+                  cardsCount: profiles.length,
+                  numberOfCardsDisplayed: 2,
+                  backCardOffset: const Offset(0, -20),
+                  padding: EdgeInsets.zero,
+                  onSwipe: (previousIndex, currentIndex, direction) {
+                    final profile = profiles[previousIndex];
+
+                    if (direction == CardSwiperDirection.right) {
+                      ref
+                          .read(encountersProvider.notifier)
+                          .likeProfile(profile.id);
+                    } else if (direction == CardSwiperDirection.left) {
+                      ref
+                          .read(encountersProvider.notifier)
+                          .skipProfile(profile.id);
+                    }
+
+                    return true;
+                  },
+                  cardBuilder:
+                      (context, index, percentThresholdX, percentThresholdY) {
+                        return Stack(
+                          children: [
+                            ProfileCard(profile: profiles[index]),
+                            Positioned(
+                              bottom: 20,
+                              left: 0,
+                              right: 0,
+                              child: _buildActionButtons(),
+                            ),
+                          ],
+                        );
+                      },
+                ),
+              ),
             ),
     );
   }
 
   Widget _buildActionButtons() {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 60),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildActionButton(
             icon: Icons.close,
-            color: Colors.red,
+            color: Colors.black,
+            size: 65,
+            iconSize: 35,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.left);
             },
           ),
           _buildActionButton(
-            icon: Icons.favorite,
-            color: Colors.pink,
-            size: 70,
+            icon: Iconsax.heart,
+            color: Colors.black,
+            size: 65,
             iconSize: 35,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.right);
-            },
-          ),
-          _buildActionButton(
-            icon: Icons.star,
-            color: Colors.blue,
-            onPressed: () {
-              // Super like
             },
           ),
         ],
@@ -149,8 +189,8 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
     required IconData icon,
     required Color color,
     required VoidCallback onPressed,
-    double size = 60,
-    double iconSize = 30,
+    required double size,
+    required double iconSize,
   }) {
     return Container(
       width: size,
@@ -160,15 +200,21 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: IconButton(
-        icon: Icon(icon, color: color, size: iconSize),
-        onPressed: onPressed,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const CircleBorder(),
+          child: Center(
+            child: Icon(icon, color: color, size: iconSize),
+          ),
+        ),
       ),
     );
   }

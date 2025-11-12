@@ -16,17 +16,17 @@ class _OnboardingWelcomePageState extends State<OnboardingWelcomePage> {
 
   final List<OnboardingSlide> _slides = [
     OnboardingSlide(
-      icon: Icons.favorite,
+      emoji: '💕',
       title: 'Find Your Match',
       description: 'Connect with people who share your interests and values',
     ),
     OnboardingSlide(
-      icon: Icons.chat_bubble_outline,
+      emoji: '💬',
       title: 'Start Conversations',
       description: 'Break the ice with meaningful conversations',
     ),
     OnboardingSlide(
-      icon: Icons.video_call,
+      emoji: '📹',
       title: 'Video Dates',
       description: 'Get to know each other better with video calls',
     ),
@@ -44,6 +44,23 @@ class _OnboardingWelcomePageState extends State<OnboardingWelcomePage> {
       body: SafeArea(
         child: Column(
           children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextButton(
+                  onPressed: () => context.go('/login'),
+                  child: Text(
+                    'SKIP',
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -59,20 +76,21 @@ class _OnboardingWelcomePageState extends State<OnboardingWelcomePage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
                   SmoothPageIndicator(
                     controller: _pageController,
                     count: _slides.length,
                     effect: WormEffect(
-                      dotHeight: 8,
-                      dotWidth: 8,
+                      dotHeight: 10,
+                      dotWidth: 10,
                       activeDotColor: Theme.of(context).primaryColor,
                       dotColor: Colors.grey.withOpacity(0.3),
+                      spacing: 16,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
                   CustomButton(
                     text: _currentPage == _slides.length - 1
                         ? 'Get Started'
@@ -91,7 +109,10 @@ class _OnboardingWelcomePageState extends State<OnboardingWelcomePage> {
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () => context.go('/login'),
-                    child: const Text('Already have an account? Sign in'),
+                    child: Text(
+                      'Already have an account? Sign in',
+                      style: TextStyle(color: Colors.grey[400]),
+                    ),
                   ),
                 ],
               ),
@@ -104,36 +125,45 @@ class _OnboardingWelcomePageState extends State<OnboardingWelcomePage> {
 
   Widget _buildSlide(OnboardingSlide slide) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(40),
+            width: 200,
+            height: 200,
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.2),
+                  Theme.of(context).primaryColor.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              slide.icon,
-              size: 100,
-              color: Theme.of(context).primaryColor,
+            child: Center(
+              child: Text(slide.emoji, style: const TextStyle(fontSize: 100)),
             ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 60),
           Text(
             slide.title,
-            style: Theme.of(
-              context,
-            ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 32,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
             slide.description,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Colors.grey[400],
+              fontSize: 16,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -143,12 +173,12 @@ class _OnboardingWelcomePageState extends State<OnboardingWelcomePage> {
 }
 
 class OnboardingSlide {
-  final IconData icon;
+  final String emoji;
   final String title;
   final String description;
 
   OnboardingSlide({
-    required this.icon,
+    required this.emoji,
     required this.title,
     required this.description,
   });

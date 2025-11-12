@@ -2,7 +2,7 @@ name: datadate
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -34,24 +34,24 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  
+
   # State Management
   flutter_riverpod: ^2.5.1
   hooks_riverpod: ^2.5.1
   flutter_hooks: ^0.20.5
-  
+
   # Navigation
   go_router: ^14.2.7
-  
+
   # Local Storage
   shared_preferences: ^2.3.2
   flutter_secure_storage: ^9.2.2
-  
+
   # HTTP & API
   dio: ^5.7.0
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
-  
+
   # UI & Animations
   shimmer: ^3.0.0
   google_fonts: ^6.2.1
@@ -59,15 +59,20 @@ dependencies:
   lottie: ^3.1.2
   flutter_card_swiper: ^7.0.1
   smooth_page_indicator: ^1.2.0+3
-  
+
   # Voice Calls
   agora_rtc_engine: ^6.3.2
   permission_handler: ^11.3.1
-  
+
   # Utils
   intl: ^0.19.0
   equatable: ^2.0.5
   dartz: ^0.10.1
+
+  #Icons
+  iconly: ^1.0.1
+  iconsax_flutter: ^1.0.1
+  iconsax: ^0.0.8
 
 dev_dependencies:
   flutter_test:
@@ -79,7 +84,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
-  
+
   # Code Generation
   build_runner: ^2.4.13
   freezed: ^2.5.7
@@ -90,7 +95,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

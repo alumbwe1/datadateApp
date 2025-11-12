@@ -39,7 +39,7 @@ class _OnboardingLocationPageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Enter Your Location',
+                'What\'s Your Location?',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -51,13 +51,26 @@ class _OnboardingLocationPageState
                   context,
                 ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
               ),
-              const SizedBox(height: 32),
-              Icon(
-                Icons.location_on,
-                size: 80,
-                color: Theme.of(context).primaryColor,
+              const SizedBox(height: 48),
+              Center(
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor.withOpacity(0.2),
+                        Theme.of(context).primaryColor.withOpacity(0.05),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text('📍', style: TextStyle(fontSize: 60)),
+                  ),
+                ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 48),
               CustomTextField(
                 label: 'Location',
                 hint: 'Enter your city',
@@ -65,17 +78,37 @@ class _OnboardingLocationPageState
                 prefixIcon: const Icon(Icons.search),
               ),
               const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () {
-                  // In a real app, this would use location services
-                  _locationController.text = 'Current Location';
-                },
-                icon: const Icon(Icons.my_location),
-                label: const Text('Use Current Location'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).primaryColor.withOpacity(0.1),
+                      Theme.of(context).primaryColor.withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    _locationController.text = 'Current Location';
+                  },
+                  icon: Icon(
+                    Icons.my_location,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  label: Text(
+                    'Use Current Location',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ),
@@ -91,6 +124,7 @@ class _OnboardingLocationPageState
                   }
                 },
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

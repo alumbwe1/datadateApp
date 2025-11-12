@@ -12,30 +12,46 @@ class OnboardingCompletePage extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              Icon(
-                Icons.check_circle,
-                size: 120,
-                color: Theme.of(context).primaryColor,
+              Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).primaryColor.withOpacity(0.3),
+                      Theme.of(context).primaryColor.withOpacity(0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Text('🎉', style: TextStyle(fontSize: 80)),
+                ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 48),
               Text(
                 'You\'re All Set!',
-                style: Theme.of(
-                  context,
-                ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 36,
+                ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Text(
                 'Start exploring and find your perfect match',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.grey[400],
+                  fontSize: 16,
+                  height: 1.5,
+                ),
                 textAlign: TextAlign.center,
               ),
               const Spacer(),
@@ -50,6 +66,7 @@ class OnboardingCompletePage extends ConsumerWidget {
                   }
                 },
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),

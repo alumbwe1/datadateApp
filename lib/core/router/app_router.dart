@@ -47,7 +47,7 @@ class AppRouter {
         routes: [
           GoRoute(
             path: '/encounters',
-            builder: (context, state) => const EncountersPage(),
+            builder: (context, state) => EncountersPage(),
           ),
           GoRoute(
             path: '/profile',

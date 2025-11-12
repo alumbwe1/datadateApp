@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconly/iconly.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class MainNavigation extends StatefulWidget {
   final Widget child;
@@ -17,9 +19,63 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(color: Colors.white),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  icon: Icons.local_fire_department,
+                  label: 'Encounters',
+                  index: 0,
+                  activeColor: const Color(0xFFFF6B6B),
+                ),
+                _buildNavItem(
+                  icon: IconlyBold.discovery,
+                  label: 'Nearby',
+                  index: 1,
+                  activeColor: Colors.black,
+                ),
+                _buildNavItem(
+                  icon: Iconsax.heart,
+                  label: 'Likes',
+                  index: 2,
+                  activeColor: const Color(0xFF00D9A3),
+                ),
+                _buildNavItem(
+                  icon: Iconsax.message,
+                  label: 'Chats',
+                  index: 3,
+                  activeColor: Colors.black,
+                ),
+                _buildNavItem(
+                  icon: Iconsax.user,
+                  label: 'Profile',
+                  index: 4,
+                  activeColor: Colors.black,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    required int index,
+    required Color activeColor,
+  }) {
+    final isActive = _currentIndex == index;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
           setState(() {
             _currentIndex = index;
           });
@@ -42,25 +98,20 @@ class _MainNavigationState extends State<MainNavigation> {
               break;
           }
         },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Encounters',
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: isActive ? activeColor : Colors.grey[400],
+                size: 28,
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.location_on),
-            label: 'Nearby',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Likes'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble),
-            label: 'Chats',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+        ),
       ),
     );
   }
