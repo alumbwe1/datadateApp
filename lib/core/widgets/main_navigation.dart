@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../features/encounters/presentation/pages/encounters_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/discover/presentation/pages/discover_page.dart';
 import '../../features/likes/presentation/pages/likes_page.dart';
+import '../../features/chat/presentation/pages/chat_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -18,7 +20,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const EncountersPage(),
     const DiscoverPage(),
     const LikesPage(),
-    const LikesPage(),
+    const ChatPage(),
     const ProfilePage(),
   ];
 
@@ -56,19 +58,19 @@ class _MainNavigationState extends State<MainNavigation> {
                   activeColor: const Color(0xFFFFD700),
                 ),
                 _buildNavItem(
-                  icon: Icons.favorite,
+                  icon: Iconsax.heart,
                   label: 'Likes',
                   index: 2,
                   activeColor: const Color(0xFFFF6B6B),
                 ),
                 _buildNavItem(
-                  icon: Icons.chat_bubble,
+                  icon: Iconsax.message,
                   label: 'Chats',
                   index: 3,
                   activeColor: const Color(0xFFFF6B6B),
                 ),
                 _buildNavItem(
-                  icon: Icons.person,
+                  icon: Iconsax.user,
                   label: 'Profile',
                   index: 4,
                   activeColor: Colors.black,

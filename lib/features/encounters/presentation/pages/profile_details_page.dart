@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:datadate/core/constants/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../domain/entities/profile.dart';
@@ -158,10 +159,11 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                                           Flexible(
                                             child: Text(
                                               '${widget.profile.name}, ${widget.profile.age}',
-                                              style: const TextStyle(
-                                                fontSize: 28,
-                                                fontWeight: FontWeight.w900,
-                                              ),
+                                              style: appStyle(
+                                                25,
+                                                Colors.black,
+                                                FontWeight.bold,
+                                              ).copyWith(letterSpacing: -0.3),
                                             ),
                                           ),
                                         ],
@@ -202,26 +204,28 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                             const SizedBox(height: 24),
                             Text(
                               'Description',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
+                              style: appStyle(
+                                16,
+                                Colors.black,
+                                FontWeight.w800,
                               ).copyWith(letterSpacing: -0.3),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Love to travel, explore new places, and meet interesting people. Looking for someone to share adventures with! 🌍✨',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                                height: 1.5,
+                              style: appStyle(
+                                14,
+                                Colors.grey[700]!,
+                                FontWeight.normal,
                               ),
                             ),
                             const SizedBox(height: 24),
                             Text(
                               'Interest',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
+                              style: appStyle(
+                                16,
+                                Colors.black,
+                                FontWeight.w800,
                               ).copyWith(letterSpacing: -0.2),
                             ),
                             const SizedBox(height: 12),
@@ -361,21 +365,17 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
               // Percentage text
               Text(
                 '$matchPercentage%',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                style: appStyle(15, Colors.black, FontWeight.bold),
               ),
             ],
           ),
           const SizedBox(width: 5),
           Text(
             'Match',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: Colors.black,
+            style: appStyle(
+              16,
+              Colors.black,
+              FontWeight.w800,
             ).copyWith(letterSpacing: -0.3),
           ),
           const SizedBox(width: 5),
@@ -417,10 +417,10 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
           const SizedBox(width: 8),
           Text(
             interest,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
+            style: appStyle(
+              14,
+              Colors.grey[700]!,
+              FontWeight.w500,
             ).copyWith(letterSpacing: -0.2),
           ),
         ],
@@ -432,12 +432,9 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        Text(label, style: appStyle(12, Colors.grey[600]!, FontWeight.normal)),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
+        Text(value, style: appStyle(16, Colors.black, FontWeight.w600)),
       ],
     );
   }
