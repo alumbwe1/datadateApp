@@ -33,7 +33,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
     final profiles = encountersState.profiles;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: SafeArea(
@@ -160,7 +160,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withAlpha(20),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -191,8 +191,8 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.1),
-                      Colors.black.withOpacity(0.8),
+                      Colors.black.withValues(alpha: 0.1),
+                      Colors.black.withValues(alpha: 0.8),
                     ],
                     stops: const [0.5, 0.75, 1.0],
                   ),

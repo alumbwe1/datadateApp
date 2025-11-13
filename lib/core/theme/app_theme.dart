@@ -75,7 +75,7 @@ class AppTheme {
         secondary: AppColors.secondaryDark,
         surface: AppColors.surfaceDark,
         error: AppColors.error,
-        background: AppColors.backgroundDark,
+        onSurface: AppColors.backgroundDark,
       ),
       textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme).apply(
         bodyColor: AppColors.textPrimaryDark,

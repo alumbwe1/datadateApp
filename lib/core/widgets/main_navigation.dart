@@ -23,7 +23,7 @@ class _MainNavigationState extends State<MainNavigation>
   final List<Widget> _pages = [
     const EncountersPage(),
     const DiscoverPage(),
-    const LikesPage(),
+    //const LikesPage(),
     const ChatPage(),
     const ProfilePage(),
   ];
@@ -65,16 +65,7 @@ class _MainNavigationState extends State<MainNavigation>
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, -3),
-            ),
-          ],
-        ),
+        decoration: BoxDecoration(color: Colors.white),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -83,6 +74,7 @@ class _MainNavigationState extends State<MainNavigation>
               children: [
                 _buildNavItem(
                   icon: Icons.local_fire_department,
+                  svgPath: 'assets/svgs/star5.svg',
                   label: 'Encounters',
                   index: 0,
                   activeColor: Colors.black,
@@ -93,14 +85,14 @@ class _MainNavigationState extends State<MainNavigation>
                   index: 1,
                   activeColor: Colors.black,
                 ),
+                // _buildNavItem(
+                //   svgPath: 'assets/svgs/heart.svg',
+                //   label: 'Likes',
+                //   index: 2,
+                //   activeColor: Colors.black,
+                // ),
                 _buildNavItem(
-                  icon: Iconsax.heart,
-                  label: 'Likes',
-                  index: 2,
-                  activeColor: Colors.black,
-                ),
-                _buildNavItem(
-                  icon: Iconsax.message,
+                  svgPath: 'assets/svgs/beacon.svg',
                   label: 'Chats',
                   index: 3,
                   activeColor: Colors.black,
@@ -135,55 +127,35 @@ class _MainNavigationState extends State<MainNavigation>
         borderRadius: BorderRadius.circular(16),
         splashColor: activeColor.withValues(alpha: 0.1),
         highlightColor: activeColor.withValues(alpha: 0.05),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isActive
-                ? activeColor.withValues(alpha: 0.08)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedBuilder(
-                animation: animation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: 1.0 + (animation.value * 0.15),
-                    child: child,
-                  );
-                },
-                child: svgPath != null
-                    ? SvgPicture.asset(
-                        svgPath,
-                        width: 26,
-                        height: 26,
-                        colorFilter: ColorFilter.mode(
-                          isActive ? activeColor : Colors.grey.shade400,
-                          BlendMode.srcIn,
-                        ),
-                      )
-                    : Icon(
-                        icon,
-                        color: isActive ? activeColor : Colors.grey.shade400,
-                        size: 26,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: 1.0 + (animation.value * 0.15),
+                  child: child,
+                );
+              },
+              child: svgPath != null
+                  ? SvgPicture.asset(
+                      svgPath,
+                      width: 25,
+                      height: 25,
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        isActive ? activeColor : Colors.grey.shade400,
+                        BlendMode.srcIn,
                       ),
-              ),
-              const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: TextStyle(
-                  fontSize: isActive ? 12 : 11,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  color: isActive ? activeColor : Colors.grey.shade500,
-                  letterSpacing: -0.2,
-                ),
-                child: Text(label),
-              ),
-            ],
-          ),
+                    )
+                  : Icon(
+                      icon,
+                      color: isActive ? activeColor : Colors.grey.shade400,
+                      size: 30,
+                    ),
+            ),
+          ],
         ),
       ),
     );

@@ -4,7 +4,6 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_welcome_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_dating_goal_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_interests_page.dart';
-import '../../features/onboarding/presentation/pages/onboarding_location_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_complete_page.dart';
 import '../widgets/main_navigation.dart';
 
@@ -25,10 +24,7 @@ class AppRouter {
         path: '/onboarding/interests',
         builder: (context, state) => const OnboardingInterestsPage(),
       ),
-      GoRoute(
-        path: '/onboarding/location',
-        builder: (context, state) => const OnboardingLocationPage(),
-      ),
+
       GoRoute(
         path: '/onboarding/complete',
         builder: (context, state) => const OnboardingCompletePage(),
