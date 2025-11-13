@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../domain/entities/profile.dart';
 import '../pages/profile_details_page.dart';
@@ -366,17 +367,18 @@ class ProfileCard extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 30,
+              spreadRadius: 2,
               offset: const Offset(0, 10),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           child: Stack(
             children: [
               // Profile Image
@@ -384,18 +386,25 @@ class ProfileCard extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: profile.photos.first,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: Colors.grey[200],
-                    child: const Center(
-                      child: CircularProgressIndicator(color: Colors.black),
-                    ),
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(color: Colors.grey[300]),
                   ),
                   errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[200],
-                    child: const Icon(
-                      Icons.person,
-                      size: 100,
-                      color: Colors.grey,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Colors.grey[300]!, Colors.grey[200]!],
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.person_outline,
+                        size: 120,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 ),
@@ -406,17 +415,18 @@ class ProfileCard extends StatelessWidget {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: 250,
+                height: 280,
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withValues(alpha: 0.6),
+                        Colors.black.withValues(alpha: 0.75),
+                        Colors.black.withValues(alpha: 0.4),
                         Colors.transparent,
                       ],
-                      stops: const [0.0, 1.0],
+                      stops: const [0.0, 0.5, 1.0],
                     ),
                   ),
                 ),
@@ -425,8 +435,8 @@ class ProfileCard extends StatelessWidget {
               // Profile Info - NOW AT TOP
               Positioned(
                 left: 20,
-                right: 20,
-                top: 16,
+                right: 70,
+                top: 20,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -436,39 +446,66 @@ class ProfileCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             '${profile.name}, ${profile.age}',
-                            style: appStyle(
-                              25,
-                              Colors.white,
-
-                              FontWeight.w700,
-                            ).copyWith(letterSpacing: -0.3, height: 1.2),
+                            style: appStyle(28, Colors.white, FontWeight.w800)
+                                .copyWith(
+                                  letterSpacing: -0.5,
+                                  height: 1.2,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (profile.isOnline)
                           Container(
-                            width: 12,
-                            height: 12,
+                            width: 14,
+                            height: 14,
                             margin: const EdgeInsets.only(left: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00D9A3),
+                              color: const Color(0xFF00FF94),
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 2.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF00FF94,
+                                  ).withValues(alpha: 0.5),
+                                  blurRadius: 8,
+                                  spreadRadius: 1,
+                                ),
+                              ],
                             ),
                           ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     // Relationship goal badge
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                        horizontal: 14,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -478,45 +515,56 @@ class ProfileCard extends StatelessWidget {
                             color: Colors.black,
                             size: 16,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 7),
                           Text(
                             'Here for ${profile.relationshipGoal}',
                             style: appStyle(
-                              14,
+                              13,
                               Colors.black,
-                              FontWeight.w500,
-                            ).copyWith(letterSpacing: -0.3),
+                              FontWeight.w600,
+                            ).copyWith(letterSpacing: -0.2),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     // Location badge
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                        horizontal: 14,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.black.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.school,
+                            Icons.school_outlined,
                             color: Colors.white,
                             size: 16,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 7),
                           Text(
                             profile.location,
                             style: appStyle(
-                              14,
+                              13,
                               Colors.white,
-                              FontWeight.w500,
-                            ).copyWith(letterSpacing: -0.3),
+                              FontWeight.w600,
+                            ).copyWith(letterSpacing: -0.2),
                           ),
                         ],
                       ),
@@ -527,15 +575,30 @@ class ProfileCard extends StatelessWidget {
 
               // More button
               Positioned(
-                top: 16,
-                right: 16,
+                top: 20,
+                right: 20,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.more_horiz, color: Colors.white),
+                    icon: const Icon(
+                      Icons.more_horiz,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                     onPressed: () {},
                   ),
                 ),

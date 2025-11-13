@@ -7,6 +7,7 @@ import '../../../../core/widgets/loading_shimmer.dart';
 import '../../../../core/constants/app_style.dart';
 import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
+import 'match_page.dart';
 
 class EncountersPage extends ConsumerStatefulWidget {
   const EncountersPage({super.key});
@@ -17,6 +18,9 @@ class EncountersPage extends ConsumerStatefulWidget {
 
 class _EncountersPageState extends ConsumerState<EncountersPage> {
   final CardSwiperController _controller = CardSwiperController();
+  int _swipeCount = 0;
+  final int _freeSwipeLimit = 3;
+  bool _hasShownUpgradePrompt = false;
 
   @override
   void initState() {
@@ -27,6 +31,38 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
         ref.read(encountersProvider.notifier).loadProfiles(user.gender);
       }
     });
+  }
+
+  void _handleSwipe(
+    CardSwiperDirection direction,
+    String profileId,
+    String profileName,
+    String profilePhoto,
+  ) {
+    setState(() {
+      _swipeCount++;
+    });
+
+    // Check for match (simulate 30% chance for demo)
+    if (direction == CardSwiperDirection.right) {
+      final isMatch = DateTime.now().millisecond % 10 < 3; // 30% chance
+      if (isMatch) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            _showMatchDialog(profileName, profilePhoto);
+          }
+        });
+      }
+    }
+
+    if (_swipeCount >= _freeSwipeLimit && !_hasShownUpgradePrompt) {
+      _hasShownUpgradePrompt = true;
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _showUpgradePrompt();
+        }
+      });
+    }
   }
 
   @override
@@ -129,21 +165,69 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
             )
           : profiles.isEmpty
           ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('🎉', style: TextStyle(fontSize: 80)),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'No more profiles',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Check back later for new matches',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Text('✨', style: TextStyle(fontSize: 60)),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      'You\'re All Caught Up!',
+                      style: appStyle(
+                        28,
+                        Colors.black,
+                        FontWeight.w900,
+                      ).copyWith(letterSpacing: -0.5),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Check back soon for new profiles\nto connect with',
+                      style: appStyle(
+                        16,
+                        Colors.grey[600]!,
+                        FontWeight.w400,
+                      ).copyWith(height: 1.5, letterSpacing: -0.2),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 40),
+                    ElevatedButton(
+                      onPressed: () {
+                        final user = ref.read(authProvider).user;
+                        if (user != null) {
+                          ref
+                              .read(encountersProvider.notifier)
+                              .loadProfiles(user.gender);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Text(
+                        'Refresh',
+                        style: appStyle(16, Colors.white, FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
           : SafeArea(
@@ -171,6 +255,12 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
                           .skipProfile(profile.id);
                     }
 
+                    _handleSwipe(
+                      direction,
+                      profile.id,
+                      profile.name,
+                      profile.photos.first,
+                    );
                     return true;
                   },
                   cardBuilder:
@@ -195,72 +285,62 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
 
   Widget _buildActionButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 60),
+      padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildActionButton(
+          _AnimatedActionButton(
             icon: Icons.close,
-            color: Colors.black,
-            size: 65,
-            iconSize: 35,
+            color: Colors.red,
+            backgroundColor: Colors.white,
+            size: 60,
+            iconSize: 30,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.left);
             },
           ),
-          _buildActionButton(
+          _AnimatedActionButton(
             icon: Iconsax.heart,
-            color: Colors.black,
-            size: 65,
+            color: Colors.pink,
+            backgroundColor: Colors.white,
+            size: 70,
             iconSize: 35,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.right);
             },
           ),
-          _buildActionButton(
+          _AnimatedActionButton(
             icon: Iconsax.star,
-            color: Colors.lightGreenAccent,
-            size: 65,
-            iconSize: 35,
+            color: Colors.amber,
+            backgroundColor: Colors.white,
+            size: 60,
+            iconSize: 30,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.right);
+              // Show super like animation
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Iconsax.star, color: Colors.amber, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Super Like sent! ⭐',
+                        style: appStyle(14, Colors.white, FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: Colors.black,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
             },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-    required double size,
-    required double iconSize,
-  }) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          customBorder: const CircleBorder(),
-          child: Center(
-            child: Icon(icon, color: color, size: iconSize),
-          ),
-        ),
       ),
     );
   }
@@ -274,10 +354,432 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
     );
   }
 
+  void _showMatchDialog(String profileName, String profilePhoto) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            MatchPage(profileName: profileName, profilePhoto: profilePhoto),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+    );
+  }
+
+  void _showUpgradePrompt() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Iconsax.diamonds,
+                    color: Colors.purpleAccent,
+                    size: 40,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Out of Swipes!',
+                  style: appStyle(
+                    28,
+                    Colors.black,
+                    FontWeight.w900,
+                  ).copyWith(letterSpacing: -0.5),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Upgrade to Standard for unlimited swipes\nand exclusive features',
+                  style: appStyle(
+                    15,
+                    Colors.grey[600]!,
+                    FontWeight.w400,
+                  ).copyWith(height: 1.5, letterSpacing: -0.2),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showPremiumBottomSheet(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Text(
+                      'Upgrade Now',
+                      style: appStyle(16, Colors.white, FontWeight.w700),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Maybe Later',
+                    style: appStyle(15, Colors.grey[600]!, FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+}
+
+class _AnimatedActionButton extends StatefulWidget {
+  final IconData icon;
+  final Color color;
+  final Color backgroundColor;
+  final double size;
+  final double iconSize;
+  final VoidCallback onPressed;
+
+  const _AnimatedActionButton({
+    required this.icon,
+    required this.color,
+    required this.backgroundColor,
+    required this.size,
+    required this.iconSize,
+    required this.onPressed,
+  });
+
+  @override
+  State<_AnimatedActionButton> createState() => _AnimatedActionButtonState();
+}
+
+class _AnimatedActionButtonState extends State<_AnimatedActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.85,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    _controller.forward().then((_) {
+      _controller.reverse();
+      widget.onPressed();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Container(
+        width: widget.size,
+        height: widget.size,
+        decoration: BoxDecoration(
+          color: widget.backgroundColor,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: widget.color.withValues(alpha: 0.3),
+              blurRadius: 20,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _handleTap,
+            customBorder: const CircleBorder(),
+            child: Center(
+              child: Icon(
+                widget.icon,
+                color: widget.color,
+                size: widget.iconSize,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MatchDialog extends StatefulWidget {
+  final String profileName;
+  final String profilePhoto;
+
+  const _MatchDialog({required this.profileName, required this.profilePhoto});
+
+  @override
+  State<_MatchDialog> createState() => _MatchDialogState();
+}
+
+class _MatchDialogState extends State<_MatchDialog>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+      ),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero,
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.pink.withValues(alpha: 0.3),
+                Colors.purple.withValues(alpha: 0.3),
+              ],
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Close button
+              Positioned(
+                top: 50,
+                left: 20,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+
+              // Content
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Animated hearts
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: const Text(
+                          '💕',
+                          style: TextStyle(fontSize: 100),
+                        ),
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      // Match text
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: Text(
+                          'It\'s a Match!',
+                          style: appStyle(48, Colors.white, FontWeight.w900)
+                              .copyWith(
+                                letterSpacing: -1,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withValues(alpha: 0.3),
+                                    offset: const Offset(0, 4),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: Text(
+                          '${widget.profileName} likes you back – get those sparks flying ✨',
+                          style: appStyle(18, Colors.white, FontWeight.w500)
+                              .copyWith(
+                                height: 1.4,
+                                letterSpacing: -0.3,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withValues(alpha: 0.3),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      const SizedBox(height: 60),
+
+                      // Profile image
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 4),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                            image: DecorationImage(
+                              image: NetworkImage(widget.profilePhoto),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 60),
+
+                      // Send message button
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              // Navigate to chat
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                            child: Text(
+                              'Send Message',
+                              style: appStyle(
+                                18,
+                                Colors.black,
+                                FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Keep swiping button
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'Keep Swiping',
+                            style: appStyle(16, Colors.white, FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../encounters/domain/entities/profile.dart';
 import '../../../encounters/presentation/pages/profile_details_page.dart';
@@ -32,53 +33,39 @@ class _LikesPageState extends ConsumerState<LikesPage> {
     final profiles = encountersState.profiles;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.white,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade300, width: 2),
-            ),
-            child: ClipOval(
-              child: CachedNetworkImage(
-                imageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-                fit: BoxFit.cover,
-              ),
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Text(
+                  'Likes',
+                  style: appStyle(
+                    25,
+                    Colors.black,
+                    FontWeight.w800,
+                  ).copyWith(letterSpacing: -0.3),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.tune_rounded,
+                    size: 20,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        centerTitle: true,
-        title: Text(
-          'Likes',
-          style: appStyle(
-            25,
-            Colors.black,
-            FontWeight.w800,
-          ).copyWith(letterSpacing: -0.3),
-        ),
-        actions: [
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.tune_rounded,
-                size: 20,
-                color: Colors.black87,
-              ),
-            ),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: encountersState.isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
@@ -280,14 +267,32 @@ class _LikesPageState extends ConsumerState<LikesPage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        child: Text(
-                          profile.relationshipGoal,
-                          style: appStyle(10, Colors.white, FontWeight.w500),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 4,
+                          children: [
+                            Icon(Iconsax.heart, size: 17, color: Colors.black),
+                            Text(
+                              'Here for ${profile.relationshipGoal}',
+                              style: appStyle(
+                                10,
+                                Colors.black,
+                                FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
                     ],

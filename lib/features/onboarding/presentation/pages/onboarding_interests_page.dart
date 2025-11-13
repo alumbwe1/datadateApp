@@ -128,7 +128,7 @@ class OnboardingInterestsPage extends ConsumerWidget {
               child: CustomButton(
                 text: 'Continue',
                 onPressed: selectedInterests.isNotEmpty
-                    ? () => context.push('/onboarding/location')
+                    ? () => context.push('/onboarding/complete')
                     : null,
               ),
             ),
@@ -158,13 +158,13 @@ class _InterestChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black : Colors.grey[50],
+          color: isSelected ? Colors.black : Colors.white,
           borderRadius: BorderRadius.circular(30.r),
           border: Border.all(
             color: isSelected ? Colors.black : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 2 : 0.7,
           ),
         ),
         child: Row(

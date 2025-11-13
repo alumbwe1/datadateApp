@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconly/iconly.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -114,11 +115,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 // Email field
                 CustomTextField(
                   label: 'Email',
-                  hint: 'Enter your email',
+                  hintText: 'Enter your email',
                   controller: _emailController,
                   validator: Validators.email,
                   keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  prefixIcon: Icon(
+                    IconlyLight.message,
+                    color: Colors.grey[600],
+                  ),
                 ),
 
                 SizedBox(height: 20.h),
@@ -126,16 +130,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 // Password field
                 CustomTextField(
                   label: 'Password',
-                  hint: 'Enter your password',
+                  hintText: 'Enter your password',
                   controller: _passwordController,
                   validator: Validators.password,
                   obscureText: _obscurePassword,
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  prefixIcon: Icon(IconlyLight.lock, color: Colors.grey[600]),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                      _obscurePassword ? IconlyLight.show : IconlyLight.hide,
                       color: Colors.grey[600],
                     ),
                     onPressed: () {
@@ -167,7 +169,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         14,
                         Colors.black,
                         FontWeight.w600,
-                      ).copyWith(letterSpacing: -0.2),
+                      ).copyWith(letterSpacing: -0.3),
                     ),
                   ),
                 ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../features/encounters/presentation/pages/encounters_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
@@ -13,8 +15,10 @@ class MainNavigation extends StatefulWidget {
   State<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainNavigationState extends State<MainNavigation> {
+class _MainNavigationState extends State<MainNavigation>
+    with TickerProviderStateMixin {
   int _currentIndex = 0;
+  late List<AnimationController> _animationControllers;
 
   final List<Widget> _pages = [
     const EncountersPage(),
@@ -25,23 +29,55 @@ class _MainNavigationState extends State<MainNavigation> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _animationControllers = List.generate(
+      5,
+      (index) => AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 200),
+      ),
+    );
+    _animationControllers[0].value = 1.0;
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _animationControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onItemTapped(int index) {
+    if (_currentIndex != index) {
+      HapticFeedback.lightImpact();
+      setState(() {
+        _animationControllers[_currentIndex].reverse();
+        _currentIndex = index;
+        _animationControllers[index].forward();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Color(0x0D000000),
-              blurRadius: 10,
-              offset: Offset(0, -2),
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, -3),
             ),
           ],
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -84,30 +120,67 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   Widget _buildNavItem({
-    required IconData icon,
+    IconData? icon,
+    String? svgPath,
     required String label,
     required int index,
     required Color activeColor,
   }) {
     final isActive = _currentIndex == index;
+    final animation = _animationControllers[index];
 
     return Expanded(
       child: InkWell(
-        onTap: () {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+        onTap: () => _onItemTapped(index),
+        borderRadius: BorderRadius.circular(16),
+        splashColor: activeColor.withValues(alpha: 0.1),
+        highlightColor: activeColor.withValues(alpha: 0.05),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isActive
+                ? activeColor.withValues(alpha: 0.08)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                color: isActive ? activeColor : Colors.grey[400],
-                size: 28,
+              AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: 1.0 + (animation.value * 0.15),
+                    child: child,
+                  );
+                },
+                child: svgPath != null
+                    ? SvgPicture.asset(
+                        svgPath,
+                        width: 26,
+                        height: 26,
+                        colorFilter: ColorFilter.mode(
+                          isActive ? activeColor : Colors.grey.shade400,
+                          BlendMode.srcIn,
+                        ),
+                      )
+                    : Icon(
+                        icon,
+                        color: isActive ? activeColor : Colors.grey.shade400,
+                        size: 26,
+                      ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  fontSize: isActive ? 12 : 11,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: isActive ? activeColor : Colors.grey.shade500,
+                  letterSpacing: -0.2,
+                ),
+                child: Text(label),
               ),
             ],
           ),

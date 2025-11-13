@@ -72,19 +72,22 @@ class _ChatDetailPageState extends State<ChatDetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: _buildAppBar(),
       body: Column(
         children: [
           _buildDateDivider(),
           Expanded(
             child: GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
+              onTap: () {
+                FocusScope.of(context).unfocus();
+                HapticFeedback.selectionClick();
+              },
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 12,
+                  vertical: 16,
                 ),
                 physics: const BouncingScrollPhysics(),
                 itemCount: _messages.length,
@@ -122,11 +125,21 @@ class _ChatDetailPageState extends State<ChatDetailPage>
       elevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       surfaceTintColor: Colors.white,
-      shadowColor: Colors.black.withOpacity(0.05),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
-        onPressed: () => Navigator.pop(context),
-        padding: EdgeInsets.zero,
+      shadowColor: Colors.black.withValues(alpha: 0.05),
+      leading: Container(
+        margin: const EdgeInsets.only(left: 8),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black, size: 22),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.pop(context);
+          },
+          padding: EdgeInsets.zero,
+        ),
       ),
       title: InkWell(
         onTap: () {
@@ -147,14 +160,14 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
                       child: CircleAvatar(
-                        radius: 20,
+                        radius: 22,
                         backgroundImage: CachedNetworkImageProvider(
                           widget.match['image'],
                         ),
@@ -166,12 +179,21 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                       right: 0,
                       bottom: 0,
                       child: Container(
-                        width: 14,
-                        height: 14,
+                        width: 16,
+                        height: 16,
                         decoration: BoxDecoration(
                           color: const Color(0xFF4CAF50),
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: Colors.white, width: 2.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(
+                                0xFF4CAF50,
+                              ).withValues(alpha: 0.4),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -183,35 +205,57 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      widget.match['name'],
-                      style: appStyle(
-                        16,
-                        Colors.black,
-                        FontWeight.w600,
-                      ).copyWith(letterSpacing: -0.3),
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          widget.match['name'],
+                          style: appStyle(
+                            17,
+                            Colors.black,
+                            FontWeight.w700,
+                          ).copyWith(letterSpacing: -0.4),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (widget.match['isVerified'] == true) ...[
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.verified,
+                            color: Color(0xFF2196F3),
+                            size: 18,
+                          ),
+                        ],
+                      ],
                     ),
                     if (widget.match['isOnline'] == true)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF4CAF50),
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4CAF50),
                               shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF4CAF50,
+                                  ).withValues(alpha: 0.4),
+                                  blurRadius: 4,
+                                  spreadRadius: 1,
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 5),
                           Text(
                             'Active now',
                             style: appStyle(
                               12,
                               const Color(0xFF4CAF50),
-                              FontWeight.w500,
-                            ),
+                              FontWeight.w600,
+                            ).copyWith(letterSpacing: -0.1),
                           ),
                         ],
                       ),
@@ -257,32 +301,39 @@ class _ChatDetailPageState extends State<ChatDetailPage>
 
   Widget _buildDateDivider() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFFAFAFA),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Center(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey.shade300, width: 0.7),
-            borderRadius: BorderRadius.circular(40),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade300, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Text(
             'Today',
             style: appStyle(
-              12,
-              Colors.grey.shade600,
-              FontWeight.w500,
-            ).copyWith(letterSpacing: 0.3),
+              13,
+              Colors.grey.shade700,
+              FontWeight.w600,
+            ).copyWith(letterSpacing: 0.2),
           ),
         ),
       ),
@@ -309,15 +360,15 @@ class _ChatDetailPageState extends State<ChatDetailPage>
               opacity: showAvatar ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 200),
               child: Container(
-                width: 32,
-                height: 32,
+                width: 34,
+                height: 34,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   boxShadow: showAvatar
                       ? [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 4,
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
                         ]
@@ -325,7 +376,7 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                 ),
                 child: showAvatar
                     ? CircleAvatar(
-                        radius: 16,
+                        radius: 17,
                         backgroundImage: CachedNetworkImageProvider(
                           widget.match['image'],
                         ),
@@ -348,31 +399,31 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                      horizontal: 18,
+                      vertical: 13,
                     ),
                     decoration: BoxDecoration(
                       gradient: isSent
                           ? const LinearGradient(
-                              colors: [Color(0xFF000000), Color(0xFF1a1a1a)],
+                              colors: [Color(0xFF000000), Color(0xFF2a2a2a)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             )
                           : null,
                       color: isSent ? null : Colors.white,
                       borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(20),
-                        topRight: const Radius.circular(20),
-                        bottomLeft: Radius.circular(isSent ? 20 : 4),
-                        bottomRight: Radius.circular(isSent ? 4 : 20),
+                        topLeft: const Radius.circular(22),
+                        topRight: const Radius.circular(22),
+                        bottomLeft: Radius.circular(isSent ? 22 : 6),
+                        bottomRight: Radius.circular(isSent ? 6 : 22),
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: isSent
-                              ? Colors.black.withOpacity(0.15)
-                              : Colors.black.withOpacity(0.06),
-                          blurRadius: isSent ? 12 : 8,
-                          offset: Offset(0, isSent ? 3 : 2),
+                              ? Colors.black.withValues(alpha: 0.2)
+                              : Colors.black.withValues(alpha: 0.08),
+                          blurRadius: isSent ? 14 : 10,
+                          offset: Offset(0, isSent ? 4 : 3),
                         ),
                       ],
                     ),
@@ -382,21 +433,21 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                         15,
                         isSent ? Colors.white : Colors.black87,
                         FontWeight.w400,
-                      ).copyWith(height: 1.4, letterSpacing: -0.1),
+                      ).copyWith(height: 1.45, letterSpacing: -0.15),
                     ),
                   ),
                 ),
                 if (showAvatar) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Text(
                       message['time'],
                       style: appStyle(
-                        11,
+                        12,
                         Colors.grey.shade500,
                         FontWeight.w500,
-                      ).copyWith(letterSpacing: 0.1),
+                      ).copyWith(letterSpacing: 0.15),
                     ),
                   ),
                 ],
@@ -410,10 +461,19 @@ class _ChatDetailPageState extends State<ChatDetailPage>
 
   Widget _buildMessageInput() {
     return Container(
-      decoration: BoxDecoration(color: Colors.white),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -431,18 +491,18 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                   },
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: Container(
                   constraints: const BoxConstraints(maxHeight: 120),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(26),
                     border: Border.all(
                       color: _focusNode.hasFocus
-                          ? Colors.grey.shade400
-                          : Colors.grey.shade200,
-                      width: 1,
+                          ? Colors.black
+                          : Colors.grey.shade300,
+                      width: _focusNode.hasFocus ? 1.5 : 1,
                     ),
                   ),
                   child: TextField(
@@ -454,27 +514,27 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                       15,
                       Colors.black87,
                       FontWeight.w400,
-                    ).copyWith(height: 1.4),
+                    ).copyWith(height: 1.4, letterSpacing: -0.1),
                     decoration: InputDecoration(
                       hintText: 'Message...',
                       hintStyle: appStyle(
                         15,
                         Colors.grey.shade400,
                         FontWeight.w400,
-                      ),
+                      ).copyWith(letterSpacing: -0.1),
                       filled: false,
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
+                        horizontal: 20,
+                        vertical: 13,
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               AnimatedScale(
-                scale: _isTyping ? 1.0 : 0.8,
+                scale: _isTyping ? 1.0 : 0.85,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOutCubic,
                 child: AnimatedContainer(
@@ -493,9 +553,9 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                     boxShadow: _isTyping
                         ? [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
                             ),
                           ]
                         : null,
@@ -504,7 +564,7 @@ class _ChatDetailPageState extends State<ChatDetailPage>
                     icon: Icon(
                       _isTyping ? Icons.arrow_upward_rounded : Iconsax.heart,
                       color: _isTyping ? Colors.white : Colors.grey[600],
-                      size: 22,
+                      size: 23,
                     ),
                     onPressed: _isTyping
                         ? () {
@@ -603,27 +663,37 @@ class _ChatDetailPageState extends State<ChatDetailPage>
   }
 
   Widget _buildAttachmentOption(IconData icon, String label, Color color) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          shape: BoxShape.circle,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 24),
         ),
-        child: Icon(icon, color: color, size: 24),
+        title: Text(
+          label,
+          style: appStyle(
+            16,
+            Colors.black87,
+            FontWeight.w600,
+          ).copyWith(letterSpacing: -0.3),
+        ),
+        trailing: Icon(Icons.chevron_right, color: Colors.grey.shade400),
+        onTap: () {
+          Navigator.pop(context);
+          HapticFeedback.lightImpact();
+        },
       ),
-      title: Text(
-        label,
-        style: appStyle(
-          15,
-          Colors.black87,
-          FontWeight.w500,
-        ).copyWith(letterSpacing: -0.3),
-      ),
-      onTap: () {
-        Navigator.pop(context);
-        HapticFeedback.lightImpact();
-      },
     );
   }
 

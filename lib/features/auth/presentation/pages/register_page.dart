@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -78,6 +79,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     'assets/images/dataDate.png',
                     height: 50.h,
                     width: 50.w,
+                    color: Colors.black,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -110,32 +112,32 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                 CustomTextField(
                   label: 'Full Name',
-                  hint: 'Enter your full name',
+                  hintText: 'Enter your full name',
                   controller: _nameController,
                   validator: (value) => Validators.required(value, 'Name'),
-                  prefixIcon: const Icon(Icons.person_outline),
+                  prefixIcon: const Icon(Iconsax.user_copy),
                 ),
 
                 SizedBox(height: 20.h),
 
                 CustomTextField(
                   label: 'Email',
-                  hint: 'Enter your email',
+                  hintText: 'Enter your email',
                   controller: _emailController,
                   validator: Validators.email,
                   keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  prefixIcon: const Icon(Iconsax.sms_copy),
                 ),
 
                 SizedBox(height: 20.h),
 
                 CustomTextField(
                   label: 'Password',
-                  hint: 'Create a strong password',
+                  hintText: 'Create a strong password',
                   controller: _passwordController,
                   validator: Validators.password,
                   obscureText: _obscurePassword,
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  prefixIcon: const Icon(Iconsax.lock_copy),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -155,7 +157,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                 CustomTextField(
                   label: 'Age',
-                  hint: 'Enter your age',
+                  hintText: 'Enter your age',
                   controller: _ageController,
                   validator: Validators.age,
                   keyboardType: TextInputType.number,
@@ -258,18 +260,14 @@ class _GenderOption extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black : Colors.grey[50],
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: isSelected ? Colors.black : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
-          ),
+          color: isSelected ? Colors.black : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(10.r),
         ),
         child: Column(
           children: [
             Icon(
               icon,
-              color: isSelected ? Colors.white : Colors.grey[600],
+              color: isSelected ? Colors.white : Colors.grey.shade600,
               size: 32,
             ),
             SizedBox(height: 8.h),

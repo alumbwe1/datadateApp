@@ -73,7 +73,7 @@ class _OnboardingLocationPageState
               const SizedBox(height: 48),
               CustomTextField(
                 label: 'Location',
-                hint: 'Enter your city',
+                hintText: 'Enter your city',
                 controller: _locationController,
                 prefixIcon: const Icon(Icons.search),
               ),
