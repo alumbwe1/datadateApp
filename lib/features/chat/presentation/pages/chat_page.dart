@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:iconly/iconly.dart';
 import '../../../../core/constants/app_style.dart';
 import 'chat_detail_page.dart';
 
@@ -9,7 +10,7 @@ class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -65,14 +66,18 @@ class ChatPage extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search ${_matches.length} conversations',
-                hintStyle: appStyle(14, Colors.grey.shade400, FontWeight.w400),
-                prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[400]),
+                hintText: 'Search  conversations',
+                hintStyle: appStyle(
+                  14,
+                  Colors.grey.shade400,
+                  FontWeight.w400,
+                ).copyWith(letterSpacing: -0.2),
+                prefixIcon: Icon(IconlyLight.search, color: Colors.grey[400]),
                 filled: true,
-                fillColor: Colors.grey[50],
+                fillColor: Colors.grey.shade100,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -98,7 +103,11 @@ class ChatPage extends StatelessWidget {
                 const SizedBox(width: 10),
                 Text(
                   'New Matches',
-                  style: appStyle(16, Colors.black, FontWeight.w600),
+                  style: appStyle(
+                    16,
+                    Colors.black,
+                    FontWeight.w700,
+                  ).copyWith(letterSpacing: -0.3),
                 ),
               ],
             ),
@@ -122,7 +131,11 @@ class ChatPage extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Text(
               'Recent Conversations',
-              style: appStyle(16, Colors.black, FontWeight.w600),
+              style: appStyle(
+                16,
+                Colors.black,
+                FontWeight.w700,
+              ).copyWith(letterSpacing: -0.3),
             ),
           ),
           Expanded(
@@ -154,7 +167,7 @@ class ChatPage extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: match['isSpecial'] == true
-                        ? Colors.black
+                        ? Colors.blue
                         : Colors.grey.shade300,
                     width: 2.5,
                   ),
@@ -252,28 +265,28 @@ class ChatPage extends StatelessWidget {
             Expanded(
               child: Text(
                 match['name'],
-                style: appStyle(16, Colors.black, FontWeight.w600),
+                style: appStyle(
+                  16,
+                  Colors.black,
+                  FontWeight.w600,
+                ).copyWith(letterSpacing: -0.3),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             if (match['isVerified'] == true)
-              Container(
-                margin: const EdgeInsets.only(left: 4),
-                padding: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(
-                  color: Colors.black,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 10),
-              ),
+              const Icon(Icons.verified, color: Colors.blue, size: 18),
           ],
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
             match['lastMessage'],
-            style: appStyle(14, Colors.grey.shade600, FontWeight.w400),
+            style: appStyle(
+              14,
+              Colors.grey.shade600,
+              FontWeight.w400,
+            ).copyWith(letterSpacing: -0.2),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -291,11 +304,13 @@ class ChatPage extends StatelessWidget {
                 ),
                 child: Text(
                   '${match['unreadCount']}',
-                  style: appStyle(11, Colors.white, FontWeight.bold),
+                  style: appStyle(
+                    11,
+                    Colors.white,
+                    FontWeight.bold,
+                  ).copyWith(letterSpacing: -0.3),
                 ),
-              )
-            else
-              Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 20),
+              ),
           ],
         ),
         onTap: () {

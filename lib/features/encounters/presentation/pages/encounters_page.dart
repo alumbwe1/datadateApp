@@ -57,7 +57,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.tune, color: Colors.black),
+            icon: const Icon(Iconsax.setting_4, color: Colors.black),
             onPressed: () {},
           ),
         ],
