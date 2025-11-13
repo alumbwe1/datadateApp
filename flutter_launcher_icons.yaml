@@ -1,0 +1,25 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/DDLOGO.png"
+  min_sdk_android: 21
+
+  # Adaptive icons for Android (API 26+)
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/DDLOGO.png"
+
+  # Remove alpha channel for iOS
+  remove_alpha_ios: true
+
+  # Web support
+  web:
+    generate: true
+    image_path: "assets/images/DDLOGO.png"
+    background_color: "#FFFFFF"
+    theme_color: "#000000"
+
+  # Windows support
+  windows:
+    generate: true
+    image_path: "assets/images/DDLOGO.png"
+    icon_size: 48

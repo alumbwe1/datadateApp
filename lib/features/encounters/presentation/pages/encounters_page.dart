@@ -326,15 +326,17 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
                       const SizedBox(width: 12),
                       Text(
                         'Super Like sent! ⭐',
-                        style: appStyle(14, Colors.white, FontWeight.w600),
+                        style: appStyle(14, Colors.black, FontWeight.w600),
                       ),
                     ],
                   ),
-                  backgroundColor: Colors.black,
+                  padding: EdgeInsets.symmetric(vertical: 10),
+
+                  backgroundColor: Colors.white,
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(seconds: 2),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(40),
                   ),
                 ),
               );

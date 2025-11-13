@@ -69,6 +69,7 @@ dependencies:
   intl: ^0.19.0
   equatable: ^2.0.5
   dartz: ^0.10.1
+  flutter_launcher_icons: ^0.14.4
 
 
   #Icons
@@ -134,3 +135,29 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/DDLOGO.png"
+  min_sdk_android: 21
+  
+  # Adaptive icons for Android
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/DDLOGO.png"
+  
+  # Remove alpha channel for iOS
+  remove_alpha_ios: true
+  
+  # Web support
+  web:
+    generate: true
+    image_path: "assets/images/DDLOGO.png"
+    background_color: "#FFFFFF"
+    theme_color: "#000000"
+  
+  # Windows support
+  windows:
+    generate: true
+    image_path: "assets/images/DDLOGO.png"
+    icon_size: 48
