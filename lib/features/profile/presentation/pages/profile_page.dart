@@ -392,57 +392,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Column(children: [const SizedBox(height: 12)]);
   }
 
-  Widget _buildActionButton(
-    BuildContext context, {
-    required String label,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-    bool isOutlined = false,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(40),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            color: isOutlined ? Colors.white : color,
-            borderRadius: BorderRadius.circular(40),
-            border: isOutlined ? Border.all(color: color, width: 1.5) : null,
-            boxShadow: isOutlined
-                ? null
-                : [
-                    BoxShadow(
-                      color: color.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: isOutlined ? color : Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isOutlined ? color : Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.2,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showSettingsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,

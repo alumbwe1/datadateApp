@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
+import '../../../../core/constants/app_style.dart';
 import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
 
@@ -66,11 +67,15 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.workspace_premium, size: 18),
+                  const Icon(Icons.workspace_premium, size: 17),
                   const SizedBox(width: 6),
-                  const Text(
+                  Text(
                     'Upgrade',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                    style: appStyle(
+                      13,
+                      Colors.white,
+                      FontWeight.w600,
+                    ).copyWith(letterSpacing: -0.3),
                   ),
                 ],
               ),
@@ -249,344 +254,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-        ),
-        child: Column(
-          children: [
-            // Handle bar
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            // Header
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF6C5CE7), Color(0xFF8B7FE8)],
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.workspace_premium,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Upgrade to Premium',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Get unlimited access and exclusive features',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ),
-
-            // Plans
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    _buildPlanCard(
-                      title: 'Basic',
-                      price: 'K10',
-                      period: '/week',
-                      features: [
-                        'Unlimited swipes',
-                        'See who likes you',
-                        'Rewind last swipe',
-                        '5 Super Likes per day',
-                      ],
-                      color: Colors.blue,
-                      isPopular: false,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildPlanCard(
-                      title: 'Premium',
-                      price: 'K50',
-                      period: '/week',
-                      features: [
-                        'Everything in Basic',
-                        'Unlimited Super Likes',
-                        'Boost profile 2x/week',
-                        'No ads',
-                        'Priority support',
-                      ],
-                      color: const Color(0xFF6C5CE7),
-                      isPopular: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildPlanCard(
-                      title: 'VIP',
-                      price: 'K100',
-                      period: '/week',
-                      features: [
-                        'Everything in Premium',
-                        'Unlimited Boosts',
-                        'See who viewed you',
-                        'Advanced filters',
-                        'VIP badge on profile',
-                        'Exclusive matches',
-                      ],
-                      color: Colors.amber,
-                      isPopular: false,
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-            ),
-
-            // Footer
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    Text(
-                      'Cancel anytime • Secure payment',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Maybe Later',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlanCard({
-    required String title,
-    required String price,
-    required String period,
-    required List<String> features,
-    required Color color,
-    required bool isPopular,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isPopular ? color : Colors.grey[200]!,
-          width: isPopular ? 2 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isPopular
-                ? color.withOpacity(0.1)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: isPopular ? 20 : 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          if (isPopular)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [color, color.withOpacity(0.8)],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.star, color: Colors.white, size: 16),
-                  SizedBox(width: 6),
-                  Text(
-                    'MOST POPULAR',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.workspace_premium,
-                        color: color,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                price,
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: color,
-                                ),
-                              ),
-                              Text(
-                                period,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                ...features.map(
-                  (feature) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
-                      children: [
-                        Icon(Icons.check_circle, color: color, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            feature,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Handle subscription
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('$title plan selected!'),
-                          backgroundColor: color,
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: color,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Subscribe Now',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      builder: (context) => const _PremiumBottomSheet(),
     );
   }
 
@@ -594,5 +262,259 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+}
+
+class _PremiumBottomSheet extends StatefulWidget {
+  const _PremiumBottomSheet();
+
+  @override
+  State<_PremiumBottomSheet> createState() => _PremiumBottomSheetState();
+}
+
+class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
+  bool _isStandard = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+            child: Column(
+              children: [
+                Text(
+                  'Upgrade Plan',
+                  style: appStyle(
+                    24,
+                    Colors.black,
+                    FontWeight.bold,
+                  ).copyWith(letterSpacing: -0.3),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(1),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _isStandard = true),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: _isStandard
+                                  ? Colors.black
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Text(
+                              'Standard',
+                              textAlign: TextAlign.center,
+                              style: appStyle(
+                                14,
+                                _isStandard ? Colors.white : Colors.black,
+                                FontWeight.w600,
+                              ).copyWith(letterSpacing: -0.3),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _isStandard = false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: !_isStandard
+                                  ? Colors.black
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Text(
+                              'Premium',
+                              textAlign: TextAlign.center,
+                              style: appStyle(
+                                14,
+                                !_isStandard ? Colors.white : Colors.black,
+                                FontWeight.w600,
+                              ).copyWith(letterSpacing: -0.3),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        _isStandard ? 'Standard' : 'Premium',
+                        style: appStyle(
+                          32,
+                          Colors.black,
+                          FontWeight.w900,
+                        ).copyWith(letterSpacing: -0.3),
+                      ),
+                      if (!_isStandard) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.verified, size: 24),
+                      ],
+                    ],
+                  ),
+                  if (!_isStandard) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'For Rich Kids',
+                      style: appStyle(
+                        14,
+                        Colors.grey[600]!,
+                        FontWeight.w500,
+                      ).copyWith(letterSpacing: -0.3),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        _isStandard ? 'K10' : 'K100',
+                        style: appStyle(48, Colors.black, FontWeight.bold),
+                      ),
+                      Text(
+                        '/week',
+                        style: appStyle(16, Colors.grey[600]!, FontWeight.w400),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  ...(_isStandard
+                          ? [
+                              'Unlimited swipes',
+                              'See who likes you',
+                              'Rewind last swipe',
+                              '5 Super Likes per day',
+                            ]
+                          : [
+                              'Everything in Standard',
+                              'Unlimited Super Likes',
+                              'Match with verified rich profiles',
+                              'VIP badge on profile',
+                              'Priority in search results',
+                              'Exclusive rich community',
+                            ])
+                      .map(
+                        (feature) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                color: Colors.black,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  feature,
+                                  style: appStyle(
+                                    15,
+                                    Colors.black87,
+                                    FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${_isStandard ? "Standard" : "Premium"} plan activated!',
+                              style: appStyle(
+                                14,
+                                Colors.white,
+                                FontWeight.w600,
+                              ),
+                            ),
+                            backgroundColor: Colors.black,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Subscribe Now',
+                        style: appStyle(16, Colors.white, FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Cancel anytime • Secure payment',
+                    style: appStyle(12, Colors.grey[500]!, FontWeight.w400),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
