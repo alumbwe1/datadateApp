@@ -20,8 +20,8 @@ class ProfileCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(28),
-              topRight: Radius.circular(28),
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
             ),
             boxShadow: [
               BoxShadow(
@@ -436,12 +436,12 @@ class ProfileCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             '${profile.name}, ${profile.age}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                              height: 1.2,
-                            ).copyWith(letterSpacing: -0.5),
+                            style: appStyle(
+                              25,
+                              Colors.white,
+
+                              FontWeight.w700,
+                            ).copyWith(letterSpacing: -0.3, height: 1.2),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -481,11 +481,11 @@ class ProfileCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Text(
                             'Here for ${profile.relationshipGoal}',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ).copyWith(letterSpacing: -0.2),
+                            style: appStyle(
+                              14,
+                              Colors.black,
+                              FontWeight.w500,
+                            ).copyWith(letterSpacing: -0.3),
                           ),
                         ],
                       ),
@@ -512,11 +512,11 @@ class ProfileCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             profile.location,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: appStyle(
+                              14,
+                              Colors.white,
+                              FontWeight.w500,
+                            ).copyWith(letterSpacing: -0.3),
                           ),
                         ],
                       ),

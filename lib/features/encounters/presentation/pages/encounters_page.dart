@@ -36,52 +36,68 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'DataDate',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 25,
-            fontWeight: FontWeight.w800,
-          ).copyWith(letterSpacing: -0.5),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
-            child: ElevatedButton(
-              onPressed: () => _showPremiumBottomSheet(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Image.asset(
+                  'assets/images/dataDate.png',
+                  height: 25,
+                  width: 25,
+                  fit: BoxFit.cover,
+                  color: Colors.black,
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                const SizedBox(width: 4),
+                Text(
+                  'DataDate',
+                  style: appStyle(
+                    25,
+                    Colors.black,
+                    FontWeight.w800,
+                  ).copyWith(letterSpacing: -0.3),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.workspace_premium, size: 17),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Upgrade',
-                    style: appStyle(
-                      13,
-                      Colors.white,
-                      FontWeight.w600,
-                    ).copyWith(letterSpacing: -0.3),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: () => _showPremiumBottomSheet(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
-                ],
-              ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Iconsax.diamonds,
+                        color: Colors.purpleAccent,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Upgrade',
+                        style: appStyle(
+                          13,
+                          Colors.white,
+                          FontWeight.w600,
+                        ).copyWith(letterSpacing: -0.3),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
       body: encountersState.isLoading
           ? const Center(child: ProfileCardShimmer())
@@ -278,7 +294,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
+      height: MediaQuery.of(context).size.height * 0.8,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -306,14 +322,15 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                   style: appStyle(
                     24,
                     Colors.black,
-                    FontWeight.bold,
+                    FontWeight.w700,
                   ).copyWith(letterSpacing: -0.3),
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.all(1),
+                  width: MediaQuery.of(context).size.width * 0.48,
+                  padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Row(
@@ -322,7 +339,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                         child: GestureDetector(
                           onTap: () => setState(() => _isStandard = true),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            padding: const EdgeInsets.symmetric(vertical: 5),
                             decoration: BoxDecoration(
                               color: _isStandard
                                   ? Colors.black
@@ -333,7 +350,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                               'Standard',
                               textAlign: TextAlign.center,
                               style: appStyle(
-                                14,
+                                15,
                                 _isStandard ? Colors.white : Colors.black,
                                 FontWeight.w600,
                               ).copyWith(letterSpacing: -0.3),
@@ -345,7 +362,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                         child: GestureDetector(
                           onTap: () => setState(() => _isStandard = false),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            padding: const EdgeInsets.symmetric(vertical: 5),
                             decoration: BoxDecoration(
                               color: !_isStandard
                                   ? Colors.black
@@ -356,7 +373,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                               'Premium',
                               textAlign: TextAlign.center,
                               style: appStyle(
-                                14,
+                                15,
                                 !_isStandard ? Colors.white : Colors.black,
                                 FontWeight.w600,
                               ).copyWith(letterSpacing: -0.3),
@@ -389,6 +406,12 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                       if (!_isStandard) ...[
                         const SizedBox(width: 8),
                         const Icon(Icons.verified, size: 24),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Iconsax.diamonds,
+                          color: Colors.purpleAccent,
+                          size: 24,
+                        ),
                       ],
                     ],
                   ),
@@ -428,22 +451,24 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                           : [
                               'Everything in Standard',
                               'Unlimited Super Likes',
-                              'Match with verified rich profiles',
-                              'VIP badge on profile',
-                              'Priority in search results',
-                              'Exclusive rich community',
+                              'Tired of broke girlfriends or boyfriends? Meet Zambia’s elite only',
+                              'Match with verified rich singles',
+                              'VIP badge on your profile',
+                              'Top priority in search results',
+                              'Access the exclusive rich community',
                             ])
                       .map(
                         (feature) => Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: Row(
+                            spacing: 12,
                             children: [
                               const Icon(
                                 Icons.check_circle_rounded,
                                 color: Colors.black,
                                 size: 24,
                               ),
-                              const SizedBox(width: 12),
+
                               Expanded(
                                 child: Text(
                                   feature,
@@ -485,7 +510,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                             backgroundColor: Colors.black,
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(40),
                             ),
                           ),
                         );
@@ -495,7 +520,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(40),
                         ),
                       ),
                       child: Text(
@@ -507,7 +532,11 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                   const SizedBox(height: 12),
                   Text(
                     'Cancel anytime • Secure payment',
-                    style: appStyle(12, Colors.grey[500]!, FontWeight.w400),
+                    style: appStyle(
+                      12,
+                      Colors.grey[500]!,
+                      FontWeight.w400,
+                    ).copyWith(letterSpacing: -0.2),
                   ),
                 ],
               ),

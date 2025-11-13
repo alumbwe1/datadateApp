@@ -41,9 +41,9 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
         title: Text(
           'Discover',
           style: appStyle(
-            22,
+            25,
             Colors.black,
-            FontWeight.bold,
+            FontWeight.w800,
           ).copyWith(letterSpacing: -0.3),
         ),
         leading: Padding(

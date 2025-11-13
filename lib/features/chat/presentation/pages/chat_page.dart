@@ -19,9 +19,9 @@ class ChatPage extends StatelessWidget {
         title: Text(
           'Messages',
           style: appStyle(
-            22,
+            25,
             Colors.black,
-            FontWeight.bold,
+            FontWeight.w800,
           ).copyWith(letterSpacing: -0.3),
         ),
         leading: Padding(
