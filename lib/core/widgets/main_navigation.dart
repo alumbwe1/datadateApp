@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iconly/iconly.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../features/encounters/presentation/pages/encounters_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/discover/presentation/pages/discover_page.dart';
+import '../../features/likes/presentation/pages/likes_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -16,9 +16,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _pages = [
     const EncountersPage(),
-    const Center(child: Text('Nearby - Coming Soon')),
-    const Center(child: Text('Likes - Coming Soon')),
-    const Center(child: Text('Chats - Coming Soon')),
+    const DiscoverPage(),
+    const LikesPage(),
+    const LikesPage(),
     const ProfilePage(),
   ];
 
@@ -50,25 +50,25 @@ class _MainNavigationState extends State<MainNavigation> {
                   activeColor: const Color(0xFFFF6B6B),
                 ),
                 _buildNavItem(
-                  icon: IconlyBold.discovery,
-                  label: 'Nearby',
+                  icon: Icons.grid_view_rounded,
+                  label: 'Discover',
                   index: 1,
-                  activeColor: Colors.black,
+                  activeColor: const Color(0xFFFFD700),
                 ),
                 _buildNavItem(
-                  icon: Iconsax.heart,
+                  icon: Icons.favorite,
                   label: 'Likes',
                   index: 2,
-                  activeColor: const Color(0xFF00D9A3),
+                  activeColor: const Color(0xFFFF6B6B),
                 ),
                 _buildNavItem(
-                  icon: Iconsax.message,
+                  icon: Icons.chat_bubble,
                   label: 'Chats',
                   index: 3,
-                  activeColor: Colors.black,
+                  activeColor: const Color(0xFFFF6B6B),
                 ),
                 _buildNavItem(
-                  icon: Iconsax.user,
+                  icon: Icons.person,
                   label: 'Profile',
                   index: 4,
                   activeColor: Colors.black,

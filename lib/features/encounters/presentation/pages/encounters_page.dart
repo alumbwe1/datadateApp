@@ -180,6 +180,15 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
               _controller.swipe(CardSwiperDirection.right);
             },
           ),
+          _buildActionButton(
+            icon: Iconsax.star,
+            color: Colors.lightGreenAccent,
+            size: 65,
+            iconSize: 35,
+            onPressed: () {
+              _controller.swipe(CardSwiperDirection.right);
+            },
+          ),
         ],
       ),
     );

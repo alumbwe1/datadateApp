@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:iconly/iconly.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../domain/entities/profile.dart';
 import 'dart:math' as math;
 
@@ -99,41 +98,17 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
             ),
           ),
 
-          // Photo indicators
-          Positioned(
-            top: 60,
-            left: 16,
-            right: 16,
-            child: Row(
-              children: List.generate(
-                widget.profile.photos.length,
-                (index) => Expanded(
-                  child: Container(
-                    height: 3,
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      color: _currentPhotoIndex == index
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
           // Back button
           Positioned(
             top: 50,
             left: 16,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
+                color: Colors.white,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -141,7 +116,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
 
           // Circular Match Percentage in Center
           Positioned(
-            top: MediaQuery.of(context).size.height * 0.25,
+            top: MediaQuery.of(context).size.height * 0.35,
             left: MediaQuery.of(context).size.width / 2 - 60,
             child: _buildCircularMatchIndicator(),
           ),
@@ -185,21 +160,8 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                                               '${widget.profile.name}, ${widget.profile.age}',
                                               style: const TextStyle(
                                                 fontSize: 28,
-                                                fontWeight: FontWeight.bold,
+                                                fontWeight: FontWeight.w900,
                                               ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: const BoxDecoration(
-                                              color: Color(0xFF00D9A3),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.check,
-                                              color: Colors.white,
-                                              size: 16,
                                             ),
                                           ),
                                         ],
@@ -238,12 +200,12 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                               ],
                             ),
                             const SizedBox(height: 24),
-                            const Text(
+                            Text(
                               'Description',
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                fontWeight: FontWeight.w800,
+                              ).copyWith(letterSpacing: -0.3),
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -255,12 +217,12 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            const Text(
+                            Text(
                               'Interest',
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                fontWeight: FontWeight.w800,
+                              ).copyWith(letterSpacing: -0.2),
                             ),
                             const SizedBox(height: 12),
                             Wrap(
@@ -329,7 +291,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
 
                         // Center button (Like) - Larger
                         _buildActionButton(
-                          icon: Icons.favorite,
+                          icon: Iconsax.heart,
                           color: Colors.black,
                           size: 50,
                           onPressed: () {
@@ -340,7 +302,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
 
                         // Right button (Super Like)
                         _buildActionButton(
-                          icon: Icons.star,
+                          icon: Iconsax.star,
                           color: const Color(0xFFFFB800),
                           size: 50,
                           onPressed: () {
@@ -361,63 +323,62 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
 
   Widget _buildCircularMatchIndicator() {
     final matchPercentage = _calculateMatchPercentage();
+
     return Container(
-      width: MediaQuery.of(context).size.width * 0.3,
-      height: 80,
+      width: MediaQuery.of(context).size.width * 0.35,
+      height: 60,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(40),
+        borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Stack(
             alignment: Alignment.center,
             children: [
               // Circular progress indicator
               SizedBox(
-                width: 50,
-                height: 50,
+                width: 45,
+                height: 45,
                 child: CustomPaint(
                   painter: CircularProgressPainter(
                     progress: matchPercentage / 100,
-                    strokeWidth: 6,
-                    color: const Color(0xFF00D9A3),
-                    backgroundColor: Colors.grey[200]!,
+                    strokeWidth: 5,
+                    color: Colors.deepPurpleAccent,
+                    backgroundColor: Colors.grey.shade200,
                   ),
                 ),
               ),
               // Percentage text
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '$matchPercentage%',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF00D9A3),
-                    ),
-                  ),
-                ],
+              Text(
+                '$matchPercentage%',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ],
           ),
-
+          const SizedBox(width: 5),
           Text(
-            'match',
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF00D9A3),
-            ),
+            'Match',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Colors.black,
+            ).copyWith(letterSpacing: -0.3),
           ),
+          const SizedBox(width: 5),
         ],
       ),
     );
@@ -460,7 +421,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
               fontSize: 14,
               color: Colors.grey[700],
               fontWeight: FontWeight.w500,
-            ),
+            ).copyWith(letterSpacing: -0.2),
           ),
         ],
       ),
