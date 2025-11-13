@@ -3,12 +3,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../main.dart';
 
 class OnboardingState {
+  final String? name;
+  final String? email;
+  final String? password;
+  final int? age;
+  final String? gender;
   final String? datingGoal;
   final List<String> interests;
   final String? location;
   final bool isCompleted;
 
   OnboardingState({
+    this.name,
+    this.email,
+    this.password,
+    this.age,
+    this.gender,
     this.datingGoal,
     this.interests = const [],
     this.location,
@@ -16,12 +26,22 @@ class OnboardingState {
   });
 
   OnboardingState copyWith({
+    String? name,
+    String? email,
+    String? password,
+    int? age,
+    String? gender,
     String? datingGoal,
     List<String>? interests,
     String? location,
     bool? isCompleted,
   }) {
     return OnboardingState(
+      name: name ?? this.name,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
       datingGoal: datingGoal ?? this.datingGoal,
       interests: interests ?? this.interests,
       location: location ?? this.location,
@@ -40,6 +60,22 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   void _loadOnboardingStatus() {
     final isCompleted = _prefs.getBool('onboarding_completed') ?? false;
     state = state.copyWith(isCompleted: isCompleted);
+  }
+
+  void setBasicInfo({
+    required String name,
+    required String email,
+    required String password,
+    required int age,
+    required String gender,
+  }) {
+    state = state.copyWith(
+      name: name,
+      email: email,
+      password: password,
+      age: age,
+      gender: gender,
+    );
   }
 
   void setDatingGoal(String goal) {

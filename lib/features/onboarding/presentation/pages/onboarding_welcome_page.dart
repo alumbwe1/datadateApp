@@ -1,4 +1,7 @@
+import 'package:datadate/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_style.dart';
 
@@ -7,6 +10,11 @@ class OnboardingWelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isTablet = screenWidth >= 600;
+    final isSmallScreen = screenHeight < 700;
+
     final List<Map<String, String>> profiles = [
       {
         'image':
@@ -42,34 +50,42 @@ class OnboardingWelcomePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Top section with angled grid
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: MediaQuery.of(context).size.height * 0.55,
-            child: Stack(
-              children: [
-                // Angled container with grid
-                Positioned.fill(
-                  child: Transform(
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.0008)
-                      ..rotateX(-0.3),
-                    alignment: Alignment.center,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            //AppLogo
+            Positioned(
+              top: isSmallScreen ? 10 : 20,
+              left: screenWidth / 2 - (isTablet ? 20 : 17.5),
+              child: Image.asset(
+                'assets/images/dataDate.png',
+                height: isTablet ? 40 : 35,
+                width: isTablet ? 40 : 35,
+                fit: BoxFit.cover,
+              ),
+            ),
+            // Top section with angled grid
+            Positioned(
+              top: isSmallScreen ? 60 : 80,
+              left: 0,
+              right: 0,
+              height: screenHeight * (isSmallScreen ? 0.45 : 0.5),
+              child: Stack(
+                children: [
+                  // Angled container with grid
+                  Positioned.fill(
                     child: Container(
-                      padding: const EdgeInsets.fromLTRB(24, 80, 24, 0),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 40 : 24,
+                      ),
                       child: GridView.builder(
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 0.75,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                            ),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          childAspectRatio: isSmallScreen ? 0.85 : 1,
+                          crossAxisSpacing: isTablet ? 16 : 5,
+                          mainAxisSpacing: isTablet ? 16 : 5,
+                        ),
                         itemCount: profiles.length,
                         itemBuilder: (context, index) {
                           return Stack(
@@ -77,7 +93,9 @@ class OnboardingWelcomePage extends StatelessWidget {
                               // Image
                               Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(
+                                    isTablet ? 30 : 25,
+                                  ),
                                   image: DecorationImage(
                                     image: NetworkImage(
                                       profiles[index]['image']!,
@@ -86,46 +104,28 @@ class OnboardingWelcomePage extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              // Name overlay at top
+                              // Name overlay at bottom
                               Positioned(
-                                top: 12,
-                                left: 12,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.6),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        profiles[index]['name']!,
-                                        style: appStyle(
-                                          11,
-                                          Colors.white,
-                                          FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Container(
-                                        width: 14,
-                                        height: 14,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFFFFD700),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.check,
-                                          color: Colors.black,
-                                          size: 10,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                left: isTablet ? 16 : 12,
+                                bottom: isTablet ? 8 : 5,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      profiles[index]['name']!,
+                                      style: appStyle(
+                                        isTablet ? 13 : 11,
+                                        Colors.white,
+                                        FontWeight.w600,
+                                      ).copyWith(letterSpacing: -0.3),
+                                    ),
+                                    SizedBox(width: isTablet ? 6 : 4),
+                                    Icon(
+                                      Icons.verified,
+                                      color: const Color(0xFFFFD700),
+                                      size: isTablet ? 18 : 15,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -134,150 +134,184 @@ class OnboardingWelcomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
 
-                // Gradient overlay
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.2),
-                          Colors.black.withOpacity(0.6),
-                          Colors.black,
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
+                  // Gradient overlay
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.2),
+                            Colors.black.withValues(alpha: 0.6),
+                            Colors.black,
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Bottom content section
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
-                child: Column(
-                  children: [
-                    // Star icon
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.star_rounded,
-                        color: Colors.black,
-                        size: 32,
-                      ),
-                    ),
+            // Bottom content section
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    isTablet ? 48 : 32,
+                    0,
+                    isTablet ? 48 : 32,
+                    isSmallScreen ? 20 : 40,
+                  ),
+                  child: Column(
+                    children: [
+                      _StarIcon(isTablet: isTablet),
+                      SizedBox(height: isSmallScreen ? 16 : 24),
 
-                    const SizedBox(height: 24),
-
-                    // Headline
-                    Text(
-                      'Date Zambia\'s Elite',
-                      style: appStyle(
-                        32,
-                        Colors.white,
-                        FontWeight.w900,
-                      ).copyWith(letterSpacing: -0.5, height: 1.1),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Subheading
-                    Text(
-                      'Connect with verified rich singles and\nfind your perfect match',
-                      style: appStyle(
-                        14,
-                        Colors.white60,
-                        FontWeight.w400,
-                      ).copyWith(height: 1.4),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    const SizedBox(height: 40),
-
-                    // Sign up button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => context.push('/register'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 18),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: Text(
-                          'Create Account',
-                          style: appStyle(
-                            16,
-                            Colors.black,
-                            FontWeight.w700,
-                          ).copyWith(letterSpacing: 0.3),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Log in button
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () => context.go('/login'),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 18),
-                        ),
-                        child: Text(
-                          'Sign In',
-                          style: appStyle(
-                            16,
-                            Colors.white,
-                            FontWeight.w600,
-                          ).copyWith(letterSpacing: 0.3),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Terms text
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'By signing up, you are creating a DataDate account and agree to DataDate\'s Terms and Privacy Policy',
+                      // Headline
+                      Text(
+                        'Meet Campus Elite\n& Find Your Match',
                         style: appStyle(
-                          11,
-                          Colors.white38,
-                          FontWeight.w400,
-                        ).copyWith(height: 1.3),
+                          isTablet ? 40 : (isSmallScreen ? 28 : 32),
+                          Colors.white,
+                          FontWeight.w900,
+                        ).copyWith(letterSpacing: -0.3, height: 1.1),
                         textAlign: TextAlign.center,
                       ),
-                    ),
-                  ],
+
+                      SizedBox(height: isSmallScreen ? 8 : 12),
+
+                      // Subheading
+                      Text(
+                        'Connect with verified students. Where the\nrich & ambitious come to date 💎',
+                        style: appStyle(
+                          isTablet ? 16.sp : 15.sp,
+                          Colors.grey[400]!,
+                          FontWeight.w400,
+                        ).copyWith(height: 1.5),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: isSmallScreen ? 24 : 40),
+
+                      // Sign up button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => context.push('/register'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            padding: EdgeInsets.symmetric(
+                              vertical: isTablet ? 20 : 18,
+                            ),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text(
+                            'Create Account',
+                            style: appStyle(
+                              isTablet ? 18 : 16,
+                              Colors.black,
+                              FontWeight.w700,
+                            ).copyWith(letterSpacing: 0.3),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: isSmallScreen ? 12 : 16),
+
+                      // Log in button
+                      GestureDetector(
+                        onTap: () => context.go('/login'),
+                        child: Text(
+                          'Already have an account? Sign In',
+                          style: appStyle(
+                            isTablet ? 15.sp : 14.sp,
+                            Colors.grey[400]!,
+                            FontWeight.w500,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: isSmallScreen ? 12 : 16),
+
+                      // Terms text
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 24 : 16,
+                        ),
+                        child: Text(
+                          'By signing up, you are creating a DataDate account and agree to DataDate\'s Terms and Privacy Policy',
+                          style: appStyle(
+                            isTablet ? 12 : 11,
+                            Colors.white38,
+                            FontWeight.w400,
+                          ).copyWith(height: 1.3),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StarIcon extends StatelessWidget {
+  final bool isTablet;
+
+  const _StarIcon({required this.isTablet});
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 1000),
+      curve: Curves.elasticOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Transform.rotate(
+            angle: (1 - value) * 3.14,
+            child: Center(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 24 : 10,
+                  vertical: isTablet ? 5 : 5,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(isTablet ? 16 : 16),
+                  color: AppColors.mellowLime,
+                ),
+                child: SvgPicture.asset(
+                  'assets/svgs/star3.svg',
+                  width: isTablet ? 70.r : 35.r,
+                  height: isTablet ? 70.r : 35.r,
+                  fit: BoxFit.cover,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primaryLight,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -20,6 +20,7 @@ class AppColors {
   static const Color cardDark = Color(0xFF2A2A2A);
   static const Color textPrimaryDark = Color(0xFFFFFFFF);
   static const Color textSecondaryDark = Color(0xFF9E9E9E);
+  static const Color mellowLime = Color(0xFFFFD900);
 
   // Common
   static const Color success = Color(0xFF00D9A3);

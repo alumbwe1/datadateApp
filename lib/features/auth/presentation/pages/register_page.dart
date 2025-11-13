@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/utils/validators.dart';
-import '../providers/auth_provider.dart';
+import '../../../onboarding/presentation/providers/onboarding_provider.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -22,20 +23,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _ageController = TextEditingController();
 
   String _selectedGender = 'male';
-  String _selectedUniversity = 'MIT';
-  String _selectedGoal = AppConstants.goalDating;
   bool _obscurePassword = true;
-
-  final List<String> _universities = [
-    'MIT',
-    'Stanford',
-    'Harvard',
-    'Berkeley',
-    'Yale',
-    'Princeton',
-    'Columbia',
-    'Cornell',
-  ];
 
   @override
   void dispose() {
@@ -46,95 +34,114 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     super.dispose();
   }
 
-  Future<void> _handleRegister() async {
+  void _handleContinue() {
     if (_formKey.currentState!.validate()) {
-      await ref
-          .read(authProvider.notifier)
-          .register(
+      // Store basic info in onboarding provider
+      ref
+          .read(onboardingProvider.notifier)
+          .setBasicInfo(
+            name: _nameController.text,
             email: _emailController.text,
             password: _passwordController.text,
-            name: _nameController.text,
             age: int.parse(_ageController.text),
             gender: _selectedGender,
-            university: _selectedUniversity,
-            relationshipGoal: _selectedGoal,
           );
 
-      if (mounted) {
-        final authState = ref.read(authProvider);
-        if (authState.user != null) {
-          context.go('/encounters');
-        } else if (authState.error != null) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(authState.error!)));
-        }
-      }
+      // Navigate to dating goal selection
+      context.push('/onboarding/dating-goal');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Create Account',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                // Logo
+                Center(
+                  child: Image.asset(
+                    'assets/images/dataDate.png',
+                    height: 50.h,
+                    width: 50.w,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(height: 8),
+
+                SizedBox(height: 24.h),
+
                 Text(
-                  'Join DataDate and find your match',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                  'Create Account',
+                  style: appStyle(
+                    32,
+                    Colors.black,
+                    FontWeight.w900,
+                  ).copyWith(letterSpacing: -0.5),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+
+                SizedBox(height: 8.h),
+
+                Text(
+                  'Join the elite dating community',
+                  style: appStyle(
+                    15,
+                    Colors.grey[600]!,
+                    FontWeight.w400,
+                  ).copyWith(letterSpacing: -0.2),
+                  textAlign: TextAlign.center,
+                ),
+
+                SizedBox(height: 40.h),
+
                 CustomTextField(
-                  label: 'Name',
-                  hint: 'Enter your name',
+                  label: 'Full Name',
+                  hint: 'Enter your full name',
                   controller: _nameController,
                   validator: (value) => Validators.required(value, 'Name'),
-                  prefixIcon: const Icon(Icons.person),
+                  prefixIcon: const Icon(Icons.person_outline),
                 ),
-                const SizedBox(height: 16),
+
+                SizedBox(height: 20.h),
+
                 CustomTextField(
                   label: 'Email',
                   hint: 'Enter your email',
                   controller: _emailController,
                   validator: Validators.email,
                   keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email),
+                  prefixIcon: const Icon(Icons.email_outlined),
                 ),
-                const SizedBox(height: 16),
+
+                SizedBox(height: 20.h),
+
                 CustomTextField(
                   label: 'Password',
-                  hint: 'Enter your password',
+                  hint: 'Create a strong password',
                   controller: _passwordController,
                   validator: Validators.password,
                   obscureText: _obscurePassword,
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: Colors.grey[600],
                     ),
                     onPressed: () {
                       setState(() {
@@ -143,105 +150,85 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 16),
+
+                SizedBox(height: 20.h),
+
                 CustomTextField(
                   label: 'Age',
                   hint: 'Enter your age',
                   controller: _ageController,
                   validator: Validators.age,
                   keyboardType: TextInputType.number,
-                  prefixIcon: const Icon(Icons.cake),
+                  prefixIcon: const Icon(Icons.cake_outlined),
                 ),
-                const SizedBox(height: 16),
+
+                SizedBox(height: 24.h),
+
                 Text(
                   'Gender',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                  style: appStyle(
+                    14,
+                    Colors.black,
+                    FontWeight.w600,
+                  ).copyWith(letterSpacing: -0.2),
                 ),
-                const SizedBox(height: 8),
+
+                SizedBox(height: 12.h),
+
                 Row(
                   children: [
                     Expanded(
-                      child: RadioListTile<String>(
-                        title: const Text('Male'),
-                        value: 'male',
-                        groupValue: _selectedGender,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedGender = value!;
-                          });
-                        },
+                      child: _GenderOption(
+                        label: 'Male',
+                        icon: Icons.male,
+                        isSelected: _selectedGender == 'male',
+                        onTap: () => setState(() => _selectedGender = 'male'),
                       ),
                     ),
+                    SizedBox(width: 12.w),
                     Expanded(
-                      child: RadioListTile<String>(
-                        title: const Text('Female'),
-                        value: 'female',
-                        groupValue: _selectedGender,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedGender = value!;
-                          });
-                        },
+                      child: _GenderOption(
+                        label: 'Female',
+                        icon: Icons.female,
+                        isSelected: _selectedGender == 'female',
+                        onTap: () => setState(() => _selectedGender = 'female'),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'University',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+
+                SizedBox(height: 40.h),
+
+                CustomButton(text: 'Continue', onPressed: _handleContinue),
+
+                SizedBox(height: 24.h),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Already have an account? ',
+                      style: appStyle(
+                        15,
+                        Colors.grey[600]!,
+                        FontWeight.w400,
+                      ).copyWith(letterSpacing: -0.2),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.go('/login'),
+                      child: Text(
+                        'Sign In',
+                        style: appStyle(
+                          15,
+                          Colors.black,
+                          FontWeight.w700,
+                        ).copyWith(letterSpacing: -0.2),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: _selectedUniversity,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.school),
-                  ),
-                  items: _universities
-                      .map(
-                        (uni) => DropdownMenuItem(value: uni, child: Text(uni)),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedUniversity = value!;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'I\'m looking for',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 8),
-                _buildGoalOption(
-                  AppConstants.goalDating,
-                  'I want to go on dates and have a good time. No labels.',
-                  Icons.favorite,
-                ),
-                _buildGoalOption(
-                  AppConstants.goalFriends,
-                  'I\'m here to chat and see where it goes. No pressure.',
-                  Icons.people,
-                ),
-                _buildGoalOption(
-                  AppConstants.goalRelationship,
-                  'I\'m looking for something that lasts. No games.',
-                  Icons.favorite_border,
-                ),
-                const SizedBox(height: 24),
-                CustomButton(
-                  text: 'Create Account',
-                  onPressed: _handleRegister,
-                  isLoading: authState.isLoading,
-                ),
-                const SizedBox(height: 16),
+
+                SizedBox(height: 20.h),
               ],
             ),
           ),
@@ -249,65 +236,50 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       ),
     );
   }
+}
 
-  Widget _buildGoalOption(String goal, String description, IconData icon) {
-    final isSelected = _selectedGoal == goal;
+class _GenderOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
 
+  const _GenderOption({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedGoal = goal;
-        });
-      },
+      onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.1)
-              : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? Colors.black : Colors.grey[50],
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isSelected
-                ? Theme.of(context).primaryColor
-                : Colors.grey.withOpacity(0.3),
-            width: 2,
+            color: isSelected ? Colors.black : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
             Icon(
               icon,
-              color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+              color: isSelected ? Colors.white : Colors.grey[600],
+              size: 32,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    goal,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Theme.of(context).primaryColor : null,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
+            SizedBox(height: 8.h),
+            Text(
+              label,
+              style: appStyle(
+                14,
+                isSelected ? Colors.white : Colors.grey[600]!,
+                FontWeight.w600,
               ),
-            ),
-            Radio<String>(
-              value: goal,
-              groupValue: _selectedGoal,
-              onChanged: (value) {
-                setState(() {
-                  _selectedGoal = value!;
-                });
-              },
             ),
           ],
         ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/utils/validators.dart';
@@ -37,9 +39,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         if (authState.user != null) {
           context.go('/encounters');
         } else if (authState.error != null) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(authState.error!)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                authState.error!,
+                style: appStyle(14, Colors.white, FontWeight.w600),
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
         }
       }
     }
@@ -50,53 +62,81 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 60),
-                Text(
-                  'DataDate',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
+                SizedBox(height: 40.h),
+
+                // Logo
+                Center(
+                  child: Image.asset(
+                    'assets/images/dataDate.png',
+                    height: 60.h,
+                    width: 60.w,
+                    color: Colors.black,
+                    fit: BoxFit.cover,
                   ),
-                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+
+                SizedBox(height: 24.h),
+
+                // Welcome back text
                 Text(
-                  'Find your perfect match',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                  'Welcome Back',
+                  style: appStyle(
+                    32,
+                    Colors.black,
+                    FontWeight.w900,
+                  ).copyWith(letterSpacing: -0.3),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 60),
+
+                SizedBox(height: 8.h),
+
+                Text(
+                  'Sign in to continue your journey',
+                  style: appStyle(
+                    15,
+                    Colors.grey[600]!,
+                    FontWeight.w400,
+                  ).copyWith(letterSpacing: -0.3),
+                  textAlign: TextAlign.center,
+                ),
+
+                SizedBox(height: 48.h),
+
+                // Email field
                 CustomTextField(
                   label: 'Email',
                   hint: 'Enter your email',
                   controller: _emailController,
                   validator: Validators.email,
                   keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email),
+                  prefixIcon: const Icon(Icons.email_outlined),
                 ),
-                const SizedBox(height: 16),
+
+                SizedBox(height: 20.h),
+
+                // Password field
                 CustomTextField(
                   label: 'Password',
                   hint: 'Enter your password',
                   controller: _passwordController,
                   validator: Validators.password,
                   obscureText: _obscurePassword,
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: Colors.grey[600],
                     ),
                     onPressed: () {
                       setState(() {
@@ -105,19 +145,92 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 24),
+
+                SizedBox(height: 12.h),
+
+                // Forgot password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      // TODO: Implement forgot password
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
+                    ),
+                    child: Text(
+                      'Forgot Password?',
+                      style: appStyle(
+                        14,
+                        Colors.black,
+                        FontWeight.w600,
+                      ).copyWith(letterSpacing: -0.2),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 32.h),
+
+                // Login button
                 CustomButton(
-                  text: 'Login',
+                  text: 'Sign In',
                   onPressed: _handleLogin,
                   isLoading: authState.isLoading,
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {
-                    context.push('/register');
-                  },
-                  child: const Text('Don\'t have an account? Sign up'),
+
+                SizedBox(height: 24.h),
+
+                // Divider with OR
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(color: Colors.grey[300], thickness: 1),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Text(
+                        'OR',
+                        style: appStyle(12, Colors.grey[600]!, FontWeight.w600),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(color: Colors.grey[300], thickness: 1),
+                    ),
+                  ],
                 ),
+
+                SizedBox(height: 24.h),
+
+                // Sign up link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Don\'t have an account? ',
+                      style: appStyle(
+                        15,
+                        Colors.grey[600]!,
+                        FontWeight.w400,
+                      ).copyWith(letterSpacing: -0.2),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.push('/register'),
+                      child: Text(
+                        'Sign Up',
+                        style: appStyle(
+                          15,
+                          Colors.black,
+                          FontWeight.w700,
+                        ).copyWith(letterSpacing: -0.2),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 20.h),
               ],
             ),
           ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../providers/onboarding_provider.dart';
 
@@ -18,7 +20,7 @@ class OnboardingInterestsPage extends ConsumerWidget {
     {'name': 'Gaming', 'emoji': '🎮'},
     {'name': 'Movies', 'emoji': '🎬'},
     {'name': 'Sports', 'emoji': '⚽'},
-    {'name': 'Dancing', 'emoji': '💃'},
+    {'name': 'Dancing', 'emoji': '�'},
     {'name': 'Technology', 'emoji': '💻'},
     {'name': 'Fashion', 'emoji': '👗'},
     {'name': 'Nature', 'emoji': '🌿'},
@@ -33,51 +35,69 @@ class OnboardingInterestsPage extends ConsumerWidget {
     final selectedInterests = ref.watch(onboardingProvider).interests;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Select up to 5 interests',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Select your\ninterests',
+                    style: appStyle(
+                      32,
+                      Colors.black,
+                      FontWeight.w900,
+                    ).copyWith(letterSpacing: -0.5, height: 1.2),
                   ),
-                  const SizedBox(height: 12),
+
+                  SizedBox(height: 12.h),
+
                   Text(
                     'Let others know what you\'re passionate about',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                    style: appStyle(
+                      15,
+                      Colors.grey[600]!,
+                      FontWeight.w400,
+                    ).copyWith(letterSpacing: -0.2, height: 1.4),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${selectedInterests.length}/5 selected',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w600,
+
+                  SizedBox(height: 16.h),
+
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      '${selectedInterests.length}/5 selected',
+                      style: appStyle(13, Colors.white, FontWeight.w600),
                     ),
                   ),
                 ],
               ),
             ),
+
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  spacing: 12.w,
+                  runSpacing: 12.h,
                   children: availableInterests.map((interest) {
                     final isSelected = selectedInterests.contains(
                       interest['name'],
@@ -102,8 +122,9 @@ class OnboardingInterestsPage extends ConsumerWidget {
                 ),
               ),
             ),
+
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24.w),
               child: CustomButton(
                 text: 'Continue',
                 onPressed: selectedInterests.isNotEmpty
@@ -133,41 +154,30 @@ class _InterestChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(30),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
         decoration: BoxDecoration(
-          gradient: isSelected
-              ? LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColor.withOpacity(0.8),
-                  ],
-                )
-              : null,
-          color: isSelected ? null : const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(30),
+          color: isSelected ? Colors.black : Colors.grey[50],
+          borderRadius: BorderRadius.circular(30.r),
           border: Border.all(
-            color: isSelected
-                ? Colors.transparent
-                : Colors.grey.withOpacity(0.2),
-            width: 1,
+            color: isSelected ? Colors.black : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 18)),
-            const SizedBox(width: 8),
+            Text(emoji, style: TextStyle(fontSize: 18.sp)),
+            SizedBox(width: 8.w),
             Text(
               label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.white,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                fontSize: 15,
+              style: appStyle(
+                14,
+                isSelected ? Colors.white : Colors.black,
+                isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],

@@ -59,6 +59,7 @@ dependencies:
   lottie: ^3.1.2
   flutter_card_swiper: ^7.0.1
   smooth_page_indicator: ^1.2.0+3
+  flutter_screenutil: ^5.9.3
 
   # Voice Calls
   agora_rtc_engine: ^6.3.2
@@ -69,10 +70,12 @@ dependencies:
   equatable: ^2.0.5
   dartz: ^0.10.1
 
+
   #Icons
   iconly: ^1.0.1
   iconsax_flutter: ^1.0.1
   iconsax: ^0.0.8
+  flutter_svg: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -104,6 +107,7 @@ flutter:
   assets:
     - assets/images/
     - assets/lottie/
+    - assets/svgs/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

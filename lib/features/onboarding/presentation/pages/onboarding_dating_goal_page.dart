@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../providers/onboarding_provider.dart';
 
@@ -12,71 +14,94 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
     final selectedGoal = ref.watch(onboardingProvider).datingGoal;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Tell people why you\'re here',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'What are you\nlooking for?',
+                      style: appStyle(
+                        32,
+                        Colors.black,
+                        FontWeight.w900,
+                      ).copyWith(letterSpacing: -0.5, height: 1.2),
+                    ),
+
+                    SizedBox(height: 12.h),
+
+                    Text(
+                      'Be honest about what you want. You can\nchange this anytime.',
+                      style: appStyle(
+                        15,
+                        Colors.grey[600]!,
+                        FontWeight.w400,
+                      ).copyWith(letterSpacing: -0.2, height: 1.4),
+                    ),
+
+                    SizedBox(height: 40.h),
+
+                    _DatingGoalOption(
+                      emoji: '☕',
+                      title: 'Here to date',
+                      description: 'I want to go on dates and have a good time',
+                      isSelected: selectedGoal == 'date',
+                      onTap: () => ref
+                          .read(onboardingProvider.notifier)
+                          .setDatingGoal('date'),
+                    ),
+
+                    SizedBox(height: 16.h),
+
+                    _DatingGoalOption(
+                      emoji: '💬',
+                      title: 'Open to chat',
+                      description: 'I\'m here to chat and see where it goes',
+                      isSelected: selectedGoal == 'chat',
+                      onTap: () => ref
+                          .read(onboardingProvider.notifier)
+                          .setDatingGoal('chat'),
+                    ),
+
+                    SizedBox(height: 16.h),
+
+                    _DatingGoalOption(
+                      emoji: '❤️',
+                      title: 'Ready for a relationship',
+                      description: 'I\'m looking for something that lasts',
+                      isSelected: selectedGoal == 'relationship',
+                      onTap: () => ref
+                          .read(onboardingProvider.notifier)
+                          .setDatingGoal('relationship'),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Be confident about what you want, and find the right people for you. You can change this anytime.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
-              ),
-              const SizedBox(height: 32),
-              _DatingGoalOption(
-                emoji: '☕',
-                title: 'Here to date',
-                description:
-                    'I want to go on dates and have a good time. No labels.',
-                isSelected: selectedGoal == 'date',
-                onTap: () =>
-                    ref.read(onboardingProvider.notifier).setDatingGoal('date'),
-              ),
-              const SizedBox(height: 16),
-              _DatingGoalOption(
-                emoji: '💬',
-                title: 'Open to chat',
-                description:
-                    'I\'m here to chat and see where it goes. No pressure.',
-                isSelected: selectedGoal == 'chat',
-                onTap: () =>
-                    ref.read(onboardingProvider.notifier).setDatingGoal('chat'),
-              ),
-              const SizedBox(height: 16),
-              _DatingGoalOption(
-                emoji: '❤️',
-                title: 'Ready for a relationship',
-                description: 'I\'m looking for something that lasts. No games.',
-                isSelected: selectedGoal == 'relationship',
-                onTap: () => ref
-                    .read(onboardingProvider.notifier)
-                    .setDatingGoal('relationship'),
-              ),
-              const SizedBox(height: 40),
-              CustomButton(
+            ),
+
+            Padding(
+              padding: EdgeInsets.all(24.w),
+              child: CustomButton(
                 text: 'Continue',
                 onPressed: selectedGoal != null
                     ? () => context.push('/onboarding/interests')
                     : null,
               ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -100,65 +125,78 @@ class _DatingGoalOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.15)
-              : const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? Colors.black : Colors.grey[50],
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: isSelected
-                ? Theme.of(context).primaryColor
-                : Colors.transparent,
-            width: 2,
+            color: isSelected ? Colors.black : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           children: [
             Container(
-              width: 56,
-              height: 56,
+              width: 56.w,
+              height: 56.h,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context).primaryColor.withOpacity(0.2)
-                    : Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(16.r),
               ),
               child: Center(
-                child: Text(emoji, style: const TextStyle(fontSize: 28)),
+                child: Text(emoji, style: TextStyle(fontSize: 28.sp)),
               ),
             ),
-            const SizedBox(width: 16),
+
+            SizedBox(width: 16.w),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: appStyle(
+                      16,
+                      isSelected ? Colors.white : Colors.black,
+                      FontWeight.w700,
+                    ).copyWith(letterSpacing: -0.2),
                   ),
-                  const SizedBox(height: 4),
+
+                  SizedBox(height: 4.h),
+
                   Text(
                     description,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    style: appStyle(
+                      13,
+                      isSelected ? Colors.white70 : Colors.grey[600]!,
+                      FontWeight.w400,
+                    ).copyWith(letterSpacing: -0.1),
                   ),
                 ],
               ),
             ),
-            Radio<bool>(
-              value: true,
-              groupValue: isSelected,
-              onChanged: (_) => onTap(),
-              activeColor: Theme.of(context).primaryColor,
+
+            Container(
+              width: 24.w,
+              height: 24.h,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? Colors.white : Colors.grey[400]!,
+                  width: 2,
+                ),
+                color: isSelected ? Colors.white : Colors.transparent,
+              ),
+              child: isSelected
+                  ? Icon(Icons.check, size: 16.sp, color: Colors.black)
+                  : null,
             ),
           ],
         ),
