@@ -43,19 +43,19 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
           style: TextStyle(
             color: Colors.black,
             fontSize: 25,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
           ).copyWith(letterSpacing: -0.5),
         ),
         actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.refresh, color: Colors.black),
-          //   onPressed: () {
-          //     final user = ref.read(authProvider).user;
-          //     if (user != null) {
-          //       ref.read(encountersProvider.notifier).loadProfiles(user.gender);
-          //     }
-          //   },
-          // ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.black),
+            onPressed: () {
+              final user = ref.read(authProvider).user;
+              if (user != null) {
+                ref.read(encountersProvider.notifier).loadProfiles(user.gender);
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.tune, color: Colors.black),
             onPressed: () {},

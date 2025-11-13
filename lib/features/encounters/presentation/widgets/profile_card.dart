@@ -32,7 +32,7 @@ class ProfileCard extends StatelessWidget {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(16),
           child: Stack(
             children: [
               // Profile Image

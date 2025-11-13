@@ -1,6 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:iconly/iconly.dart';
+import 'package:iconsax/iconsax.dart';
 import '../../domain/entities/profile.dart';
+import 'dart:math' as math;
 
 class ProfileDetailsPage extends StatefulWidget {
   final Profile profile;
@@ -21,35 +24,57 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
     super.dispose();
   }
 
+  int _calculateMatchPercentage() {
+    // Calculate match percentage based on profile data
+    return 85 + (widget.profile.interests.length * 2);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Photo Gallery
+          // Photo Gallery with looping
           Positioned.fill(
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (index) {
                 setState(() {
-                  _currentPhotoIndex = index;
+                  _currentPhotoIndex = index % widget.profile.photos.length;
                 });
               },
-              itemCount: widget.profile.photos.length,
+              itemCount: widget.profile.photos.length * 1000,
               itemBuilder: (context, index) {
-                return CachedNetworkImage(
-                  imageUrl: widget.profile.photos[index],
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: Colors.grey[200],
-                    child: const Center(
-                      child: CircularProgressIndicator(color: Colors.black),
+                final photoIndex = index % widget.profile.photos.length;
+                return GestureDetector(
+                  onTapUp: (details) {
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    if (details.globalPosition.dx > screenWidth / 2) {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    } else {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                  child: CachedNetworkImage(
+                    imageUrl: widget.profile.photos[photoIndex],
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: CircularProgressIndicator(color: Colors.black),
+                      ),
                     ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.person, size: 100),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.person, size: 100),
+                    ),
                   ),
                 );
               },
@@ -64,11 +89,11 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.4),
+                    Colors.black.withValues(alpha: 0.3),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withValues(alpha: 0.7),
                   ],
-                  stops: const [0.0, 0.3, 1.0],
+                  stops: const [0.0, 0.4, 1.0],
                 ),
               ),
             ),
@@ -114,179 +139,210 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
             ),
           ),
 
-          // Distance badge
+          // Circular Match Percentage in Center
           Positioned(
-            top: 50,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                '12.6 km away',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
+            top: MediaQuery.of(context).size.height * 0.25,
+            left: MediaQuery.of(context).size.width / 2 - 60,
+            child: _buildCircularMatchIndicator(),
           ),
 
-          // Profile info card
+          // Scrollable Profile info card
           Positioned(
             left: 0,
+            top: MediaQuery.of(context).size.height * 0.45,
             right: 0,
             bottom: 0,
             child: Container(
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
                 ),
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  // Scrollable content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        '${widget.profile.name}, ${widget.profile.age}',
-                                        style: const TextStyle(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              '${widget.profile.name}, ${widget.profile.age}',
+                                              style: const TextStyle(
+                                                fontSize: 28,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFF00D9A3),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 8),
-                                      const Text(
-                                        '✓',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          color: Color(0xFF00D9A3),
-                                        ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.school,
+                                            size: 14,
+                                            color: Colors.grey[600],
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            widget.profile.location
+                                                .toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600],
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    widget.profile.location.toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                      letterSpacing: 0.5,
-                                    ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    shape: BoxShape.circle,
                                   ),
-                                ],
+                                  child: const Icon(Iconsax.message),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Description',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                shape: BoxShape.circle,
+                            const SizedBox(height: 8),
+                            Text(
+                              'Love to travel, explore new places, and meet interesting people. Looking for someone to share adventures with! 🌍✨',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                                height: 1.5,
                               ),
-                              child: const Icon(Icons.chat_bubble_outline),
                             ),
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Interest',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 12,
+                              children: widget.profile.interests
+                                  .map(
+                                    (interest) => _buildInterestChip(interest),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildInfoItem(
+                                    'Age',
+                                    widget.profile.age.toString(),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: _buildInfoItem(
+                                    'University',
+                                    widget.profile.university,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 100),
                           ],
                         ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          'Description',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Love to travel, explore new places, and meet interesting people. Looking for someone to share adventures with! 🌍✨',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[700],
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          'Interest',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: widget.profile.interests
-                              .map((interest) => _buildInterestChip(interest))
-                              .toList(),
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildInfoItem(
-                                'Age',
-                                widget.profile.age.toString(),
-                              ),
-                            ),
-                            Expanded(
-                              child: _buildInfoItem(
-                                'University',
-                                widget.profile.university,
-                              ),
-                            ),
-                          ],
+                      ),
+                    ),
+                  ),
+
+                  // Action buttons - Fixed layout
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 40),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(40),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 20,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(24),
-                        topRight: Radius.circular(24),
-                      ),
-                    ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        // Left button (Nope)
                         _buildActionButton(
                           icon: Icons.close,
-                          color: const Color(0xFFFF6B6B),
-                          size: 56,
+                          color: Colors.black,
+                          size: 50,
                           onPressed: () => Navigator.pop(context),
                         ),
+                        const SizedBox(width: 16),
+
+                        // Center button (Like) - Larger
                         _buildActionButton(
                           icon: Icons.favorite,
-                          color: const Color(0xFF00D9A3),
-                          size: 64,
+                          color: Colors.black,
+                          size: 50,
                           onPressed: () {
-                            // Like action
                             Navigator.pop(context);
                           },
                         ),
+                        const SizedBox(width: 16),
+
+                        // Right button (Super Like)
                         _buildActionButton(
                           icon: Icons.star,
                           color: const Color(0xFFFFB800),
-                          size: 56,
+                          size: 50,
                           onPressed: () {
                             // Super like action
                           },
@@ -296,6 +352,70 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                   ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCircularMatchIndicator() {
+    final matchPercentage = _calculateMatchPercentage();
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.3,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(40),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // Circular progress indicator
+              SizedBox(
+                width: 50,
+                height: 50,
+                child: CustomPaint(
+                  painter: CircularProgressPainter(
+                    progress: matchPercentage / 100,
+                    strokeWidth: 6,
+                    color: const Color(0xFF00D9A3),
+                    backgroundColor: Colors.grey[200]!,
+                  ),
+                ),
+              ),
+              // Percentage text
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '$matchPercentage%',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF00D9A3),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          Text(
+            'match',
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF00D9A3),
             ),
           ),
         ],
@@ -327,7 +447,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -375,8 +495,8 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 12,
+            color: color.withValues(alpha: 0.3),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -386,11 +506,69 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
         child: InkWell(
           onTap: onPressed,
           customBorder: const CircleBorder(),
-          child: Center(
-            child: Icon(icon, color: color, size: size * 0.5),
+          child: Container(
+            decoration: BoxDecoration(shape: BoxShape.circle),
+            child: Center(
+              child: Icon(icon, color: color, size: size * 0.45),
+            ),
           ),
         ),
       ),
     );
+  }
+}
+
+// Custom painter for circular progress indicator
+class CircularProgressPainter extends CustomPainter {
+  final double progress;
+  final double strokeWidth;
+  final Color color;
+  final Color backgroundColor;
+
+  CircularProgressPainter({
+    required this.progress,
+    required this.strokeWidth,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    // Draw background circle
+    final backgroundPaint = Paint()
+      ..color = backgroundColor
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, backgroundPaint);
+
+    // Draw progress arc
+    final progressPaint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    const startAngle = -math.pi / 2; // Start from top
+    final sweepAngle = 2 * math.pi * progress;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CircularProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.backgroundColor != backgroundColor;
   }
 }

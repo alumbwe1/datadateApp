@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import '../../features/encounters/presentation/pages/encounters_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 class MainNavigation extends StatefulWidget {
-  final Widget child;
-
-  const MainNavigation({super.key, required this.child});
+  const MainNavigation({super.key});
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -15,12 +14,29 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
+  final List<Widget> _pages = [
+    const EncountersPage(),
+    const Center(child: Text('Nearby - Coming Soon')),
+    const Center(child: Text('Likes - Coming Soon')),
+    const Center(child: Text('Chats - Coming Soon')),
+    const ProfilePage(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widget.child,
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.white),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x0D000000),
+              blurRadius: 10,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -79,24 +95,6 @@ class _MainNavigationState extends State<MainNavigation> {
           setState(() {
             _currentIndex = index;
           });
-
-          switch (index) {
-            case 0:
-              context.go('/encounters');
-              break;
-            case 1:
-              // Nearby
-              break;
-            case 2:
-              // Likes
-              break;
-            case 3:
-              // Chats
-              break;
-            case 4:
-              context.go('/profile');
-              break;
-          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
