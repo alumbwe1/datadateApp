@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:datadate/core/constants/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -12,42 +14,7 @@ class ProfilePage extends ConsumerStatefulWidget {
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends ConsumerState<ProfilePage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeOutCubic,
-          ),
-        );
-
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -58,113 +25,52 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        surfaceTintColor: Colors.white,
         title: Text(
           'Profile',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.3,
-          ),
+          style: appStyle(
+            28,
+            Colors.black,
+            FontWeight.bold,
+          ).copyWith(letterSpacing: -0.5),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+          IconButton(
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: Colors.black,
+              size: 28,
             ),
-            child: IconButton(
-              icon: const Icon(Icons.settings_outlined, color: Colors.black87),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                _showSettingsBottomSheet(context);
-              },
-            ),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              _showSettingsBottomSheet(context);
+            },
           ),
         ],
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 100),
-                    _buildProfileHeader(context, user),
-                    const SizedBox(height: 32),
-                    _buildStatsRow(context),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _buildSectionTitle('About Me'),
-                    const SizedBox(height: 12),
-                    if (user.bio != null) _buildBioCard(context, user.bio!),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Personal Information'),
-                    const SizedBox(height: 12),
-                    _buildInfoCard(
-                      context,
-                      'University',
-                      user.university,
-                      Icons.school_outlined,
-                      Colors.blue,
-                    ),
-                    _buildInfoCard(
-                      context,
-                      'Email',
-                      user.email,
-                      Icons.email_outlined,
-                      Colors.purple,
-                    ),
-                    _buildInfoCard(
-                      context,
-                      'Age',
-                      '${user.age} years old',
-                      Icons.cake_outlined,
-                      Colors.pink,
-                    ),
-                    _buildInfoCard(
-                      context,
-                      'Looking for',
-                      user.relationshipGoal,
-                      Icons.favorite_outline,
-                      Colors.red,
-                    ),
-                    const SizedBox(height: 24),
-                    if (user.photos.isNotEmpty) ...[
-                      _buildSectionTitle('Photos'),
-                      const SizedBox(height: 12),
-                      _buildPhotoGrid(context, user.photos),
-                      const SizedBox(height: 24),
-                    ],
-                    _buildActionButtons(context, ref),
-                    const SizedBox(height: 40),
-                  ]),
-                ),
-              ),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildProfileHeader(context, user),
+              const SizedBox(height: 24),
+              _buildQuestionCard(),
+              const SizedBox(height: 24),
+              _buildTabSection(),
+              const SizedBox(height: 20),
+              _buildStatsCards(),
+              const SizedBox(height: 20),
+              _buildPremiumCard(),
+              const SizedBox(height: 24),
+              _buildActionButtons(context, ref),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -173,416 +79,317 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   }
 
   Widget _buildProfileHeader(BuildContext context, dynamic user) {
-    return Stack(
+    return Row(
       children: [
-        Column(
+        Stack(
           children: [
-            Hero(
-              tag: 'profile_avatar',
-              child: Container(
-                width: 130,
-                height: 130,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withOpacity(0.7),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(4),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  padding: const EdgeInsets.all(4),
-                  child: ClipOval(
-                    child: user.photos.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: user.photos.first,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[100],
-                              child: Icon(
-                                Icons.person_outline,
-                                size: 50,
-                                color: Colors.grey[400],
-                              ),
-                            ),
-                          )
-                        : Container(
-                            color: Colors.grey[100],
-                            child: Icon(
-                              Icons.person_outline,
-                              size: 50,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              user.name,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              width: 120,
+              height: 120,
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.green.withOpacity(0.3)),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF6C5CE7), width: 4),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  const Text(
-                    'Active',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              child: ClipOval(
+                child: user.photos.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: user.photos.first,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      )
+                    : Container(
+                        color: Colors.grey[200],
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6C5CE7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '70%',
+                  textAlign: TextAlign.center,
+                  style: appStyle(12, Colors.white, FontWeight.bold),
+                ),
               ),
             ),
           ],
         ),
-        Positioned(
-          top: 90,
-          right: MediaQuery.of(context).size.width / 2 - 85,
-          child: GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              _showEditPhotoOptions(context);
-            },
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColor.withOpacity(0.8),
-                  ],
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
+        const SizedBox(width: 20),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${user.name}, ${user.age}',
+                style: appStyle(
+                  24,
+                  Colors.black,
+                  FontWeight.bold,
+                ).copyWith(letterSpacing: -0.5),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Iconsax.heart, size: 16, color: Colors.grey[600]),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Here for ${user.relationshipGoal}',
+                    style: appStyle(14, Colors.grey[700]!, FontWeight.w500),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStatsRow(BuildContext context) {
+  Widget _buildQuestionCard() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildStatItem('Matches', '24', Icons.favorite, Colors.red),
-          Container(width: 1, height: 40, color: Colors.grey[200]),
-          _buildStatItem('Chats', '12', Icons.chat_bubble, Colors.blue),
-          Container(width: 1, height: 40, color: Colors.grey[200]),
-          _buildStatItem('Likes', '156', Icons.thumb_up, Colors.purple),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Colors.black87,
-        letterSpacing: -0.3,
-      ),
-    );
-  }
-
-  Widget _buildBioCard(BuildContext context, String bio) {
-    return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey[50],
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Text(
-        bio,
-        style: TextStyle(
-          fontSize: 15,
-          color: Colors.grey[800],
-          height: 1.6,
-          letterSpacing: -0.1,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-    Color iconColor,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: const Color(0xFF6C5CE7).withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: iconColor, size: 22),
+            child: const Icon(
+              Icons.home_outlined,
+              color: Color(0xFF6C5CE7),
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-              ],
+            child: Text(
+              'Are you an introvert or an extrovert?',
+              style: appStyle(14, Colors.black87, FontWeight.w500),
             ),
           ),
-          Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
+          Icon(Icons.chevron_right, color: Colors.grey[400]),
         ],
       ),
     );
   }
 
-  Widget _buildPhotoGrid(BuildContext context, List<String> photos) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: photos.length > 6 ? 6 : photos.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            _showPhotoViewer(context, photos, index);
-          },
-          child: Hero(
-            tag: 'photo_$index',
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: CachedNetworkImage(
-                  imageUrl: photos[index],
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: Colors.grey[200],
-                    child: const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.error),
-                  ),
+  Widget _buildTabSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              Text('Plans', style: appStyle(16, Colors.black, FontWeight.w600)),
+              const SizedBox(height: 8),
+              Container(
+                height: 3,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Text(
+            'Safety',
+            textAlign: TextAlign.center,
+            style: appStyle(16, Colors.grey[500]!, FontWeight.w500),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsCards() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.trending_up,
+                        color: Colors.green,
+                        size: 20,
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Your activity',
+                  style: appStyle(12, Colors.grey[600]!, FontWeight.w500),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'High',
+                  style: appStyle(18, Colors.black, FontWeight.bold),
+                ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.add_circle_outline,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Credits',
+                  style: appStyle(12, Colors.grey[600]!, FontWeight.w500),
+                ),
+                const SizedBox(height: 4),
+                Text('350', style: appStyle(18, Colors.black, FontWeight.bold)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPremiumCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6C5CE7), Color(0xFF8B7FE8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6C5CE7).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.workspace_premium,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'DataDate Premium',
+                style: appStyle(20, Colors.white, FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Control your dating on Premium and get up to 13x more matches* than non-subscribers.',
+            textAlign: TextAlign.center,
+            style: appStyle(
+              13,
+              Colors.white.withOpacity(0.95),
+              FontWeight.w400,
+            ).copyWith(height: 1.4),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '*Top 10% of 2.7m users',
+            style: appStyle(11, Colors.white.withOpacity(0.8), FontWeight.w400),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              'Upgrade From \$8.99',
+              textAlign: TextAlign.center,
+              style: appStyle(15, const Color(0xFF6C5CE7), FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        _buildActionButton(
-          context,
-          label: 'Edit Profile',
-          icon: Icons.edit_outlined,
-          color: Colors.black,
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            // Edit profile
-          },
-        ),
-        const SizedBox(height: 12),
-        _buildActionButton(
-          context,
-          label: 'Share Profile',
-          icon: Icons.share_outlined,
-          color: Colors.blue,
-          isOutlined: true,
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            // Share profile
-          },
-        ),
-        const SizedBox(height: 12),
-        _buildActionButton(
-          context,
-          label: 'Logout',
-          icon: Icons.logout,
-          color: Colors.red,
-          isOutlined: true,
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            _showLogoutDialog(context, ref);
-          },
-        ),
-      ],
-    );
+    return Column(children: [const SizedBox(height: 12)]);
   }
 
   Widget _buildActionButton(
@@ -597,13 +404,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(40),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             color: isOutlined ? Colors.white : color,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(40),
             border: isOutlined ? Border.all(color: color, width: 1.5) : null,
             boxShadow: isOutlined
                 ? null
@@ -628,54 +435,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.2,
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showEditPhotoOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildBottomSheetOption(
-                'Take Photo',
-                Icons.camera_alt,
-                Colors.blue,
-                () => Navigator.pop(context),
-              ),
-              _buildBottomSheetOption(
-                'Choose from Gallery',
-                Icons.photo_library,
-                Colors.purple,
-                () => Navigator.pop(context),
-              ),
-              _buildBottomSheetOption(
-                'Remove Photo',
-                Icons.delete,
-                Colors.red,
-                () => Navigator.pop(context),
               ),
             ],
           ),
@@ -766,39 +525,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         HapticFeedback.lightImpact();
         onTap();
       },
-    );
-  }
-
-  void _showPhotoViewer(BuildContext context, List<String> photos, int index) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            leading: IconButton(
-              icon: const Icon(Icons.close, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-          body: PageView.builder(
-            itemCount: photos.length,
-            controller: PageController(initialPage: index),
-            itemBuilder: (context, index) {
-              return Center(
-                child: Hero(
-                  tag: 'photo_$index',
-                  child: CachedNetworkImage(
-                    imageUrl: photos[index],
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
     );
   }
 
