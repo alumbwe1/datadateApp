@@ -1,4 +1,4 @@
-package com.example.datadate
+package com.datadate.datingapp
 
 import io.flutter.embedding.android.FlutterActivity
 
