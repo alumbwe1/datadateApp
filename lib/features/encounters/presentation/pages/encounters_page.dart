@@ -80,14 +80,14 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                Image.asset(
-                  'assets/images/dataDate.png',
-                  height: 25,
-                  width: 25,
-                  fit: BoxFit.cover,
-                  color: Colors.black,
-                ),
-                const SizedBox(width: 4),
+                // Image.asset(
+                //   'assets/images/dataDate.png',
+                //   height: 25,
+                //   width: 25,
+                //   fit: BoxFit.cover,
+                //   color: Colors.black,
+                // ),
+                // const SizedBox(width: 4),
                 Text(
                   'DataDate',
                   style: appStyle(
