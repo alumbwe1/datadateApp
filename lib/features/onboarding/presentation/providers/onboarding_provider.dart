@@ -8,6 +8,8 @@ class OnboardingState {
   final String? password;
   final int? age;
   final String? gender;
+  final String? genderPreference;
+  final List<String> desiredTraits;
   final String? datingGoal;
   final List<String> interests;
   final String? location;
@@ -19,6 +21,8 @@ class OnboardingState {
     this.password,
     this.age,
     this.gender,
+    this.genderPreference,
+    this.desiredTraits = const [],
     this.datingGoal,
     this.interests = const [],
     this.location,
@@ -31,6 +35,8 @@ class OnboardingState {
     String? password,
     int? age,
     String? gender,
+    String? genderPreference,
+    List<String>? desiredTraits,
     String? datingGoal,
     List<String>? interests,
     String? location,
@@ -42,6 +48,8 @@ class OnboardingState {
       password: password ?? this.password,
       age: age ?? this.age,
       gender: gender ?? this.gender,
+      genderPreference: genderPreference ?? this.genderPreference,
+      desiredTraits: desiredTraits ?? this.desiredTraits,
       datingGoal: datingGoal ?? this.datingGoal,
       interests: interests ?? this.interests,
       location: location ?? this.location,
@@ -75,6 +83,22 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       password: password,
       age: age,
       gender: gender,
+    );
+  }
+
+  void setGenderPreference(String preference) {
+    state = state.copyWith(genderPreference: preference);
+  }
+
+  void addDesiredTrait(String trait) {
+    if (!state.desiredTraits.contains(trait)) {
+      state = state.copyWith(desiredTraits: [...state.desiredTraits, trait]);
+    }
+  }
+
+  void removeDesiredTrait(String trait) {
+    state = state.copyWith(
+      desiredTraits: state.desiredTraits.where((t) => t != trait).toList(),
     );
   }
 
