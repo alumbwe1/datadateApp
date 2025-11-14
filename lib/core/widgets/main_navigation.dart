@@ -134,8 +134,8 @@ class _MainNavigationState extends State<MainNavigation>
               child: svgPath != null
                   ? SvgPicture.asset(
                       svgPath,
-                      width: 25,
-                      height: 25,
+                      width: 22,
+                      height: 22,
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
                         isActive ? activeColor : Colors.grey.shade400,
@@ -145,7 +145,7 @@ class _MainNavigationState extends State<MainNavigation>
                   : Icon(
                       icon,
                       color: isActive ? activeColor : Colors.grey.shade400,
-                      size: 30,
+                      size: 25,
                     ),
             ),
           ],

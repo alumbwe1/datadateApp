@@ -43,7 +43,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
       _swipeCount++;
     });
 
-    // Check for match (simulate 30% chance for demo)
+    // Check for match (simulate 30% chance for demo) - only on right swipe
     if (direction == CardSwiperDirection.right) {
       final isMatch = DateTime.now().millisecond % 10 < 3; // 30% chance
       if (isMatch) {
@@ -55,6 +55,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
       }
     }
 
+    // Show upgrade prompt after 5 swipes (any direction)
     if (_swipeCount >= _freeSwipeLimit && !_hasShownUpgradePrompt) {
       _hasShownUpgradePrompt = true;
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -374,6 +375,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isDismissible: true,
+      isScrollControlled: true,
       builder: (context) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -383,12 +385,13 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Container(
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
@@ -396,76 +399,147 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Iconsax.diamonds,
-                    color: Colors.purpleAccent,
-                    size: 40,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Out of Swipes!',
-                  style: appStyle(
-                    28,
-                    Colors.black,
-                    FontWeight.w900,
-                  ).copyWith(letterSpacing: -0.5),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Upgrade to Standard for unlimited swipes\nand exclusive features',
-                  style: appStyle(
-                    15,
-                    Colors.grey[600]!,
-                    FontWeight.w400,
-                  ).copyWith(height: 1.5, letterSpacing: -0.2),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _showPremiumBottomSheet(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+              ),
+              // Scrollable content
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(32, 20, 32, 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Premium icon with gradient background
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.purpleAccent.withOpacity(0.1),
+                              Colors.deepPurpleAccent.withOpacity(0.1),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.purpleAccent.withOpacity(0.3),
+                                blurRadius: 20,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Iconsax.diamonds,
+                            color: Colors.purpleAccent,
+                            size: 36,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'Upgrade Now',
-                      style: appStyle(16, Colors.white, FontWeight.w700),
-                    ),
+                      const SizedBox(height: 28),
+
+                      // Title
+                      Text(
+                        'Out of Swipes!',
+                        style: appStyle(
+                          30,
+                          Colors.black,
+                          FontWeight.w900,
+                        ).copyWith(letterSpacing: -0.8),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Description
+                      Text(
+                        'Upgrade to Standard for unlimited swipes\nand exclusive features',
+                        style: appStyle(
+                          15,
+                          Colors.grey[600]!,
+                          FontWeight.w500,
+                        ).copyWith(height: 1.6, letterSpacing: -0.2),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Upgrade button with gradient
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.black, Colors.grey[900]!],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _showPremiumBottomSheet(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text(
+                            'Upgrade Now',
+                            style: appStyle(
+                              16,
+                              Colors.white,
+                              FontWeight.w700,
+                            ).copyWith(letterSpacing: 0.5),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Maybe later button
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 24,
+                          ),
+                        ),
+                        child: Text(
+                          'Maybe Later',
+                          style: appStyle(
+                            15,
+                            Colors.grey[600]!,
+                            FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'Maybe Later',
-                    style: appStyle(15, Colors.grey[600]!, FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+
+  // Helper widget for feature items
 
   @override
   void dispose() {

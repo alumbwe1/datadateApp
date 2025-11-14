@@ -1,6 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:datadate/core/constants/app_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../domain/entities/profile.dart';
 import 'dart:math' as math;
@@ -14,13 +17,48 @@ class ProfileDetailsPage extends StatefulWidget {
   State<ProfileDetailsPage> createState() => _ProfileDetailsPageState();
 }
 
-class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
+class _ProfileDetailsPageState extends State<ProfileDetailsPage>
+    with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentPhotoIndex = 0;
+  late AnimationController _matchAnimationController;
+  late Animation<double> _matchScaleAnimation;
+  late Animation<double> _matchProgressAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _matchAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _matchScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _matchAnimationController,
+        curve: const Interval(0.0, 0.5, curve: Curves.elasticOut),
+      ),
+    );
+
+    _matchProgressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _matchAnimationController,
+        curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    // Start animation after a short delay
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        _matchAnimationController.forward();
+      }
+    });
+  }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _matchAnimationController.dispose();
     super.dispose();
   }
 
@@ -99,27 +137,90 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
             ),
           ),
 
-          // Back button
+          // Back button with animation
           Positioned(
             top: 50,
             left: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () => Navigator.pop(context),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutBack,
+              builder: (context, value, child) {
+                return Transform.scale(scale: value, child: child);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                  },
+                ),
               ),
             ),
+          ),
+
+          // Photo indicators
+          Positioned(
+            top: 60,
+            left: 0,
+            right: 0,
+            child: widget.profile.photos.length > 1
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 80),
+                    child: Row(
+                      children: List.generate(
+                        widget.profile.photos.length,
+                        (index) => Expanded(
+                          child: Container(
+                            height: 3,
+                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                            decoration: BoxDecoration(
+                              color: _currentPhotoIndex == index
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
 
           // Circular Match Percentage in Center
           Positioned(
             top: MediaQuery.of(context).size.height * 0.35,
-            left: MediaQuery.of(context).size.width / 2 - 60,
-            child: _buildCircularMatchIndicator(),
+            left: 0,
+            right: 0,
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _matchScaleAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _matchScaleAnimation.value,
+                    child: child,
+                  );
+                },
+                child: _buildCircularMatchIndicator(),
+              ),
+            ),
           ),
 
           // Scrollable Profile info card
@@ -147,96 +248,231 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              '${widget.profile.name}, ${widget.profile.age}',
-                                              style: appStyle(
-                                                25,
-                                                Colors.black,
-                                                FontWeight.bold,
-                                              ).copyWith(letterSpacing: -0.3),
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 600),
+                              curve: Curves.easeOut,
+                              builder: (context, value, child) {
+                                return Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: Opacity(opacity: value, child: child),
+                                );
+                              },
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                '${widget.profile.name}, ${widget.profile.age}',
+                                                style: appStyle(
+                                                  28,
+                                                  Colors.black,
+                                                  FontWeight.w900,
+                                                ).copyWith(letterSpacing: -0.5),
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.school,
-                                            size: 14,
-                                            color: Colors.grey[600],
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            widget.profile.location
-                                                .toUpperCase(),
-                                            style: TextStyle(
-                                              fontSize: 14,
+                                            if (widget.profile.isOnline) ...[
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                width: 12,
+                                                height: 12,
+                                                decoration: BoxDecoration(
+                                                  color: const Color(
+                                                    0xFF4CAF50,
+                                                  ),
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                    width: 2,
+                                                  ),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: const Color(
+                                                        0xFF4CAF50,
+                                                      ).withValues(alpha: 0.5),
+                                                      blurRadius: 8,
+                                                      spreadRadius: 2,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.school_outlined,
+                                              size: 16,
                                               color: Colors.grey[600],
-                                              letterSpacing: 0.5,
                                             ),
-                                          ),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                widget.profile.university,
+                                                style: appStyle(
+                                                  14,
+                                                  Colors.grey[700]!,
+                                                  FontWeight.w600,
+                                                ).copyWith(letterSpacing: -0.2),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              IconlyLight.location,
+                                              size: 16,
+                                              color: Colors.grey[600],
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              widget.profile.location,
+                                              style: appStyle(
+                                                14,
+                                                Colors.grey[700]!,
+                                                FontWeight.w500,
+                                              ).copyWith(letterSpacing: -0.2),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF000000),
+                                          Color(0xFF2a2a2a),
                                         ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
                                       ),
-                                    ],
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Iconsax.message,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
                                   ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Iconsax.message),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              'Description',
-                              style: appStyle(
-                                16,
-                                Colors.black,
-                                FontWeight.w800,
-                              ).copyWith(letterSpacing: -0.3),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Love to travel, explore new places, and meet interesting people. Looking for someone to share adventures with! 🌍✨',
-                              style: appStyle(
-                                14,
-                                Colors.grey[700]!,
-                                FontWeight.normal,
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 24),
-                            Text(
-                              'Interest',
-                              style: appStyle(
-                                16,
-                                Colors.black,
-                                FontWeight.w800,
-                              ).copyWith(letterSpacing: -0.2),
+                            const SizedBox(height: 28),
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 700),
+                              curve: Curves.easeOut,
+                              builder: (context, value, child) {
+                                return Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: Opacity(opacity: value, child: child),
+                                );
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'About Me',
+                                    style: appStyle(
+                                      18,
+                                      Colors.black,
+                                      FontWeight.w800,
+                                    ).copyWith(letterSpacing: -0.4),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    widget.profile.bio ??
+                                        'Love to travel, explore new places, and meet interesting people. Looking for someone to share adventures with! 🌍✨',
+                                    style:
+                                        appStyle(
+                                          15,
+                                          Colors.grey[800]!,
+                                          FontWeight.w400,
+                                        ).copyWith(
+                                          height: 1.5,
+                                          letterSpacing: -0.2,
+                                        ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
-                              children: widget.profile.interests
-                                  .map(
-                                    (interest) => _buildInterestChip(interest),
-                                  )
-                                  .toList(),
+                            const SizedBox(height: 28),
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 800),
+                              curve: Curves.easeOut,
+                              builder: (context, value, child) {
+                                return Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: Opacity(opacity: value, child: child),
+                                );
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Interests',
+                                    style: appStyle(
+                                      18,
+                                      Colors.black,
+                                      FontWeight.w800,
+                                    ).copyWith(letterSpacing: -0.4),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Wrap(
+                                    spacing: 10,
+                                    runSpacing: 10,
+                                    children: widget.profile.interests
+                                        .asMap()
+                                        .entries
+                                        .map(
+                                          (
+                                            entry,
+                                          ) => TweenAnimationBuilder<double>(
+                                            tween: Tween(begin: 0.0, end: 1.0),
+                                            duration: Duration(
+                                              milliseconds:
+                                                  800 + (entry.key * 100),
+                                            ),
+                                            curve: Curves.easeOutBack,
+                                            builder: (context, value, child) {
+                                              return Transform.scale(
+                                                scale: value,
+                                                child: child,
+                                              );
+                                            },
+                                            child: _buildInterestChip(
+                                              entry.value,
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 24),
                             Row(
@@ -262,58 +498,76 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                     ),
                   ),
 
-                  // Action buttons - Fixed layout
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 40),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(40),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 20,
-                          offset: const Offset(0, 4),
+                  // Action buttons - Fixed layout with animation
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.easeOutBack,
+                    builder: (context, value, child) {
+                      return Transform.translate(
+                        offset: Offset(0, 50 * (1 - value)),
+                        child: Opacity(
+                          opacity: value.clamp(0.0, 1.0),
+                          child: child,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Left button (Nope)
-                        _buildActionButton(
-                          icon: Icons.close,
-                          color: Colors.black,
-                          size: 50,
-                          onPressed: () => Navigator.pop(context),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 40),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF000000), Color(0xFF2a2a2a)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        const SizedBox(width: 16),
+                        borderRadius: BorderRadius.circular(40),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Left button (Nope)
+                          _buildActionButton(
+                            icon: Icons.close,
+                            color: Colors.black,
+                            size: 50,
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                          const SizedBox(width: 16),
 
-                        // Center button (Like) - Larger
-                        _buildActionButton(
-                          icon: Iconsax.heart,
-                          color: Colors.black,
-                          size: 50,
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        const SizedBox(width: 16),
+                          // Center button (Like) - Larger
+                          _buildActionButton(
+                            icon: Iconsax.heart,
+                            color: Colors.black,
+                            size: 50,
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          const SizedBox(width: 16),
 
-                        // Right button (Super Like)
-                        _buildActionButton(
-                          icon: Iconsax.star,
-                          color: const Color(0xFFFFB800),
-                          size: 50,
-                          onPressed: () {
-                            // Super like action
-                          },
-                        ),
-                      ],
+                          // Right button (Super Like)
+                          _buildActionButton(
+                            icon: Iconsax.star,
+                            color: const Color(0xFFFFB800),
+                            size: 50,
+                            onPressed: () {
+                              // Super like action
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -329,56 +583,115 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
     final matchPercentage = _calculateMatchPercentage();
 
     return Container(
-      width: MediaQuery.of(context).size.width * 0.35,
-      height: 60,
+      constraints: const BoxConstraints(maxWidth: 180),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.deepPurpleAccent.withValues(alpha: 0.1),
+            blurRadius: 30,
+            spreadRadius: 5,
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Stack(
             alignment: Alignment.center,
             children: [
-              // Circular progress indicator
-              SizedBox(
-                width: 45,
-                height: 45,
-                child: CustomPaint(
-                  painter: CircularProgressPainter(
-                    progress: matchPercentage / 100,
-                    strokeWidth: 5,
-                    color: Colors.deepPurpleAccent,
-                    backgroundColor: Colors.grey.shade200,
-                  ),
-                ),
+              // Animated circular progress indicator
+              AnimatedBuilder(
+                animation: _matchProgressAnimation,
+                builder: (context, child) {
+                  return SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: CustomPaint(
+                      painter: CircularProgressPainter(
+                        progress:
+                            (matchPercentage / 100) *
+                            _matchProgressAnimation.value,
+                        strokeWidth: 5,
+                        color: Colors.deepPurpleAccent,
+                        backgroundColor: Colors.grey.shade200,
+                      ),
+                    ),
+                  );
+                },
               ),
-              // Percentage text
-              Text(
-                '$matchPercentage%',
-                style: appStyle(15, Colors.black, FontWeight.bold),
+              // Animated percentage text
+              AnimatedBuilder(
+                animation: _matchProgressAnimation,
+                builder: (context, child) {
+                  final displayPercentage =
+                      (matchPercentage * _matchProgressAnimation.value).toInt();
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.8, end: 1.0),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.elasticOut,
+                    builder: (context, scale, child) {
+                      return Transform.scale(
+                        scale: scale,
+                        child: Text(
+                          '$displayPercentage%',
+                          style: appStyle(
+                            16,
+                            Colors.black,
+                            FontWeight.w900,
+                          ).copyWith(letterSpacing: -0.5),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),
-          const SizedBox(width: 5),
-          Text(
-            'Match',
-            style: appStyle(
-              16,
-              Colors.black,
-              FontWeight.w800,
-            ).copyWith(letterSpacing: -0.3),
+          const SizedBox(width: 12),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Match',
+                style: appStyle(
+                  17,
+                  Colors.black,
+                  FontWeight.w800,
+                ).copyWith(letterSpacing: -0.4, height: 1),
+              ),
+              const SizedBox(height: 2),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.deepPurpleAccent.withValues(alpha: 0.2),
+                      Colors.pinkAccent.withValues(alpha: 0.2),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Great!',
+                  style: appStyle(
+                    10,
+                    Colors.deepPurple,
+                    FontWeight.w700,
+                  ).copyWith(letterSpacing: 0.5),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 5),
         ],
       ),
     );
@@ -386,41 +699,79 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
 
   Widget _buildInterestChip(String interest) {
     IconData icon;
+    Color iconColor;
+
     switch (interest.toLowerCase()) {
       case 'gaming':
         icon = Icons.sports_esports;
+        iconColor = Colors.purple;
         break;
       case 'music':
         icon = Icons.music_note;
+        iconColor = Colors.pink;
         break;
       case 'book':
       case 'reading':
         icon = Icons.book;
+        iconColor = Colors.blue;
         break;
       case 'photography':
         icon = Icons.camera_alt;
+        iconColor = Colors.orange;
+        break;
+      case 'travel':
+        icon = Icons.flight;
+        iconColor = Colors.teal;
+        break;
+      case 'fitness':
+        icon = Icons.fitness_center;
+        iconColor = Colors.red;
+        break;
+      case 'cooking':
+        icon = Icons.restaurant;
+        iconColor = Colors.deepOrange;
+        break;
+      case 'art':
+        icon = Icons.palette;
+        iconColor = Colors.indigo;
         break;
       default:
         icon = Icons.favorite;
+        iconColor = Colors.pink;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(44),
+        border: Border.all(color: Colors.grey.shade300, width: 0.7.w),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: Colors.grey[700]),
-          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 16, color: iconColor),
+          ),
+          const SizedBox(width: 10),
           Text(
             interest,
             style: appStyle(
               14,
-              Colors.grey[700]!,
-              FontWeight.w500,
+              Colors.black87,
+              FontWeight.w600,
             ).copyWith(letterSpacing: -0.2),
           ),
         ],

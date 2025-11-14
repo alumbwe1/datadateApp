@@ -49,7 +49,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           );
 
       // Navigate to dating goal selection
-      context.push('/onboarding/dating-goal');
+      context.push('/onboarding/gender-preference');
     }
   }
 
@@ -57,8 +57,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
       appBar: AppBar(
         backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: Colors.white),
+        ),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),

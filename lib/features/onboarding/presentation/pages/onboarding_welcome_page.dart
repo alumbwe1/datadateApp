@@ -18,33 +18,33 @@ class OnboardingWelcomePage extends StatelessWidget {
     final List<Map<String, String>> profiles = [
       {
         'image':
+            'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400',
+        'name': 'Marcus',
+      },
+      {
+        'image':
+            'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400',
+        'name': 'Amara',
+      },
+      {
+        'image':
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400',
+        'name': 'David',
+      },
+      {
+        'image':
+            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400',
+        'name': 'Zara',
+      },
+      {
+        'image':
             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
         'name': 'Chris',
       },
       {
         'image':
-            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-        'name': 'Matt',
-      },
-      {
-        'image':
-            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
-        'name': 'John',
-      },
-      {
-        'image':
             'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-        'name': 'Sylvia',
-      },
-      {
-        'image':
-            'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
-        'name': 'Jay',
-      },
-      {
-        'image':
-            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400',
-        'name': 'Sarah',
+        'name': 'Maya',
       },
     ];
 
@@ -172,7 +172,7 @@ class OnboardingWelcomePage extends StatelessWidget {
                   child: Column(
                     children: [
                       _StarIcon(isTablet: isTablet),
-                      SizedBox(height: isSmallScreen ? 16 : 24),
+                      SizedBox(height: isSmallScreen ? 10 : 15),
 
                       // Headline
                       Text(
