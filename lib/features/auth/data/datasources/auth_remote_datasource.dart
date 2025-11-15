@@ -1,66 +1,82 @@
-import 'dart:math';
+import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/network/api_client.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> login(String email, String password);
+  Future<Map<String, String>> login(String email, String password);
   Future<UserModel> register({
+    required String username,
     required String email,
     required String password,
-    required String name,
-    required int age,
+    required int university,
     required String gender,
-    required String university,
-    required String relationshipGoal,
+    required List<String> preferredGenders,
+    required String intent,
   });
+  Future<String> refreshToken(String refreshToken);
+  Future<UserModel> getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  // Mock implementation using dummy data
-  @override
-  Future<UserModel> login(String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1));
+  final ApiClient apiClient;
 
-    // Mock successful login
-    return UserModel(
-      id: 'user_${Random().nextInt(1000)}',
-      email: email,
-      name: 'John Doe',
-      age: 22,
-      gender: 'male',
-      university: 'MIT',
-      bio: 'Love coding and coffee',
-      photos: ['https://randomuser.me/api/portraits/men/1.jpg'],
-      relationshipGoal: 'Dating',
-      isSubscribed: false,
+  AuthRemoteDataSourceImpl({required this.apiClient});
+
+  @override
+  Future<Map<String, String>> login(String email, String password) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.login,
+      data: {'email': email, 'password': password},
     );
+
+    return {
+      'access': response['access'] as String,
+      'refresh': response['refresh'] as String,
+    };
   }
 
   @override
   Future<UserModel> register({
+    required String username,
     required String email,
     required String password,
-    required String name,
-    required int age,
+    required int university,
     required String gender,
-    required String university,
-    required String relationshipGoal,
+    required List<String> preferredGenders,
+    required String intent,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-
-    return UserModel(
-      id: 'user_${Random().nextInt(1000)}',
-      email: email,
-      name: name,
-      age: age,
-      gender: gender,
-      university: university,
-      photos: [
-        gender == 'male'
-            ? 'https://randomuser.me/api/portraits/men/${Random().nextInt(99)}.jpg'
-            : 'https://randomuser.me/api/portraits/women/${Random().nextInt(99)}.jpg',
-      ],
-      relationshipGoal: relationshipGoal,
-      isSubscribed: false,
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.register,
+      data: {
+        'username': username,
+        'email': email,
+        'password': password,
+        'university': university,
+        'gender': gender,
+        'preferred_genders': preferredGenders,
+        'intent': intent,
+      },
     );
+
+    return UserModel.fromJson(response);
+  }
+
+  @override
+  Future<String> refreshToken(String refreshToken) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.refreshToken,
+      data: {'refresh': refreshToken},
+    );
+
+    return response['access'] as String;
+  }
+
+  @override
+  Future<UserModel> getCurrentUser() async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      ApiEndpoints.currentUser,
+    );
+
+    return UserModel.fromJson(response);
   }
 }

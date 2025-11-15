@@ -1,20 +1,15 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/profile_remote_datasource.dart';
 import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/entities/profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 
-// Dio provider
-final dioProvider = Provider<Dio>((ref) {
-  return Dio();
-});
-
 // Data source
 final profileRemoteDataSourceProvider = Provider<ProfileRemoteDataSource>((
   ref,
 ) {
-  return ProfileRemoteDataSourceImpl(dio: ref.watch(dioProvider));
+  return ProfileRemoteDataSourceImpl(apiClient: ref.watch(apiClientProvider));
 });
 
 // Repository

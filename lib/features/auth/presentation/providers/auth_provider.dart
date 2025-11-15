@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/auth_local_datasource.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -8,10 +8,6 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../../../main.dart';
 
 // Data sources
-final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
-  return const FlutterSecureStorage();
-});
-
 final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
   final secureStorage = ref.watch(secureStorageProvider);
   final sharedPrefs = ref.watch(sharedPreferencesProvider);
@@ -23,7 +19,8 @@ final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
 });
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  return AuthRemoteDataSourceImpl();
+  final apiClient = ref.watch(apiClientProvider);
+  return AuthRemoteDataSourceImpl(apiClient: apiClient);
 });
 
 // Repository

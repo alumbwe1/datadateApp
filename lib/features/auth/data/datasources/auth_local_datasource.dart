@@ -5,6 +5,8 @@ import '../../../../core/constants/app_constants.dart';
 abstract class AuthLocalDataSource {
   Future<void> saveAuthToken(String token);
   Future<String?> getAuthToken();
+  Future<void> saveRefreshToken(String token);
+  Future<String?> getRefreshToken();
   Future<void> saveUserId(String userId);
   Future<String?> getUserId();
   Future<void> clearAuthData();
@@ -30,6 +32,16 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
+  Future<void> saveRefreshToken(String token) async {
+    await secureStorage.write(key: AppConstants.keyRefreshToken, value: token);
+  }
+
+  @override
+  Future<String?> getRefreshToken() async {
+    return await secureStorage.read(key: AppConstants.keyRefreshToken);
+  }
+
+  @override
   Future<void> saveUserId(String userId) async {
     await sharedPreferences.setString(AppConstants.keyUserId, userId);
   }
@@ -42,6 +54,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> clearAuthData() async {
     await secureStorage.delete(key: AppConstants.keyAuthToken);
+    await secureStorage.delete(key: AppConstants.keyRefreshToken);
     await sharedPreferences.remove(AppConstants.keyUserId);
   }
 }

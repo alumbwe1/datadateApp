@@ -16,36 +16,90 @@ class ProfileRepositoryImpl implements ProfileRepository {
     int count = 10,
   }) async {
     try {
+      // Get opposite gender
+      final oppositeGender = _getOppositeGender(userGender);
+
+      // Map relationship goal to intent
+      final intent = relationshipGoal != null
+          ? _mapRelationshipGoalToIntent(relationshipGoal)
+          : null;
+
       final profiles = await remoteDataSource.getProfiles(
-        userGender: userGender,
-        relationshipGoal: relationshipGoal,
-        count: count,
+        gender: oppositeGender,
+        intent: intent,
+        page: 1,
       );
+
       return Right(profiles);
+    } on NetworkFailure catch (e) {
+      return Left(e);
+    } on ServerFailure catch (e) {
+      return Left(e);
     } catch (e) {
-      return Left(ServerFailure('Failed to load profiles: $e'));
+      return Left(ServerFailure('Failed to load profiles: ${e.toString()}'));
+    }
+  }
+
+  String _getOppositeGender(String gender) {
+    switch (gender.toLowerCase()) {
+      case 'male':
+        return 'female';
+      case 'female':
+        return 'male';
+      default:
+        return 'female';
+    }
+  }
+
+  String _mapRelationshipGoalToIntent(String goal) {
+    switch (goal.toLowerCase()) {
+      case 'relationship':
+      case 'dating':
+        return 'dating';
+      case 'new friends':
+      case 'friends':
+        return 'friendship';
+      case 'networking':
+        return 'networking';
+      default:
+        return 'dating';
     }
   }
 
   @override
   Future<Either<Failure, void>> likeProfile(String profileId) async {
     try {
-      // Mock implementation
-      await Future.delayed(const Duration(milliseconds: 300));
+      final id = int.tryParse(profileId);
+      if (id == null) {
+        return const Left(ValidationFailure('Invalid profile ID'));
+      }
+
+      final result = await remoteDataSource.likeProfile(id);
+
+      // Check if it's a match
+      if (result['matched'] == true) {
+        // You can emit a match event here or return match info
+        print('🎉 It\'s a match! Match ID: ${result['match_id']}');
+      }
+
       return const Right(null);
+    } on NetworkFailure catch (e) {
+      return Left(e);
+    } on ServerFailure catch (e) {
+      return Left(e);
     } catch (e) {
-      return const Left(ServerFailure('Failed to like profile'));
+      return Left(ServerFailure('Failed to like profile: ${e.toString()}'));
     }
   }
 
   @override
   Future<Either<Failure, void>> skipProfile(String profileId) async {
     try {
-      // Mock implementation
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Skip is just a local action, no API call needed
+      // Unless you want to track skips on the backend
       return const Right(null);
     } catch (e) {
-      return const Left(ServerFailure('Failed to skip profile'));
+      return Left(ServerFailure('Failed to skip profile: ${e.toString()}'));
     }
   }
 }

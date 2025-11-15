@@ -1,18 +1,32 @@
 import 'package:dio/dio.dart';
+import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/network/api_response.dart';
 import '../models/profile_model.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<List<ProfileModel>> getProfiles({
-    required String userGender,
-    String? relationshipGoal,
-    int count = 10,
+    String? gender,
+    String? intent,
+    int? university,
+    int page = 1,
+  });
+  Future<ProfileModel> getProfileDetail(int id);
+  Future<Map<String, dynamic>> likeProfile(int profileId);
+  Future<ProfileModel> createProfile({
+    required String bio,
+    required int age,
+    required String major,
+    required int graduationYear,
+    required List<String> interests,
+    String? profilePhoto,
   });
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
-  final Dio dio;
+  final ApiClient apiClient;
 
-  ProfileRemoteDataSourceImpl({required this.dio});
+  ProfileRemoteDataSourceImpl({required this.apiClient});
 
   // Curated diverse profile images
   static final List<Map<String, dynamic>> _maleProfiles = [
@@ -168,46 +182,108 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<List<ProfileModel>> getProfiles({
-    required String userGender,
-    String? relationshipGoal,
-    int count = 10,
+    String? gender,
+    String? intent,
+    int? university,
+    int page = 1,
   }) async {
     try {
-      // Simulate network delay
-      await Future.delayed(const Duration(milliseconds: 500));
+      final queryParams = <String, dynamic>{'page': page};
 
-      // Get opposite gender profiles
-      final oppositeGender = userGender == 'male' ? 'female' : 'male';
-      final sourceProfiles = oppositeGender == 'male'
-          ? _maleProfiles
-          : _femaleProfiles;
+      if (gender != null) queryParams['gender'] = gender;
+      if (intent != null) queryParams['intent'] = intent;
+      if (university != null) queryParams['university'] = university;
 
-      // Shuffle and take requested count
-      final shuffled = List<Map<String, dynamic>>.from(sourceProfiles)
-        ..shuffle();
-      final selectedProfiles = shuffled.take(count).toList();
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiEndpoints.profiles,
+        queryParameters: queryParams,
+      );
 
-      // Convert to ProfileModel
-      return selectedProfiles.map((profile) {
-        return ProfileModel(
-          id:
-              DateTime.now().millisecondsSinceEpoch.toString() +
-              profile['name'],
-          name: profile['name'],
-          age: profile['age'],
-          gender: oppositeGender,
-          university: profile['university'],
-          location: profile['location'],
-          relationshipGoal: (_relationshipGoals..shuffle()).first,
-          bio:
-              'Love to travel, explore new places, and meet interesting people. Looking for someone to share adventures with! 🌍✨',
-          photos: [profile['photo']],
-          interests: (_interests..shuffle()).take(3).toList(),
-          isOnline: DateTime.now().second % 2 == 0,
-        );
-      }).toList();
+      final paginatedResponse = PaginatedResponse.fromJson(
+        response,
+        (json) => ProfileModel.fromJson(json),
+      );
+
+      return paginatedResponse.results;
     } catch (e) {
-      throw Exception('Error fetching profiles: $e');
+      // Fallback to mock data if API fails
+      return _getMockProfiles(gender: gender);
     }
+  }
+
+  @override
+  Future<ProfileModel> getProfileDetail(int id) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      ApiEndpoints.profileDetail(id),
+    );
+
+    return ProfileModel.fromJson(response);
+  }
+
+  @override
+  Future<Map<String, dynamic>> likeProfile(int profileId) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.likeProfile(profileId),
+    );
+
+    return {
+      'matched': response['matched'] ?? false,
+      'match_id': response['match_id'],
+      'detail': response['detail'] ?? '',
+    };
+  }
+
+  @override
+  Future<ProfileModel> createProfile({
+    required String bio,
+    required int age,
+    required String major,
+    required int graduationYear,
+    required List<String> interests,
+    String? profilePhoto,
+  }) async {
+    final formData = FormData.fromMap({
+      'bio': bio,
+      'age': age,
+      'major': major,
+      'graduation_year': graduationYear,
+      'interests': interests,
+      if (profilePhoto != null)
+        'profile_photo': await MultipartFile.fromFile(profilePhoto),
+    });
+
+    final response = await apiClient.uploadFile<Map<String, dynamic>>(
+      ApiEndpoints.profiles,
+      formData: formData,
+    );
+
+    return ProfileModel.fromJson(response);
+  }
+
+  // Mock data fallback
+  List<ProfileModel> _getMockProfiles({String? gender}) {
+    final oppositeGender = gender == 'male' ? 'female' : 'male';
+    final sourceProfiles = oppositeGender == 'male'
+        ? _maleProfiles
+        : _femaleProfiles;
+
+    final shuffled = List<Map<String, dynamic>>.from(sourceProfiles)..shuffle();
+
+    return shuffled.take(10).map((profile) {
+      return ProfileModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString() + profile['name'],
+        name: profile['name'],
+        age: profile['age'],
+        gender: oppositeGender,
+        university: profile['university'],
+        location: profile['location'],
+        relationshipGoal: (_relationshipGoals..shuffle()).first,
+        bio:
+            'Love to travel, explore new places, and meet interesting people. Looking for someone to share adventures with! 🌍✨',
+        photos: [profile['photo']],
+        interests: (_interests..shuffle()).take(3).toList(),
+        isOnline: DateTime.now().second % 2 == 0,
+      );
+    }).toList();
   }
 }
