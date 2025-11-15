@@ -76,25 +76,25 @@ class _MainNavigationState extends State<MainNavigation>
                   svgPath: 'assets/svgs/star5.svg',
                   label: 'Encounters',
                   index: 0,
-                  activeColor: Colors.black,
+                  activeColor: Colors.blue,
                 ),
                 _buildNavItem(
                   icon: Icons.grid_view_rounded,
                   label: 'Discover',
                   index: 1,
-                  activeColor: Colors.black,
+                  activeColor: Colors.blue,
                 ),
                 _buildNavItem(
                   svgPath: 'assets/svgs/beacon.svg',
                   label: 'Chats',
                   index: 2,
-                  activeColor: Colors.black,
+                  activeColor: Colors.blue,
                 ),
                 _buildNavItem(
                   icon: Iconsax.user,
                   label: 'Profile',
                   index: 3,
-                  activeColor: Colors.black,
+                  activeColor: Colors.blue,
                 ),
               ],
             ),
@@ -134,8 +134,8 @@ class _MainNavigationState extends State<MainNavigation>
               child: svgPath != null
                   ? SvgPicture.asset(
                       svgPath,
-                      width: 24,
-                      height: 24,
+                      width: 26,
+                      height: 26,
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
                         isActive ? activeColor : Colors.grey.shade400,
@@ -145,7 +145,7 @@ class _MainNavigationState extends State<MainNavigation>
                   : Icon(
                       icon,
                       color: isActive ? activeColor : Colors.grey.shade400,
-                      size: 27,
+                      size: 28,
                     ),
             ),
           ],

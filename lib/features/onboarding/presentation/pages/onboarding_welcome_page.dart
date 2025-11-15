@@ -303,7 +303,7 @@ class _StarIcon extends StatelessWidget {
                   height: isTablet ? 70.r : 35.r,
                   fit: BoxFit.cover,
                   colorFilter: const ColorFilter.mode(
-                    AppColors.primaryLight,
+                    Colors.blue,
                     BlendMode.srcIn,
                   ),
                 ),
