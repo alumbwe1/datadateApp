@@ -1,0 +1,23 @@
+import '../../domain/entities/university.dart';
+
+class UniversityModel extends University {
+  const UniversityModel({
+    required super.id,
+    required super.name,
+    required super.slug,
+    super.logo,
+  });
+
+  factory UniversityModel.fromJson(Map<String, dynamic> json) {
+    return UniversityModel(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      slug: json['slug'] as String,
+      logo: json['logo'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'name': name, 'slug': slug, 'logo': logo};
+  }
+}

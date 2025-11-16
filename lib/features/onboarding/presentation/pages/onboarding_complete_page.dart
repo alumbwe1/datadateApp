@@ -33,7 +33,7 @@ class _OnboardingCompletePageState
           name: onboardingState.name!,
           age: onboardingState.age!,
           gender: onboardingState.gender!,
-          university: onboardingState.location ?? 'Not specified',
+          university: onboardingState.universityId?.toString() ?? '1',
           relationshipGoal: onboardingState.datingGoal ?? 'date',
         );
 

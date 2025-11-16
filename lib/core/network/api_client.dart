@@ -4,7 +4,7 @@ import '../constants/api_endpoints.dart';
 import '../constants/app_constants.dart';
 import '../errors/failures.dart';
 
-/// Generic API Client with interceptors for token management, logging, and error handling
+/// Generic API Client with [interceptors for token management, logging, and error handling]
 class ApiClient {
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;

@@ -3,13 +3,17 @@ class ApiEndpoints {
   // Base URL - should be loaded from environment
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.datadate.com',
+    defaultValue: 'http://127.0.0.1:7000',
   );
 
   // Authentication
   static const String login = '/auth/jwt/create/';
   static const String register = '/auth/users/';
   static const String refreshToken = '/auth/jwt/refresh/';
+
+  // Universities (No authentication required)
+  static const String universities = '/api/universities/';
+  static String universityBySlug(String slug) => '/api/universities/$slug/';
 
   // Users
   static const String currentUser = '/api/users/me/';

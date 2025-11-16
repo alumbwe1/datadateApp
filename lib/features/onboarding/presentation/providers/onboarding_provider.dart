@@ -13,6 +13,7 @@ class OnboardingState {
   final String? datingGoal;
   final List<String> interests;
   final String? location;
+  final int? universityId;
   final bool isCompleted;
 
   OnboardingState({
@@ -26,6 +27,7 @@ class OnboardingState {
     this.datingGoal,
     this.interests = const [],
     this.location,
+    this.universityId,
     this.isCompleted = false,
   });
 
@@ -40,6 +42,7 @@ class OnboardingState {
     String? datingGoal,
     List<String>? interests,
     String? location,
+    int? universityId,
     bool? isCompleted,
   }) {
     return OnboardingState(
@@ -53,6 +56,7 @@ class OnboardingState {
       datingGoal: datingGoal ?? this.datingGoal,
       interests: interests ?? this.interests,
       location: location ?? this.location,
+      universityId: universityId ?? this.universityId,
       isCompleted: isCompleted ?? this.isCompleted,
     );
   }
@@ -120,6 +124,10 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
   void setLocation(String location) {
     state = state.copyWith(location: location);
+  }
+
+  void setUniversity(int universityId) {
+    state = state.copyWith(universityId: universityId);
   }
 
   Future<void> completeOnboarding() async {

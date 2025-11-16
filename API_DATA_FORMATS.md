@@ -58,15 +58,61 @@ This document shows the exact JSON format for all API endpoints based on the Dja
   "id": 1,
   "username": "john_doe",
   "email": "john@university.edu",
-  "university": 1,
+  "university": {
+    "id": 1,
+    "name": "Stanford University",
+    "slug": "stanford-university",
+    "logo": "http://api.example.com/media/universities/logos/stanford.png"
+  },
   "gender": "male",
   "preferred_genders": ["female"],
   "intent": "dating",
   "is_private": false,
-  "anon_handle": null,
+  "anon_handle": "abcd1234",
   "show_real_name_on_match": true,
   "subscription_active": false,
-  "remaining_profile_views": 10
+  "remaining_profile_views": 10,
+  "display_name": "John Doe"
+}
+```
+
+---
+
+## Universities
+
+### GET `/api/universities/` - List Universities (No Authentication Required)
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Stanford University",
+    "slug": "stanford-university",
+    "logo": "http://api.example.com/media/universities/logos/stanford.png"
+  },
+  {
+    "id": 2,
+    "name": "Harvard University",
+    "slug": "harvard-university",
+    "logo": "http://api.example.com/media/universities/logos/harvard.png"
+  },
+  {
+    "id": 3,
+    "name": "MIT",
+    "slug": "mit",
+    "logo": "http://api.example.com/media/universities/logos/mit.png"
+  }
+]
+```
+
+### GET `/api/universities/{slug}/` - Get University by Slug (No Authentication Required)
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "name": "Stanford University",
+  "slug": "stanford-university",
+  "logo": "http://api.example.com/media/universities/logos/stanford.png"
 }
 ```
 
@@ -86,7 +132,12 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
   "id": 1,
   "username": "john_doe",
   "email": "john@university.edu",
-  "university": 1,
+  "university": {
+    "id": 1,
+    "name": "Stanford University",
+    "slug": "stanford-university",
+    "logo": "http://api.example.com/media/universities/logos/stanford.png"
+  },
   "gender": "male",
   "preferred_genders": ["female"],
   "intent": "dating",
@@ -95,7 +146,8 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
   "show_real_name_on_match": true,
   "subscription_active": false,
   "remaining_profile_views": 10,
-  "quota_reset_at": "2025-11-22T00:00:00Z"
+  "quota_reset_at": "2025-11-22T00:00:00Z",
+  "display_name": "John Doe"
 }
 ```
 
@@ -116,7 +168,12 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
   "id": 1,
   "username": "john_doe",
   "email": "john@university.edu",
-  "university": 1,
+  "university": {
+    "id": 1,
+    "name": "Stanford University",
+    "slug": "stanford-university",
+    "logo": "http://api.example.com/media/universities/logos/stanford.png"
+  },
   "gender": "male",
   "preferred_genders": ["female", "non-binary"],
   "intent": "dating",
@@ -124,7 +181,8 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
   "anon_handle": "mysterious_student",
   "show_real_name_on_match": false,
   "subscription_active": false,
-  "remaining_profile_views": 10
+  "remaining_profile_views": 10,
+  "display_name": "mysterious_student"
 }
 ```
 
@@ -784,8 +842,10 @@ or
 
 5. **WebSocket**: Requires JWT token as query parameter for authentication
 
-6. **Gender Values**: `male`, `female`, `non-binary`, `other`
+6. **Gender Values**: `male`, `female`, `other`
 
-7. **Intent Values**: `dating`, `friendship`, `networking`
+7. **Intent Values**: `relationship`, `dating`, `friends`
 
 8. **Payment Status**: `pending`, `completed`, `failed`, `refunded`
+
+9. **Universities Endpoint**: `/api/universities/` is publicly accessible without authentication

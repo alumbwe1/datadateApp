@@ -8,6 +8,8 @@ import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../onboarding/presentation/providers/onboarding_provider.dart';
+import '../../../universities/domain/entities/university.dart';
+import '../../../universities/presentation/pages/university_selection_page.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -20,23 +22,56 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
 
   String _selectedGender = 'male';
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  University? _selectedUniversity;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _nameController.dispose();
     _ageController.dispose();
     super.dispose();
   }
 
+  Future<void> _selectUniversity() async {
+    final result = await Navigator.of(context).push<University>(
+      MaterialPageRoute(builder: (context) => const UniversitySelectionPage()),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedUniversity = result;
+      });
+    }
+  }
+
   void _handleContinue() {
     if (_formKey.currentState!.validate()) {
+      if (_selectedUniversity == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Please select your university',
+              style: appStyle(14, Colors.white, FontWeight.w600),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+        );
+        return;
+      }
+
       // Store basic info in onboarding provider
       ref
           .read(onboardingProvider.notifier)
@@ -48,7 +83,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             gender: _selectedGender,
           );
 
-      // Navigate to dating goal selection
+      // Store university ID
+      ref
+          .read(onboardingProvider.notifier)
+          .setUniversity(_selectedUniversity!.id);
+
+      // Navigate to gender preference
       context.push('/onboarding/gender-preference');
     }
   }
@@ -160,12 +200,106 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 SizedBox(height: 20.h),
 
                 CustomTextField(
+                  label: 'Confirm Password',
+                  hintText: 'Re-enter your password',
+                  controller: _confirmPasswordController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                  obscureText: _obscureConfirmPassword,
+                  prefixIcon: const Icon(Iconsax.lock_copy),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: Colors.grey[600],
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
+                  ),
+                ),
+
+                SizedBox(height: 20.h),
+
+                CustomTextField(
                   label: 'Age',
                   hintText: 'Enter your age',
                   controller: _ageController,
                   validator: Validators.age,
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Icons.cake_outlined),
+                ),
+
+                SizedBox(height: 20.h),
+
+                // University selector
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'University',
+                      style: appStyle(
+                        14,
+                        Colors.black,
+                        FontWeight.w600,
+                      ).copyWith(letterSpacing: -0.2),
+                    ),
+                    SizedBox(height: 12.h),
+                    GestureDetector(
+                      onTap: _selectUniversity,
+                      child: Container(
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: _selectedUniversity != null
+                                ? Colors.black
+                                : Colors.grey[300]!,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.school_outlined,
+                              color: _selectedUniversity != null
+                                  ? Colors.black
+                                  : Colors.grey[400],
+                            ),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Text(
+                                _selectedUniversity?.name ??
+                                    'Select your university',
+                                style: appStyle(
+                                  14,
+                                  _selectedUniversity != null
+                                      ? Colors.black
+                                      : Colors.grey[400]!,
+                                  FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16.sp,
+                              color: Colors.grey[400],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
 
                 SizedBox(height: 24.h),
