@@ -30,17 +30,24 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Inject access token
-          final token = await _secureStorage.read(
-            key: AppConstants.keyAuthToken,
-          );
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
+          // Check if this is a public endpoint (skip auth)
+          final skipAuth = options.extra['skipAuth'] == true;
+
+          if (!skipAuth) {
+            // Inject access token for authenticated endpoints
+            final token = await _secureStorage.read(
+              key: AppConstants.keyAuthToken,
+            );
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
           }
 
           // Log request
           print('🌐 REQUEST[${options.method}] => ${options.uri}');
-          print('📦 Data: ${options.data}');
+          if (options.data != null) {
+            print('📦 Data: ${options.data}');
+          }
 
           return handler.next(options);
         },
@@ -120,6 +127,54 @@ class ApiClient {
         path,
         queryParameters: queryParameters,
         options: options,
+      );
+      return response.data as T;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// GET request for public endpoints (no authentication required)
+  Future<T> getPublic<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    try {
+      // Create options that explicitly skip the auth interceptor
+      final publicOptions = (options ?? Options()).copyWith(
+        extra: {'skipAuth': true},
+      );
+
+      final response = await _dio.get(
+        path,
+        queryParameters: queryParameters,
+        options: publicOptions,
+      );
+      return response.data as T;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// POST request for public endpoints (no authentication required)
+  Future<T> postPublic<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    try {
+      // Create options that explicitly skip the auth interceptor
+      final publicOptions = (options ?? Options()).copyWith(
+        extra: {'skipAuth': true},
+      );
+
+      final response = await _dio.post(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: publicOptions,
       );
       return response.data as T;
     } on DioException catch (e) {

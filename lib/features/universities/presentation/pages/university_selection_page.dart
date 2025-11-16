@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconly/iconly.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../providers/university_provider.dart';
@@ -33,6 +36,7 @@ class _UniversitySelectionPageState
         .read(universitiesProvider)
         .selectedUniversity;
     if (selectedUniversity != null) {
+      HapticFeedback.mediumImpact();
       // Navigate back with the selected university
       context.pop(selectedUniversity);
     }
@@ -54,48 +58,49 @@ class _UniversitySelectionPageState
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'Select University',
-          style: appStyle(20, Colors.black, FontWeight.w700),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            context.pop();
+          },
         ),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search bar
+          // Title and subtitle
           Padding(
-            padding: EdgeInsets.all(16.w),
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Search universities...',
-                hintStyle: appStyle(14, Colors.grey[400]!, FontWeight.w400),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide.none,
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 8.h),
+                Text(
+                  'Select Your\nUniversity',
+                  style: appStyle(
+                    32,
+                    Colors.black,
+                    FontWeight.w900,
+                  ).copyWith(letterSpacing: -0.5, height: 1.2),
                 ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 12.h,
+                SizedBox(height: 12.h),
+                Text(
+                  'Choose your university to connect\nwith students on your campus.',
+                  style: appStyle(
+                    15,
+                    Colors.grey[600]!,
+                    FontWeight.w400,
+                  ).copyWith(letterSpacing: -0.2, height: 1.4),
                 ),
-              ),
+              ],
             ),
           ),
+
+          SizedBox(height: 20.h),
 
           // Universities list
           Expanded(
             child: universitiesState.isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: Colors.black),
-                  )
+                ? _buildShimmerLoading()
                 : universitiesState.error != null
                 ? Center(
                     child: Column(
@@ -136,25 +141,42 @@ class _UniversitySelectionPageState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.school_outlined,
-                          size: 64,
-                          color: Colors.grey[400],
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.school_outlined,
+                            size: 48,
+                            color: Colors.grey[400],
+                          ),
                         ),
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 24.h),
                         Text(
                           'No universities found',
                           style: appStyle(
-                            16,
+                            18,
+                            Colors.black,
+                            FontWeight.w700,
+                          ).copyWith(letterSpacing: -0.3),
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          'Try adjusting your search',
+                          style: appStyle(
+                            14,
                             Colors.grey[600]!,
-                            FontWeight.w600,
+                            FontWeight.w400,
                           ),
                         ),
                       ],
                     ),
                   )
                 : ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
                     itemCount: filteredUniversities.length,
                     itemBuilder: (context, index) {
                       final university = filteredUniversities[index];
@@ -164,93 +186,127 @@ class _UniversitySelectionPageState
 
                       return GestureDetector(
                         onTap: () {
+                          HapticFeedback.selectionClick();
                           ref
                               .read(universitiesProvider.notifier)
                               .selectUniversity(university);
                         },
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 12.h),
-                          padding: EdgeInsets.all(16.w),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: EdgeInsets.only(bottom: 16.h),
+                          padding: EdgeInsets.all(20.w),
                           decoration: BoxDecoration(
                             color: isSelected ? Colors.black : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isSelected
                                   ? Colors.black
-                                  : Colors.grey[300]!,
-                              width: isSelected ? 2 : 1,
+                                  : Colors.grey.shade300,
+                              width: isSelected ? 2 : 1.5,
                             ),
-                            borderRadius: BorderRadius.circular(12.r),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ]
+                                : [],
                           ),
                           child: Row(
                             children: [
                               // University logo
-                              if (university.logo != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  child: CachedNetworkImage(
-                                    imageUrl: university.logo!,
-                                    width: 48.w,
-                                    height: 48.h,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(
-                                      width: 48.w,
-                                      height: 48.h,
-                                      color: Colors.grey[200],
-                                      child: Icon(
-                                        Icons.school,
-                                        color: Colors.grey[400],
-                                      ),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        Container(
-                                          width: 48.w,
-                                          height: 48.h,
-                                          color: Colors.grey[200],
-                                          child: Icon(
-                                            Icons.school,
-                                            color: Colors.grey[400],
-                                          ),
-                                        ),
-                                  ),
-                                )
-                              else
-                                Container(
-                                  width: 48.w,
-                                  height: 48.h,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? Colors.white.withOpacity(0.2)
-                                        : Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(8.r),
-                                  ),
-                                  child: Icon(
-                                    Icons.school,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.grey[400],
-                                  ),
+                              Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
+                                child: university.logo != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(16),
+                                        child: CachedNetworkImage(
+                                          imageUrl: university.logo!,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) => Center(
+                                            child: Icon(
+                                              Icons.school,
+                                              color: Colors.grey[400],
+                                              size: 28,
+                                            ),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Center(
+                                                child: Icon(
+                                                  Icons.school,
+                                                  color: Colors.grey[400],
+                                                  size: 28,
+                                                ),
+                                              ),
+                                        ),
+                                      )
+                                    : Center(
+                                        child: Icon(
+                                          Icons.school,
+                                          color: isSelected
+                                              ? Colors.black
+                                              : Colors.grey[400],
+                                          size: 28,
+                                        ),
+                                      ),
+                              ),
 
                               SizedBox(width: 16.w),
 
                               // University name
                               Expanded(
-                                child: Text(
-                                  university.name,
-                                  style: appStyle(
-                                    16,
-                                    isSelected ? Colors.white : Colors.black,
-                                    FontWeight.w600,
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      university.name,
+                                      style: appStyle(
+                                        18,
+                                        isSelected
+                                            ? Colors.white
+                                            : Colors.black,
+                                        FontWeight.w700,
+                                      ).copyWith(letterSpacing: -0.3),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      'Campus Community',
+                                      style: appStyle(
+                                        14,
+                                        isSelected
+                                            ? Colors.white70
+                                            : Colors.grey[600]!,
+                                        FontWeight.w400,
+                                      ).copyWith(letterSpacing: -0.2),
+                                    ),
+                                  ],
                                 ),
                               ),
 
                               // Checkmark
                               if (isSelected)
-                                Icon(
-                                  Icons.check_circle,
-                                  color: Colors.white,
-                                  size: 24.sp,
+                                Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check,
+                                    color: Colors.black,
+                                    size: 20,
+                                  ),
                                 ),
                             ],
                           ),
@@ -263,11 +319,72 @@ class _UniversitySelectionPageState
           // Continue button
           if (universitiesState.selectedUniversity != null)
             Padding(
-              padding: EdgeInsets.all(16.w),
+              padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 20.h),
               child: CustomButton(text: 'Continue', onPressed: _handleContinue),
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            margin: EdgeInsets.only(bottom: 16.h),
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey.shade300, width: 1.5),
+            ),
+            child: Row(
+              children: [
+                // Logo placeholder
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                // Text placeholders
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Container(
+                        width: 120,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

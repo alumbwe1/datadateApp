@@ -3,6 +3,7 @@
 ## Before vs After
 
 ### Before (Dummy Data)
+
 ```
 ┌─────────────────────────────────────┐
 │         Login Page                  │
@@ -26,6 +27,7 @@
 ```
 
 ### After (Real API)
+
 ```
 ┌─────────────────────────────────────┐
 │         Login Page                  │

@@ -246,59 +246,133 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'University',
-                      style: appStyle(
-                        14,
-                        Colors.black,
-                        FontWeight.w600,
-                      ).copyWith(letterSpacing: -0.2),
+                    // Optional: Add a label above the selector
+                    Padding(
+                      padding: EdgeInsets.only(left: 4.w, bottom: 8.h),
+                      child: Text(
+                        'University',
+                        style: appStyle(
+                          14,
+                          Colors.black,
+                          FontWeight.w600,
+                        ).copyWith(letterSpacing: -0.2),
+                      ),
                     ),
-                    SizedBox(height: 12.h),
+
                     GestureDetector(
                       onTap: _selectUniversity,
-                      child: Container(
-                        padding: EdgeInsets.all(16.w),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 14.h,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: _selectedUniversity != null
+                              ? Colors.blue.withOpacity(0.05)
+                              : Colors.grey[50],
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: _selectedUniversity != null
-                                ? Colors.black
+                                ? Colors.blue.withOpacity(0.4)
                                 : Colors.grey[300]!,
+                            width: 1.5,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.school_outlined,
-                              color: _selectedUniversity != null
-                                  ? Colors.black
-                                  : Colors.grey[400],
-                            ),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              child: Text(
-                                _selectedUniversity?.name ??
-                                    'Select your university',
-                                style: appStyle(
-                                  14,
-                                  _selectedUniversity != null
-                                      ? Colors.black
-                                      : Colors.grey[400]!,
-                                  FontWeight.w500,
-                                ),
+                            // Icon with background
+                            Container(
+                              padding: EdgeInsets.all(8.w),
+                              decoration: BoxDecoration(
+                                color: _selectedUniversity != null
+                                    ? Colors.blue.withOpacity(0.1)
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: Icon(
+                                Icons.school_rounded,
+                                size: 20.sp,
+                                color: _selectedUniversity != null
+                                    ? Colors.blue
+                                    : Colors.grey[400],
                               ),
                             ),
+
+                            SizedBox(width: 12.w),
+
+                            // Text content
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _selectedUniversity?.name ??
+                                        'Select your university',
+                                    style: appStyle(
+                                      15,
+                                      _selectedUniversity != null
+                                          ? Colors.black87
+                                          : Colors.grey[500]!,
+                                      _selectedUniversity != null
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+
+                                  // Optional: Add subtitle when university is selected
+                                  if (_selectedUniversity != null) ...[
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      'Tap to change',
+                                      style: appStyle(
+                                        11,
+                                        Colors.grey[500]!,
+                                        FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(width: 8.w),
+
+                            // Arrow indicator
                             Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16.sp,
-                              color: Colors.grey[400],
+                              Icons.chevron_right_rounded,
+                              size: 20.sp,
+                              color: _selectedUniversity != null
+                                  ? Colors.blue
+                                  : Colors.grey[400],
                             ),
                           ],
                         ),
                       ),
                     ),
+
+                    // Optional: Add helper text below
+                    if (_selectedUniversity == null)
+                      Padding(
+                        padding: EdgeInsets.only(left: 4.w, top: 6.h),
+                        child: Text(
+                          'Choose your university to continue',
+                          style: appStyle(
+                            11,
+                            Colors.grey[500]!,
+                            FontWeight.w400,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
 

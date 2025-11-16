@@ -24,7 +24,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<Map<String, String>> login(String email, String password) async {
-    final response = await apiClient.post<Map<String, dynamic>>(
+    // Note: Login doesn't require authentication
+    final response = await apiClient.postPublic<Map<String, dynamic>>(
       ApiEndpoints.login,
       data: {'email': email, 'password': password},
     );
@@ -45,7 +46,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required List<String> preferredGenders,
     required String intent,
   }) async {
-    final response = await apiClient.post<Map<String, dynamic>>(
+    // Note: Registration doesn't require authentication
+    final response = await apiClient.postPublic<Map<String, dynamic>>(
       ApiEndpoints.register,
       data: {
         'username': username,
@@ -63,7 +65,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<String> refreshToken(String refreshToken) async {
-    final response = await apiClient.post<Map<String, dynamic>>(
+    // Note: Token refresh doesn't require authentication (uses refresh token)
+    final response = await apiClient.postPublic<Map<String, dynamic>>(
       ApiEndpoints.refreshToken,
       data: {'refresh': refreshToken},
     );
