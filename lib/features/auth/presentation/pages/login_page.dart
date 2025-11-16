@@ -18,13 +18,13 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -33,7 +33,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (_formKey.currentState!.validate()) {
       await ref
           .read(authProvider.notifier)
-          .login(_emailController.text, _passwordController.text);
+          .login(_usernameController.text, _passwordController.text);
 
       if (mounted) {
         final authState = ref.read(authProvider);
@@ -113,15 +113,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 SizedBox(height: 48.h),
 
-                // Email field
+                // Username field
                 CustomTextField(
-                  label: 'Email',
-                  hintText: 'Enter your email',
-                  controller: _emailController,
-                  validator: Validators.email,
-                  keyboardType: TextInputType.emailAddress,
+                  label: 'Username',
+                  hintText: 'Enter your username',
+                  controller: _usernameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Username is required';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.text,
                   prefixIcon: Icon(
-                    IconlyLight.message,
+                    IconlyLight.profile,
                     color: Colors.grey[600],
                   ),
                 ),

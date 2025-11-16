@@ -23,11 +23,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<Map<String, String>> login(String email, String password) async {
+  Future<Map<String, String>> login(String username, String password) async {
     // Note: Login doesn't require authentication
+    // Backend requires 'username' field (can be email or username)
     final response = await apiClient.postPublic<Map<String, dynamic>>(
       ApiEndpoints.login,
-      data: {'email': email, 'password': password},
+      data: {'username': username, 'password': password},
     );
 
     return {
@@ -53,10 +54,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'username': username,
         'email': email,
         'password': password,
+        're_password': password,
         'university': university,
         'gender': gender,
         'preferred_genders': preferredGenders,
         'intent': intent,
+        "is_private": false,
       },
     );
 

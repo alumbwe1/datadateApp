@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/api_endpoints.dart';
@@ -43,11 +45,13 @@ class ApiClient {
             }
           }
 
-          // Log request
+          // Log request details
           print('🌐 REQUEST[${options.method}] => ${options.uri}');
+          print('📋 Headers: ${options.headers}');
           if (options.data != null) {
             print('📦 Data: ${options.data}');
           }
+          print('🔓 Public Endpoint: $skipAuth');
 
           return handler.next(options);
         },
@@ -56,12 +60,15 @@ class ApiClient {
           print(
             '✅ RESPONSE[${response.statusCode}] => ${response.requestOptions.uri}',
           );
+          print('📥 Response Data: ${response.data}');
           return handler.next(response);
         },
         onError: (error, handler) async {
           print(
             '❌ ERROR[${error.response?.statusCode}] => ${error.requestOptions.uri}',
           );
+          print('❌ Error Response: ${error.response?.data}');
+          print('❌ Error Message: ${error.message}');
 
           // Handle 401 - Token expired
           if (error.response?.statusCode == 401) {
@@ -172,7 +179,7 @@ class ApiClient {
 
       final response = await _dio.post(
         path,
-        data: data,
+        data: jsonEncode(data),
         queryParameters: queryParameters,
         options: publicOptions,
       );

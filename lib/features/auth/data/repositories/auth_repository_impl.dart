@@ -55,9 +55,12 @@ class AuthRepositoryImpl implements AuthRepository {
       // Map gender to preferred genders (opposite)
       final preferredGenders = _getPreferredGenders(gender);
 
+      // Create username from name
+      final username = name.toLowerCase().replaceAll(' ', '_');
+
       // Register user
       final user = await remoteDataSource.register(
-        username: name.toLowerCase().replaceAll(' ', '_'),
+        username: username,
         email: email,
         password: password,
         university: int.tryParse(university) ?? 1, // Parse university ID
@@ -67,10 +70,11 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       // Note: Registration doesn't return tokens, need to login
-      final tokens = await remoteDataSource.login(email, password);
+      // Use the username (not email) for login
+      final tokens = await remoteDataSource.login(username, password);
       await localDataSource.saveAuthToken(tokens['access']!);
       await localDataSource.saveRefreshToken(tokens['refresh']!);
-      await localDataSource.saveUserId(user.id);
+      await localDataSource.saveUserId(user.id.toString());
 
       return Right(user);
     } on AuthFailure catch (e) {
