@@ -31,8 +31,9 @@ class OnboardingTraitsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Using interests as traits for now
     final selectedTraits = ref.watch(
-      onboardingProvider.select((state) => state.desiredTraits),
+      onboardingProvider.select((state) => state.interests),
     );
 
     return Scaffold(
@@ -135,11 +136,11 @@ class OnboardingTraitsPage extends ConsumerWidget {
                         if (isSelected) {
                           ref
                               .read(onboardingProvider.notifier)
-                              .removeDesiredTrait(trait['value']);
+                              .removeInterest(trait['value']);
                         } else {
                           ref
                               .read(onboardingProvider.notifier)
-                              .addDesiredTrait(trait['value']);
+                              .addInterest(trait['value']);
                         }
                       },
                     );

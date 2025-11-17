@@ -1,4 +1,6 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/auth_local_datasource.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
@@ -67,14 +69,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Future<void> register({
+  Future<Either<Failure, User>> register({
     required String email,
     required String password,
     required String name,
-    required int age,
-    required String gender,
-    required String university,
-    required String relationshipGoal,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -82,10 +80,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       email: email,
       password: password,
       name: name,
-      age: age,
-      gender: gender,
-      university: university,
-      relationshipGoal: relationshipGoal,
     );
 
     result.fold(
@@ -94,6 +88,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       (user) =>
           state = state.copyWith(isLoading: false, user: user, error: null),
     );
+
+    return result;
   }
 
   Future<void> logout() async {
@@ -110,6 +106,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         (user) => state = state.copyWith(user: user),
       );
     }
+  }
+
+  Future<String?> getAuthToken() async {
+    return await _authRepository.getAuthToken();
   }
 }
 

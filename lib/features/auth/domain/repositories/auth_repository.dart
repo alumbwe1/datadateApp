@@ -8,12 +8,9 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String name,
-    required int age,
-    required String gender,
-    required String university,
-    required String relationshipGoal,
   });
   Future<Either<Failure, void>> logout();
   Future<Either<Failure, User>> getCurrentUser();
   Future<bool> isLoggedIn();
+  Future<String?> getAuthToken();
 }

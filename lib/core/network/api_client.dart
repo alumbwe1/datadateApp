@@ -11,6 +11,9 @@ class ApiClient {
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;
 
+  // Expose Dio instance for direct access when needed
+  Dio get dio => _dio;
+
   ApiClient({FlutterSecureStorage? secureStorage})
     : _secureStorage = secureStorage ?? const FlutterSecureStorage() {
     _dio = Dio(
@@ -305,9 +308,21 @@ class ApiClient {
 
         switch (statusCode) {
           case 400:
-            return ValidationFailure(
-              data is Map ? data['detail'] ?? 'Invalid input' : 'Invalid input',
-            );
+            // Parse field-specific errors
+            if (data is Map) {
+              // Cast to Map<String, dynamic>
+              final errorData = Map<String, dynamic>.from(data);
+              // Check for field-specific errors first
+              final errorMessage = _parseFieldErrors(errorData);
+              if (errorMessage != null) {
+                return ValidationFailure(errorMessage);
+              }
+              // Fall back to detail field
+              return ValidationFailure(
+                errorData['detail'] ?? 'Invalid input. Please check your data.',
+              );
+            }
+            return ValidationFailure('Invalid input. Please check your data.');
           case 401:
             return AuthFailure('Authentication failed. Please login again.');
           case 403:
@@ -317,15 +332,16 @@ class ApiClient {
           case 429:
             return ServerFailure(
               data is Map
-                  ? data['detail'] ?? 'Too many requests'
-                  : 'Too many requests',
+                  ? data['detail'] ??
+                        'Too many requests. Please try again later.'
+                  : 'Too many requests. Please try again later.',
             );
           case 500:
           case 502:
           case 503:
             return ServerFailure('Server error. Please try again later.');
           default:
-            return ServerFailure('Something went wrong.');
+            return ServerFailure('Something went wrong. Please try again.');
         }
 
       case DioExceptionType.cancel:
@@ -340,6 +356,89 @@ class ApiClient {
       default:
         return ServerFailure('Unexpected error occurred.');
     }
+  }
+
+  /// Parse field-specific errors from API response
+  String? _parseFieldErrors(Map<String, dynamic> data) {
+    // Common field names to check
+    final fieldNames = [
+      'username',
+      'email',
+      'password',
+      're_password',
+      'non_field_errors',
+    ];
+
+    for (final field in fieldNames) {
+      if (data.containsKey(field)) {
+        final fieldError = data[field];
+        if (fieldError is List && fieldError.isNotEmpty) {
+          // Return user-friendly message
+          return _getUserFriendlyMessage(field, fieldError.first.toString());
+        } else if (fieldError is String) {
+          return _getUserFriendlyMessage(field, fieldError);
+        }
+      }
+    }
+
+    // Check for any other field errors
+    for (final entry in data.entries) {
+      if (entry.value is List && (entry.value as List).isNotEmpty) {
+        return _getUserFriendlyMessage(
+          entry.key.toString(),
+          (entry.value as List).first.toString(),
+        );
+      } else if (entry.value is String) {
+        return _getUserFriendlyMessage(
+          entry.key.toString(),
+          entry.value as String,
+        );
+      }
+    }
+
+    return null;
+  }
+
+  /// Convert technical error messages to user-friendly ones
+  String _getUserFriendlyMessage(String field, String message) {
+    // Username errors
+    if (field == 'username') {
+      if (message.toLowerCase().contains('already exists')) {
+        return 'This username is already taken. Please try a different name.';
+      }
+      if (message.toLowerCase().contains('invalid')) {
+        return 'Username can only contain letters, numbers, and underscores.';
+      }
+    }
+
+    // Email errors
+    if (field == 'email') {
+      if (message.toLowerCase().contains('already exists')) {
+        return 'An account with this email already exists. Please login instead.';
+      }
+      if (message.toLowerCase().contains('invalid')) {
+        return 'Please enter a valid email address.';
+      }
+    }
+
+    // Password errors
+    if (field == 'password' || field == 're_password') {
+      if (message.toLowerCase().contains('too short')) {
+        return 'Password must be at least 8 characters long.';
+      }
+      if (message.toLowerCase().contains('too common')) {
+        return 'This password is too common. Please choose a stronger password.';
+      }
+      if (message.toLowerCase().contains('numeric')) {
+        return 'Password cannot be entirely numeric.';
+      }
+      if (message.toLowerCase().contains('match')) {
+        return 'Passwords do not match.';
+      }
+    }
+
+    // Return the original message if no specific mapping found
+    return message;
   }
 
   /// Clear all stored tokens (logout)

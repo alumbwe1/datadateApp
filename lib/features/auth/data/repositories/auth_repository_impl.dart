@@ -43,35 +43,24 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String name,
-    required int age,
-    required String gender,
-    required String university,
-    required String relationshipGoal,
   }) async {
     try {
-      // Map relationship goal to intent
-      final intent = _mapRelationshipGoalToIntent(relationshipGoal);
-
-      // Map gender to preferred genders (opposite)
-      final preferredGenders = _getPreferredGenders(gender);
-
       // Create username from name
       final username = name.toLowerCase().replaceAll(' ', '_');
 
-      // Register user
+      // Register with minimal data - will complete profile in onboarding
       final user = await remoteDataSource.register(
         username: username,
         email: email,
         password: password,
-        university: int.tryParse(university) ?? 1, // Parse university ID
-        gender: gender.toLowerCase(),
-        preferredGenders: preferredGenders,
-        intent: intent,
+        university: 1, // Default university, will update in onboarding
+        gender: 'male', // Default, will update in onboarding
+        preferredGenders: ['female'], // Default, will update in onboarding
+        intent: 'dating', // Default, will update in onboarding
       );
 
-      // Note: Registration doesn't return tokens, need to login
-      // Use the username (not email) for login
-      final tokens = await remoteDataSource.login(username, password);
+      // Auto-login after registration
+      final tokens = await remoteDataSource.login(email, password);
       await localDataSource.saveAuthToken(tokens['access']!);
       await localDataSource.saveRefreshToken(tokens['refresh']!);
       await localDataSource.saveUserId(user.id.toString());
@@ -85,32 +74,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(e);
     } catch (e) {
       return Left(AuthFailure('Registration failed: ${e.toString()}'));
-    }
-  }
-
-  String _mapRelationshipGoalToIntent(String goal) {
-    switch (goal.toLowerCase()) {
-      case 'relationship':
-        return 'dating';
-      case 'dating':
-        return 'dating';
-      case 'new friends':
-      case 'friends':
-        return 'friendship';
-      default:
-        return 'dating';
-    }
-  }
-
-  List<String> _getPreferredGenders(String userGender) {
-    // Default to opposite gender
-    switch (userGender.toLowerCase()) {
-      case 'male':
-        return ['female'];
-      case 'female':
-        return ['male'];
-      default:
-        return ['male', 'female', 'non-binary'];
     }
   }
 
@@ -149,5 +112,10 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> isLoggedIn() async {
     final token = await localDataSource.getAuthToken();
     return token != null;
+  }
+
+  @override
+  Future<String?> getAuthToken() async {
+    return await localDataSource.getAuthToken();
   }
 }

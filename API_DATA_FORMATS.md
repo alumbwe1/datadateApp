@@ -7,7 +7,9 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ## Authentication
 
 ### POST `/auth/jwt/create/` - Login
+
 **Request:**
+
 ```json
 {
   "email": "user@university.edu",
@@ -16,6 +18,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
@@ -24,7 +27,9 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ```
 
 ### POST `/auth/jwt/refresh/` - Refresh Token
+
 **Request:**
+
 ```json
 {
   "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
@@ -32,6 +37,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
@@ -39,7 +45,9 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ```
 
 ### POST `/auth/users/` - Register
+
 **Request:**
+
 ```json
 {
   "username": "john_doe",
@@ -53,6 +61,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -81,7 +90,9 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ## Universities
 
 ### GET `/api/universities/` - List Universities (No Authentication Required)
+
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -106,7 +117,9 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ```
 
 ### GET `/api/universities/{slug}/` - Get University by Slug (No Authentication Required)
+
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -121,12 +134,15 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ## Users
 
 ### GET `/api/users/me/` - Get Current User
+
 **Headers:**
+
 ```
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -152,7 +168,9 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
 ```
 
 ### PATCH `/api/users/me/` - Update User
+
 **Request:**
+
 ```json
 {
   "is_private": true,
@@ -163,6 +181,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -190,13 +209,122 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
 
 ## Profiles
 
-### GET `/api/profiles/` - List Profiles (Discovery)
+### GET `/api/profiles/me/` - Get Current User's Profile
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "user": {
+    "id": 1,
+    "display_name": "John Doe",
+    "university": {
+      "id": 1,
+      "name": "Stanford University",
+      "slug": "stanford-university",
+      "logo": "http://api.example.com/media/universities/logos/stanford.png"
+    },
+    "gender": "male",
+    "intent": "dating",
+    "is_private": false
+  },
+  "bio": "Love hiking and coffee ☕",
+  "real_name": "John Doe",
+  "course": "Computer Science",
+  "date_of_birth": "2003-05-15",
+  "age": 21,
+  "graduation_year": 2026,
+  "interests": ["hiking", "coffee", "coding", "AI"],
+  "profile_photo": "http://api.example.com/media/profiles/photos/john_photo.jpg",
+  "last_active": "2025-11-17T10:30:00Z",
+  "created_at": "2025-11-10T14:30:00Z",
+  "updated_at": "2025-11-15T09:20:00Z"
+}
+```
+
+### PATCH `/api/profiles/me/` - Update Current User's Profile
+
+**Request:**
+
+```json
+{
+  "bio": "Updated bio - Love hiking, coffee, and coding!",
+  "real_name": "John Michael Doe",
+  "course": "Computer Science & AI",
+  "date_of_birth": "2003-05-15",
+  "graduation_year": 2026,
+  "interests": ["hiking", "coffee", "coding", "AI", "machine learning"]
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "user": {
+    "id": 1,
+    "display_name": "John Doe",
+    "university": {
+      "id": 1,
+      "name": "Stanford University",
+      "slug": "stanford-university",
+      "logo": "http://api.example.com/media/universities/logos/stanford.png"
+    },
+    "gender": "male",
+    "intent": "dating",
+    "is_private": false
+  },
+  "bio": "Updated bio - Love hiking, coffee, and coding!",
+  "real_name": "John Michael Doe",
+  "course": "Computer Science & AI",
+  "date_of_birth": "2003-05-15",
+  "age": 21,
+  "graduation_year": 2026,
+  "interests": ["hiking", "coffee", "coding", "AI", "machine learning"],
+  "profile_photo": "http://api.example.com/media/profiles/photos/john_photo.jpg",
+  "last_active": "2025-11-17T10:35:00Z",
+  "created_at": "2025-11-10T14:30:00Z",
+  "updated_at": "2025-11-17T10:35:00Z"
+}
+```
+
+### POST `/api/profiles/me/photo/` - Upload Profile Photo
+
+**Request (multipart/form-data):**
+
+```
+profile_photo: <file>
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "profile_photo": "http://api.example.com/media/profiles/photos/john_photo_new.jpg"
+}
+```
+
+**Error (400 Bad Request) - Age Validation:**
+
+```json
+{
+  "date_of_birth": ["You must be at least 18 years old to use this platform."]
+}
+```
+
+### GET `/api/profiles/` - List Profiles (Browse/Discovery)
+
 **Query Parameters:**
+
 ```
 ?gender=female&intent=dating&university=1&page=1
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "count": 45,
@@ -205,118 +333,142 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
   "results": [
     {
       "id": 5,
-      "user": 5,
-      "username": "jane_smith",
       "display_name": "Jane S.",
-      "bio": "Love hiking and coffee ☕",
+      "user": {
+        "id": 5,
+        "display_name": "Jane S.",
+        "university": {
+          "id": 1,
+          "name": "Stanford University",
+          "slug": "stanford-university",
+          "logo": "http://api.example.com/media/universities/logos/stanford.png"
+        },
+        "gender": "female",
+        "intent": "dating",
+        "is_private": false
+      },
+      "display_bio": "Love hiking and coffee ☕",
       "age": 21,
-      "gender": "female",
-      "intent": "dating",
-      "university": 1,
-      "university_name": "Stanford University",
-      "major": "Computer Science",
+      "course": "Computer Science",
       "graduation_year": 2026,
-      "interests": ["hiking", "coffee", "coding"],
-      "profile_photo": "http://api.example.com/media/profiles/jane_photo.jpg",
-      "is_private": false,
-      "created_at": "2025-11-10T14:30:00Z"
+      "interests": ["hiking", "coffee", "reading"],
+      "profile_photo": "http://api.example.com/media/profiles/photos/jane_photo.jpg",
+      "last_active": "2025-11-17T09:15:00Z"
+    },
+    {
+      "id": 8,
+      "display_name": "anon_xyz123",
+      "user": {
+        "id": 8,
+        "display_name": "anon_xyz123",
+        "university": {
+          "id": 1,
+          "name": "Stanford University",
+          "slug": "stanford-university",
+          "logo": "http://api.example.com/media/universities/logos/stanford.png"
+        },
+        "gender": "female",
+        "intent": "dating",
+        "is_private": true
+      },
+      "display_bio": "Profile is private",
+      "age": 22,
+      "course": "Biology",
+      "graduation_year": 2027,
+      "interests": ["nature", "science"],
+      "profile_photo": "http://api.example.com/media/profiles/photos/anon_photo.jpg",
+      "last_active": "2025-11-17T08:45:00Z"
     }
   ]
 }
 ```
 
 ### GET `/api/profiles/{id}/` - Get Profile Detail
-**Response (200 OK):**
+
+**Response (200 OK) - Public Profile:**
+
 ```json
 {
   "id": 5,
-  "user": 5,
-  "username": "jane_smith",
-  "display_name": "Jane S.",
-  "bio": "Love hiking and coffee ☕",
-  "age": 21,
-  "gender": "female",
-  "intent": "dating",
-  "university": 1,
-  "university_name": "Stanford University",
-  "major": "Computer Science",
-  "graduation_year": 2026,
-  "interests": ["hiking", "coffee", "coding"],
-  "profile_photo": "http://api.example.com/media/profiles/jane_photo.jpg",
-  "gallery_photos": [
-    {
+  "display_name": "Jane Smith",
+  "user": {
+    "id": 5,
+    "display_name": "Jane Smith",
+    "university": {
       "id": 1,
-      "image": "http://api.example.com/media/gallery/photo1.jpg",
-      "order": 1
+      "name": "Stanford University",
+      "slug": "stanford-university",
+      "logo": "http://api.example.com/media/universities/logos/stanford.png"
     },
-    {
-      "id": 2,
-      "image": "http://api.example.com/media/gallery/photo2.jpg",
-      "order": 2
-    }
-  ],
-  "is_private": false,
-  "created_at": "2025-11-10T14:30:00Z",
-  "updated_at": "2025-11-14T10:20:00Z"
-}
-```
-
-### POST `/api/profiles/` - Create Profile
-**Request (multipart/form-data):**
-```json
-{
-  "bio": "Love hiking and coffee ☕",
+    "gender": "female",
+    "intent": "dating",
+    "is_private": false
+  },
+  "display_bio": "Love hiking and coffee ☕",
+  "course": "Computer Science",
   "age": 21,
-  "major": "Computer Science",
   "graduation_year": 2026,
-  "interests": ["hiking", "coffee", "coding"],
-  "profile_photo": "<file>"
+  "interests": ["hiking", "coffee", "reading"],
+  "profile_photo": "http://api.example.com/media/profiles/photos/jane_photo.jpg",
+  "last_active": "2025-11-17T09:15:00Z"
 }
 ```
 
-**Response (201 Created):**
+**Response (200 OK) - Private Profile (Not Matched):**
+
 ```json
 {
-  "id": 5,
-  "user": 5,
-  "username": "jane_smith",
-  "display_name": "Jane S.",
-  "bio": "Love hiking and coffee ☕",
-  "age": 21,
-  "gender": "female",
-  "intent": "dating",
-  "university": 1,
-  "major": "Computer Science",
-  "graduation_year": 2026,
-  "interests": ["hiking", "coffee", "coding"],
-  "profile_photo": "http://api.example.com/media/profiles/jane_photo.jpg",
-  "is_private": false,
-  "created_at": "2025-11-15T14:30:00Z"
+  "id": 8,
+  "display_name": "anon_xyz123",
+  "user": {
+    "id": 8,
+    "display_name": "anon_xyz123",
+    "university": {
+      "id": 1,
+      "name": "Stanford University",
+      "slug": "stanford-university",
+      "logo": "http://api.example.com/media/universities/logos/stanford.png"
+    },
+    "gender": "female",
+    "intent": "dating",
+    "is_private": true
+  },
+  "display_bio": "Profile is private",
+  "course": "Biology",
+  "age": 22,
+  "graduation_year": 2027,
+  "interests": ["nature", "science"],
+  "profile_photo": "http://api.example.com/media/profiles/photos/anon_photo.jpg",
+  "last_active": "2025-11-17T08:45:00Z"
 }
 ```
 
-### POST `/api/profiles/{id}/like/` - Like a Profile
-**Response (201 Created) - No Match:**
-```json
-{
-  "detail": "Profile liked successfully.",
-  "matched": false
-}
-```
+**Response (200 OK) - Private Profile (Matched & show_real_name_on_match=true):**
 
-**Response (201 Created) - Match Created:**
 ```json
 {
-  "detail": "It's a match!",
-  "match_id": 12,
-  "matched": true
-}
-```
-
-**Error (400 Bad Request):**
-```json
-{
-  "detail": "You have already liked this profile."
+  "id": 8,
+  "display_name": "Sarah Johnson",
+  "user": {
+    "id": 8,
+    "display_name": "Sarah Johnson",
+    "university": {
+      "id": 1,
+      "name": "Stanford University",
+      "slug": "stanford-university",
+      "logo": "http://api.example.com/media/universities/logos/stanford.png"
+    },
+    "gender": "female",
+    "intent": "dating",
+    "is_private": true
+  },
+  "display_bio": "Love biology and nature walks 🌿",
+  "course": "Biology",
+  "age": 22,
+  "graduation_year": 2027,
+  "interests": ["biology", "nature", "hiking"],
+  "profile_photo": "http://api.example.com/media/profiles/photos/sarah_photo.jpg",
+  "last_active": "2025-11-17T08:45:00Z"
 }
 ```
 
@@ -325,7 +477,9 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
 ## Gallery
 
 ### GET `/api/gallery/` - List User's Gallery Photos
+
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -346,13 +500,16 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
 ```
 
 ### POST `/api/gallery/` - Upload Photo
+
 **Request (multipart/form-data):**
+
 ```
 image: <file>
 order: 1
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 3,
@@ -364,6 +521,7 @@ order: 1
 ```
 
 ### DELETE `/api/gallery/{id}/` - Delete Photo
+
 **Response (204 No Content)**
 
 ---
@@ -371,7 +529,9 @@ order: 1
 ## Interactions
 
 ### GET `/api/matches/` - List Matches
+
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -402,12 +562,15 @@ order: 1
 ```
 
 ### GET `/api/likes/` - List Likes (Sent/Received)
+
 **Query Parameters:**
+
 ```
 ?type=sent  or  ?type=received
 ```
 
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -427,7 +590,9 @@ order: 1
 ```
 
 ### POST `/api/likes/` - Create Like
+
 **Request:**
+
 ```json
 {
   "liked": 7,
@@ -436,6 +601,7 @@ order: 1
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 23,
@@ -447,7 +613,9 @@ order: 1
 ```
 
 ### GET `/api/profile-views/` - List Profile Views
+
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -466,7 +634,9 @@ order: 1
 ```
 
 ### POST `/api/profile-views/` - Record Profile View
+
 **Request:**
+
 ```json
 {
   "viewed": 9
@@ -474,6 +644,7 @@ order: 1
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 45,
@@ -488,7 +659,9 @@ order: 1
 ## Chat
 
 ### GET `/api/chat/rooms/` - List Chat Rooms
+
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -516,7 +689,9 @@ order: 1
 ```
 
 ### GET `/api/chat/rooms/{id}/` - Get Chat Room Detail
+
 **Response (200 OK):**
+
 ```json
 {
   "id": 3,
@@ -535,12 +710,15 @@ order: 1
 ```
 
 ### GET `/api/chat/rooms/{room_id}/messages/` - List Messages
+
 **Query Parameters:**
+
 ```
 ?page=1&page_size=50
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "count": 156,
@@ -580,7 +758,9 @@ order: 1
 ```
 
 ### POST `/api/chat/rooms/{room_id}/messages/` - Send Message (HTTP)
+
 **Request:**
+
 ```json
 {
   "content": "Hey! How are you?"
@@ -588,6 +768,7 @@ order: 1
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 156,
@@ -601,7 +782,9 @@ order: 1
 ```
 
 ### PATCH `/api/chat/messages/{id}/mark_read/` - Mark Message as Read
+
 **Response (200 OK):**
+
 ```json
 {
   "id": 156,
@@ -619,14 +802,17 @@ order: 1
 ## WebSocket - Real-time Chat
 
 ### Connection
+
 **URL:** `wss://api.example.com/ws/chat/{room_id}/`
 
 **Query Parameter:**
+
 ```
 ?token=eyJ0eXAiOiJKV1QiLCJhbGc...
 ```
 
 ### Send Message (Client → Server)
+
 ```json
 {
   "type": "chat_message",
@@ -635,6 +821,7 @@ order: 1
 ```
 
 ### Receive Message (Server → Client)
+
 ```json
 {
   "type": "chat_message",
@@ -655,6 +842,7 @@ order: 1
 ```
 
 ### Typing Indicator (Client → Server)
+
 ```json
 {
   "type": "typing",
@@ -663,6 +851,7 @@ order: 1
 ```
 
 ### Typing Indicator (Server → Client)
+
 ```json
 {
   "type": "typing",
@@ -672,6 +861,7 @@ order: 1
 ```
 
 ### Read Receipt (Client → Server)
+
 ```json
 {
   "type": "mark_read",
@@ -680,6 +870,7 @@ order: 1
 ```
 
 ### Read Receipt (Server → Client)
+
 ```json
 {
   "type": "message_read",
@@ -693,7 +884,9 @@ order: 1
 ## Payments
 
 ### GET `/api/payments/subscriptions/` - List Subscriptions
+
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -715,7 +908,9 @@ order: 1
 ```
 
 ### POST `/api/payments/transactions/` - Create Transaction
+
 **Request:**
+
 ```json
 {
   "subscription": 1,
@@ -726,6 +921,7 @@ order: 1
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 45,
@@ -746,7 +942,9 @@ order: 1
 ```
 
 ### GET `/api/payments/transactions/{id}/` - Get Transaction Status
+
 **Response (200 OK):**
+
 ```json
 {
   "id": 45,
@@ -771,17 +969,19 @@ order: 1
 ## Error Responses
 
 ### 400 Bad Request
+
 ```json
 {
   "detail": "Invalid input data",
   "errors": {
     "email": ["This field is required."],
-    "age": ["Ensure this value is greater than or equal to 18."]
+    "date_of_birth": ["You must be at least 18 years old to use this platform."]
   }
 }
 ```
 
 ### 401 Unauthorized
+
 ```json
 {
   "detail": "Authentication credentials were not provided."
@@ -798,6 +998,7 @@ or
 ```
 
 ### 403 Forbidden
+
 ```json
 {
   "detail": "You can only chat with matched users."
@@ -805,6 +1006,7 @@ or
 ```
 
 ### 404 Not Found
+
 ```json
 {
   "detail": "Not found."
@@ -812,6 +1014,7 @@ or
 ```
 
 ### 429 Too Many Requests
+
 ```json
 {
   "detail": "You have reached your weekly profile view limit. Upgrade to premium for unlimited views."
@@ -819,6 +1022,7 @@ or
 ```
 
 ### 500 Internal Server Error
+
 ```json
 {
   "detail": "An error occurred while processing your request."
@@ -830,6 +1034,7 @@ or
 ## Notes
 
 1. **Authentication**: All endpoints except `/auth/*` require JWT token in header:
+
    ```
    Authorization: Bearer <access_token>
    ```
@@ -849,3 +1054,8 @@ or
 8. **Payment Status**: `pending`, `completed`, `failed`, `refunded`
 
 9. **Universities Endpoint**: `/api/universities/` is publicly accessible without authentication
+
+10. **Profile Privacy**:
+    - Private profiles show `anon_handle` as `display_name` and hide bio until matched
+    - When matched and `show_real_name_on_match=true`, real name is revealed
+    - Age is calculated automatically from `date_of_birth` (must be 18+)

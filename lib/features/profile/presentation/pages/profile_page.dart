@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:datadate/core/constants/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import '../../../../core/constants/app_style.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/error_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../providers/profile_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -16,13 +19,18 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
-  Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    final user = authState.user;
+  void initState() {
+    super.initState();
+    // Load profile data on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(profileProvider.notifier).loadProfile();
+    });
+  }
 
-    if (user == null) {
-      return const Scaffold(body: Center(child: Text('No user data')));
-    }
+  @override
+  Widget build(BuildContext context) {
+    final profileState = ref.watch(profileProvider);
+    final profile = profileState.profile;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -52,43 +60,66 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildProfileHeader(context, user),
-              const SizedBox(height: 32),
-              _buildInfoSection('About', user),
-              const SizedBox(height: 24),
-              _buildInterestsSection(),
-              const SizedBox(height: 24),
-              _buildPhotosSection(user),
-              const SizedBox(height: 32),
-              _buildActionButtons(context, ref),
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ),
+      body: profileState.isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.black))
+          : profileState.error != null
+          ? CustomErrorWidget(
+              message: profileState.error!,
+              onRetry: () {
+                ref.read(profileProvider.notifier).loadProfile();
+              },
+            )
+          : profile == null
+          ? CustomErrorWidget(
+              message: 'No profile data available',
+              onRetry: () {
+                ref.read(profileProvider.notifier).loadProfile();
+              },
+            )
+          : RefreshIndicator(
+              onRefresh: () async {
+                await ref.read(profileProvider.notifier).loadProfile();
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildProfileHeader(context, profile),
+                      const SizedBox(height: 32),
+                      _buildInfoSection('About', profile),
+                      const SizedBox(height: 24),
+                      if (profile.interests.isNotEmpty)
+                        _buildInterestsSection(profile),
+                      if (profile.interests.isNotEmpty)
+                        const SizedBox(height: 24),
+                      _buildDetailsSection(profile),
+                      const SizedBox(height: 32),
+                      _buildActionButtons(context, ref),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ),
     );
   }
 
-  int _calculateProfileCompletion(dynamic user) {
+  int _calculateProfileCompletion(dynamic profile) {
     int score = 0;
-    if (user.photos.isNotEmpty) score += 30;
-    if (user.bio != null && user.bio.isNotEmpty) score += 20;
-    if (user.name.isNotEmpty) score += 20;
-    if (user.age > 0) score += 10;
-    if (user.university != null) score += 10;
-    if (user.relationshipGoal != null) score += 10;
+    if (profile.profilePhoto != null) score += 30;
+    if (profile.bio != null && profile.bio!.isNotEmpty) score += 20;
+    if (profile.displayName.isNotEmpty) score += 20;
+    if (profile.age != null) score += 10;
+    if (profile.course != null) score += 10;
+    if (profile.interests.isNotEmpty) score += 10;
     return score;
   }
 
-  Widget _buildProfileHeader(BuildContext context, dynamic user) {
-    final completionPercentage = _calculateProfileCompletion(user);
+  Widget _buildProfileHeader(BuildContext context, dynamic profile) {
+    final completionPercentage = _calculateProfileCompletion(profile);
 
     return Center(
       child: Column(
@@ -129,14 +160,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ],
                 ),
                 child: ClipOval(
-                  child: user.photos.isNotEmpty
+                  child: profile.profilePhoto != null
                       ? CachedNetworkImage(
-                          imageUrl: user.photos.first,
+                          imageUrl: profile.profilePhoto!,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
                             color: Colors.grey[200],
                             child: const Center(
                               child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey[200],
+                            child: Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.grey[400],
                             ),
                           ),
                         )
@@ -204,7 +243,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
           const SizedBox(height: 20),
           Text(
-            '${user.name}, ${user.age}',
+            profile.age != null
+                ? '${profile.displayName}, ${profile.age}'
+                : profile.displayName,
             style: appStyle(
               28,
               Colors.black,
@@ -218,7 +259,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Icon(Icons.school_outlined, size: 18, color: Colors.grey[600]),
               const SizedBox(width: 6),
               Text(
-                user.university ?? 'University',
+                profile.universityName,
                 style: appStyle(15, Colors.grey[700]!, FontWeight.w500),
               ),
             ],
@@ -236,7 +277,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 Icon(Iconsax.heart, size: 16, color: Colors.grey[700]),
                 const SizedBox(width: 6),
                 Text(
-                  'Here for ${user.relationshipGoal}',
+                  'Here for ${profile.intent}',
                   style: appStyle(14, Colors.grey[700]!, FontWeight.w600),
                 ),
               ],
@@ -247,7 +288,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildInfoSection(String title, dynamic user) {
+  Widget _buildInfoSection(String title, dynamic profile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -268,7 +309,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
-            user.bio ?? 'No bio yet. Tap to add one!',
+            profile.bio ?? 'No bio yet. Tap edit to add one!',
             style: appStyle(
               15,
               Colors.grey[800]!,
@@ -280,15 +321,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildInterestsSection() {
-    final interests = [
-      '📷 Photography',
-      '🎵 Music',
-      '✈️ Travel',
-      '💪 Fitness',
-      '🍳 Cooking',
-    ];
-
+  Widget _buildInterestsSection(dynamic profile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -304,7 +337,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: interests.map((interest) {
+          children: profile.interests.map<Widget>((interest) {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
@@ -323,65 +356,73 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildPhotosSection(dynamic user) {
+  Widget _buildDetailsSection(dynamic profile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Photos',
-              style: appStyle(
-                20,
-                Colors.black,
-                FontWeight.w800,
-              ).copyWith(letterSpacing: -0.3),
-            ),
-            TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.add, size: 20, color: Colors.black),
-              label: Text(
-                'Add',
-                style: appStyle(15, Colors.black, FontWeight.w600),
-              ),
-            ),
-          ],
+        Text(
+          'Details',
+          style: appStyle(
+            20,
+            Colors.black,
+            FontWeight.w800,
+          ).copyWith(letterSpacing: -0.3),
         ),
         const SizedBox(height: 16),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.75,
+        if (profile.course != null)
+          _buildDetailItem(
+            icon: Icons.school,
+            label: 'Course',
+            value: profile.course!,
           ),
-          itemCount: user.photos.length + 1,
-          itemBuilder: (context, index) {
-            if (index == user.photos.length) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey[300]!, width: 2),
-                ),
-                child: Icon(Icons.add, size: 40, color: Colors.grey[400]),
-              );
-            }
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: CachedNetworkImageProvider(user.photos[index]),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            );
-          },
+        if (profile.graduationYear != null)
+          _buildDetailItem(
+            icon: Icons.calendar_today,
+            label: 'Graduation Year',
+            value: profile.graduationYear.toString(),
+          ),
+        _buildDetailItem(
+          icon: Icons.person_outline,
+          label: 'Gender',
+          value: profile.gender,
         ),
       ],
+    );
+  }
+
+  Widget _buildDetailItem({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 20, color: Colors.grey[700]),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: appStyle(12, Colors.grey[600]!, FontWeight.w500),
+                ),
+                const SizedBox(height: 2),
+                Text(value, style: appStyle(15, Colors.black, FontWeight.w600)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -391,7 +432,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              // TODO: Navigate to edit profile page
+              CustomSnackbar.show(
+                context,
+                message: 'Edit profile coming soon!',
+                type: SnackbarType.info,
+              );
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(vertical: 16),
