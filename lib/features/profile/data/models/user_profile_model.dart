@@ -23,11 +23,15 @@ class UserProfileModel extends UserProfile {
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
+    final user = json['user'] as Map<String, dynamic>?;
+    final university = user?['university'] as Map<String, dynamic>?;
+
     return UserProfileModel(
       id: json['id'] as int,
       displayName:
           json['display_name'] as String? ??
-          json['user']['display_name'] as String,
+          (user?['display_name'] as String?) ??
+          'Unknown',
       bio: json['bio'] as String?,
       realName: json['real_name'] as String?,
       course: json['course'] as String?,
@@ -43,11 +47,11 @@ class UserProfileModel extends UserProfile {
       lastActive: json['last_active'] as String?,
       createdAt: json['created_at'] as String,
       updatedAt: json['updated_at'] as String,
-      userId: json['user']['id'] as int,
-      universityName: json['user']['university']['name'] as String,
-      gender: json['user']['gender'] as String,
-      intent: json['user']['intent'] as String,
-      isPrivate: json['user']['is_private'] as bool,
+      userId: user?['id'] as int? ?? 0,
+      universityName: university?['name'] as String? ?? 'Unknown University',
+      gender: user?['gender'] as String? ?? 'other',
+      intent: user?['intent'] as String? ?? 'dating',
+      isPrivate: user?['is_private'] as bool? ?? false,
     );
   }
 

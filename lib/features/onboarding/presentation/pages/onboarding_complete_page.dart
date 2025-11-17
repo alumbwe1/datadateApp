@@ -66,22 +66,36 @@ class _OnboardingCompletePageState
         },
         (_) async {
           // Registration successful, now update profile
+          print('🎯 Starting profile update...');
           final success = await ref
               .read(onboardingProvider.notifier)
               .completeOnboarding();
 
-          if (!mounted) return;
+          print('🎯 Profile update result: $success');
+
+          if (!mounted) {
+            print('⚠️ Widget not mounted, returning');
+            return;
+          }
 
           if (success) {
+            print('✅ Profile completed successfully, navigating...');
             CustomSnackbar.show(
               context,
               message: 'Profile completed successfully!',
               type: SnackbarType.success,
             );
 
+            // Small delay to ensure snackbar shows
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            if (!mounted) return;
+
             // Navigate to home
+            print('🚀 Navigating to /encounters');
             context.go('/encounters');
           } else {
+            print('❌ Profile update failed');
             setState(() => _isCompleting = false);
 
             final error = ref.read(onboardingProvider).error;

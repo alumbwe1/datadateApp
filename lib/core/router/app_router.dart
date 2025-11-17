@@ -14,6 +14,8 @@ import '../../features/onboarding/presentation/pages/profile/onboarding_bio_page
 import '../../features/onboarding/presentation/pages/profile/onboarding_course_page.dart';
 import '../../features/onboarding/presentation/pages/profile/onboarding_graduation_page.dart';
 import '../../features/onboarding/presentation/pages/profile/onboarding_age_page.dart';
+import '../../features/onboarding/presentation/pages/profile/onboarding_photo_page.dart';
+import '../../features/onboarding/presentation/pages/profile/onboarding_dob_page.dart';
 import '../../features/universities/presentation/pages/university_selection_page.dart';
 import '../widgets/main_navigation.dart';
 
@@ -53,6 +55,14 @@ class AppRouter {
         builder: (context, state) => const OnboardingDatingGoalPage(),
       ),
       // Profile onboarding routes
+      GoRoute(
+        path: '/onboarding/profile/photo',
+        builder: (context, state) => const OnboardingPhotoPage(),
+      ),
+      GoRoute(
+        path: '/onboarding/profile/dob',
+        builder: (context, state) => const OnboardingDobPage(),
+      ),
       GoRoute(
         path: '/onboarding/profile/bio',
         builder: (context, state) => const OnboardingBioPage(),

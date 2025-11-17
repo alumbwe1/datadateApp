@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../main.dart';
@@ -16,6 +17,8 @@ class OnboardingState {
   final String? course;
   final String? bio;
   final int? graduationYear;
+  final File? profilePhoto;
+  final DateTime? dateOfBirth;
   final bool isCompleted;
   final bool isLoading;
   final String? error;
@@ -33,6 +36,8 @@ class OnboardingState {
     this.course,
     this.bio,
     this.graduationYear,
+    this.profilePhoto,
+    this.dateOfBirth,
     this.isCompleted = false,
     this.isLoading = false,
     this.error,
@@ -51,6 +56,8 @@ class OnboardingState {
     String? course,
     String? bio,
     int? graduationYear,
+    File? profilePhoto,
+    DateTime? dateOfBirth,
     bool? isCompleted,
     bool? isLoading,
     String? error,
@@ -68,6 +75,8 @@ class OnboardingState {
       course: course ?? this.course,
       bio: bio ?? this.bio,
       graduationYear: graduationYear ?? this.graduationYear,
+      profilePhoto: profilePhoto ?? this.profilePhoto,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       isCompleted: isCompleted ?? this.isCompleted,
       isLoading: isLoading ?? this.isLoading,
       error: error,
@@ -140,37 +149,80 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(graduationYear: year);
   }
 
+  void setProfilePhoto(File photo) {
+    state = state.copyWith(profilePhoto: photo);
+  }
+
+  void setDateOfBirth(DateTime date) {
+    state = state.copyWith(dateOfBirth: date);
+  }
+
   Future<bool> completeOnboarding() async {
+    print('📝 Starting completeOnboarding...');
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       // Build profile update data
       final Map<String, dynamic> profileData = {};
 
-      if (state.bio != null) profileData['bio'] = state.bio;
-      if (state.course != null) profileData['course'] = state.course;
-      if (state.interests.isNotEmpty)
+      if (state.bio != null) {
+        profileData['bio'] = state.bio;
+      }
+      if (state.course != null) {
+        profileData['course'] = state.course;
+      }
+      if (state.interests.isNotEmpty) {
         profileData['interests'] = state.interests;
-      if (state.graduationYear != null)
+      }
+      if (state.graduationYear != null) {
         profileData['graduation_year'] = state.graduationYear;
+      }
 
-      // Calculate date of birth from age if provided
-      if (state.age != null) {
+      // Use date of birth if provided, otherwise calculate from age
+      if (state.dateOfBirth != null) {
+        final dob = state.dateOfBirth!;
+        profileData['date_of_birth'] =
+            '${dob.year}-${dob.month.toString().padLeft(2, '0')}-${dob.day.toString().padLeft(2, '0')}';
+      } else if (state.age != null) {
         final now = DateTime.now();
         final birthYear = now.year - state.age!;
         profileData['date_of_birth'] = '$birthYear-01-01';
       }
+
+      print('📦 Profile data to update: $profileData');
 
       // Update profile
       final success = await _ref
           .read(profileProvider.notifier)
           .updateProfile(profileData);
 
+      print('📊 Update profile result: $success');
+
       if (success) {
+        // Upload profile photo if provided
+        if (state.profilePhoto != null) {
+          print('📸 Uploading profile photo...');
+          final photoSuccess = await _ref
+              .read(profileProvider.notifier)
+              .uploadPhoto(state.profilePhoto!.path);
+
+          if (photoSuccess) {
+            print('✅ Profile photo uploaded successfully');
+          } else {
+            print('⚠️ Profile photo upload failed, but continuing...');
+            // Don't fail the whole onboarding if photo upload fails
+          }
+        } else {
+          print('ℹ️ No profile photo to upload');
+        }
+
+        print('✅ Saving onboarding_completed to SharedPreferences');
         await _prefs.setBool('onboarding_completed', true);
         state = state.copyWith(isCompleted: true, isLoading: false);
+        print('✅ completeOnboarding returning true');
         return true;
       } else {
+        print('❌ Profile update failed');
         state = state.copyWith(
           isLoading: false,
           error: 'Failed to complete onboarding',
@@ -178,6 +230,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         return false;
       }
     } catch (e) {
+      print('❌ Exception in completeOnboarding: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     }

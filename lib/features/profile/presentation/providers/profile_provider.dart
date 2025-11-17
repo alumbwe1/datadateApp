@@ -66,16 +66,21 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {
+    print('🔄 ProfileProvider: Starting updateProfile');
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await repository.updateMyProfile(data);
 
     return result.fold(
       (failure) {
+        print('❌ ProfileProvider: Update failed - ${failure.message}');
         state = state.copyWith(isLoading: false, error: failure.message);
         return false;
       },
       (profile) {
+        print(
+          '✅ ProfileProvider: Update successful - Profile: ${profile.displayName}',
+        );
         state = state.copyWith(isLoading: false, profile: profile, error: null);
         return true;
       },

@@ -21,11 +21,12 @@ class ApiEndpoints {
   static String updateUser() => '/auth/users/me/';
 
   // Profiles
-  static const String profiles = '/api/v1.0/profiles/';
-  static String profileDetail(int id) => '/api/v1.0/profiles/$id/';
+  static const String profiles = '/api/v1.0/profiles/profiles/';
+  static String profileDetail(int id) => '/api/v1.0/profiles/profiles/$id/';
   static String likeProfile(int id) => '/api/v1.0/profiles/$id/like/';
-  static const String myProfile = '/api/v1.0/profiles/me/';
-  static const String uploadProfilePhoto = '/api/v1.0/profiles/me/photo/';
+  static const String myProfile = '/api/v1.0/profiles/profiles/me/';
+  static const String uploadProfilePhoto =
+      '/api/v1.0/profiles/profiles/me/photo/';
 
   // Gallery
   static const String gallery = '/api/v1.0/gallery/';

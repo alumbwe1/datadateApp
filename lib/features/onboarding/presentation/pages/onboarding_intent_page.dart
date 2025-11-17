@@ -112,7 +112,7 @@ class OnboardingIntentPage extends ConsumerWidget {
                 onPressed: selectedIntent != null
                     ? () {
                         HapticFeedback.mediumImpact();
-                        context.push('/onboarding/profile/bio');
+                        context.push('/onboarding/profile/photo');
                       }
                     : null,
               ),
