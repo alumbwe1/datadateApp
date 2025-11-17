@@ -3,11 +3,18 @@ import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_welcome_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_gender_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_gender_preference_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_intent_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_traits_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_dating_goal_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_interests_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_complete_page.dart';
+import '../../features/onboarding/presentation/pages/profile/onboarding_bio_page.dart';
+import '../../features/onboarding/presentation/pages/profile/onboarding_course_page.dart';
+import '../../features/onboarding/presentation/pages/profile/onboarding_graduation_page.dart';
+import '../../features/onboarding/presentation/pages/profile/onboarding_age_page.dart';
+import '../../features/universities/presentation/pages/university_selection_page.dart';
 import '../widgets/main_navigation.dart';
 
 class AppRouter {
@@ -22,8 +29,20 @@ class AppRouter {
         builder: (context, state) => const OnboardingWelcomePage(),
       ),
       GoRoute(
+        path: '/onboarding/gender',
+        builder: (context, state) => const OnboardingGenderPage(),
+      ),
+      GoRoute(
+        path: '/onboarding/university',
+        builder: (context, state) => const UniversitySelectionPage(),
+      ),
+      GoRoute(
         path: '/onboarding/gender-preference',
         builder: (context, state) => const OnboardingGenderPreferencePage(),
+      ),
+      GoRoute(
+        path: '/onboarding/intent',
+        builder: (context, state) => const OnboardingIntentPage(),
       ),
       GoRoute(
         path: '/onboarding/traits',
@@ -32,6 +51,23 @@ class AppRouter {
       GoRoute(
         path: '/onboarding/dating-goal',
         builder: (context, state) => const OnboardingDatingGoalPage(),
+      ),
+      // Profile onboarding routes
+      GoRoute(
+        path: '/onboarding/profile/bio',
+        builder: (context, state) => const OnboardingBioPage(),
+      ),
+      GoRoute(
+        path: '/onboarding/profile/course',
+        builder: (context, state) => const OnboardingCoursePage(),
+      ),
+      GoRoute(
+        path: '/onboarding/profile/graduation',
+        builder: (context, state) => const OnboardingGraduationPage(),
+      ),
+      GoRoute(
+        path: '/onboarding/profile/age',
+        builder: (context, state) => const OnboardingAgePage(),
       ),
       GoRoute(
         path: '/onboarding/interests',

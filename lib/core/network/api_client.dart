@@ -73,8 +73,24 @@ class ApiClient {
           print('❌ Error Response: ${error.response?.data}');
           print('❌ Error Message: ${error.message}');
 
-          // Handle 401 - Token expired
+          // Handle 401 - Token expired or user not found
           if (error.response?.statusCode == 401) {
+            final errorData = error.response?.data;
+
+            // Check if it's a "user not found" error
+            if (errorData is Map &&
+                (errorData['code'] == 'user_not_found' ||
+                    errorData['detail']?.toString().toLowerCase().contains(
+                          'user not found',
+                        ) ==
+                        true)) {
+              // User doesn't exist in backend, clear tokens
+              print('🔒 User not found - clearing tokens');
+              await clearTokens();
+              return handler.next(error);
+            }
+
+            // Try to refresh token
             final refreshed = await _refreshToken();
             if (refreshed) {
               // Retry the request
@@ -88,8 +104,13 @@ class ApiClient {
                 final response = await _dio.fetch(options);
                 return handler.resolve(response);
               } catch (e) {
+                // Token refresh failed, clear tokens
+                await clearTokens();
                 return handler.next(error);
               }
+            } else {
+              // Token refresh failed, clear tokens
+              await clearTokens();
             }
           }
 
@@ -324,7 +345,19 @@ class ApiClient {
             }
             return ValidationFailure('Invalid input. Please check your data.');
           case 401:
-            return AuthFailure('Authentication failed. Please login again.');
+            // Check for specific 401 errors
+            if (data is Map) {
+              final errorData = Map<String, dynamic>.from(data);
+              if (errorData['code'] == 'user_not_found') {
+                return AuthFailure(
+                  'Your account was not found. Please register again.',
+                );
+              }
+              if (errorData['detail'] != null) {
+                return AuthFailure(errorData['detail'].toString());
+              }
+            }
+            return AuthFailure('Session expired. Please login again.');
           case 403:
             return AuthFailure('Access denied.');
           case 404:

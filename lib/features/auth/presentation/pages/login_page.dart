@@ -6,6 +6,7 @@ import 'package:iconly/iconly.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/utils/validators.dart';
 import '../providers/auth_provider.dart';
 
@@ -33,25 +34,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (_formKey.currentState!.validate()) {
       await ref
           .read(authProvider.notifier)
-          .login(_usernameController.text, _passwordController.text);
+          .login(_usernameController.text.trim(), _passwordController.text);
 
       if (mounted) {
         final authState = ref.read(authProvider);
         if (authState.user != null) {
           context.go('/encounters');
         } else if (authState.error != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                authState.error!,
-                style: appStyle(14, Colors.white, FontWeight.w600),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+          CustomSnackbar.show(
+            context,
+            message: authState.error!,
+            type: SnackbarType.error,
           );
         }
       }
@@ -113,14 +106,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 SizedBox(height: 48.h),
 
-                // Username field
+                // Username or Email field
                 CustomTextField(
-                  label: 'Username',
-                  hintText: 'Enter your username',
+                  label: 'Email or Username',
+                  hintText: 'Enter your email or username',
                   controller: _usernameController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Username is required';
+                      return 'Email or username is required';
                     }
                     return null;
                   },

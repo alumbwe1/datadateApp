@@ -6,9 +6,9 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
-import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/password_error_bottom_sheet.dart';
 import '../../../../core/utils/validators.dart';
-import '../providers/auth_provider.dart';
+import '../../../onboarding/presentation/providers/onboarding_provider.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -40,34 +40,36 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    // Additional password validation
+    final passwordError = Validators.password(
+      _passwordController.text,
+      email: _emailController.text.trim(),
+      username: _nameController.text.trim().toLowerCase().replaceAll(' ', '_'),
+    );
 
-    // Create basic account - will complete profile in onboarding
-    final result = await ref
-        .read(authProvider.notifier)
-        .register(
+    if (passwordError != null) {
+      PasswordErrorBottomSheet.show(
+        context,
+        errorMessage: passwordError,
+        onRetry: () {
+          // Focus on password field
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+      );
+      return;
+    }
+
+    // Store registration data in onboarding provider
+    ref
+        .read(onboardingProvider.notifier)
+        .setRegistrationData(
+          name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
-          name: _nameController.text.trim(),
         );
 
-    setState(() => _isLoading = false);
-
-    if (!mounted) return;
-
-    result.fold(
-      (failure) {
-        CustomSnackbar.show(
-          context,
-          message: failure.message,
-          type: SnackbarType.error,
-        );
-      },
-      (_) {
-        // Navigate to onboarding to complete profile
-        context.go('/onboarding/welcome');
-      },
-    );
+    // Navigate to gender selection first
+    context.push('/onboarding/gender');
   }
 
   @override
@@ -150,9 +152,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                 CustomTextField(
                   label: 'Password',
-                  hintText: 'Create a strong password',
+                  hintText: 'At least 8 characters',
                   controller: _passwordController,
-                  validator: Validators.password,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Password is required';
+                    }
+                    if (value.length < 8) {
+                      return 'Password must be at least 8 characters';
+                    }
+                    return null;
+                  },
                   obscureText: _obscurePassword,
                   prefixIcon: const Icon(Iconsax.lock_copy),
                   suffixIcon: IconButton(

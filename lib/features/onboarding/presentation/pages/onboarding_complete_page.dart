@@ -6,6 +6,8 @@ import 'package:lottie/lottie.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/password_error_bottom_sheet.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/onboarding_provider.dart';
 
 class OnboardingCompletePage extends ConsumerStatefulWidget {
@@ -23,30 +25,82 @@ class _OnboardingCompletePageState
   Future<void> _completeOnboarding() async {
     setState(() => _isCompleting = true);
 
-    final success = await ref
-        .read(onboardingProvider.notifier)
-        .completeOnboarding();
+    final onboardingState = ref.read(onboardingProvider);
 
-    if (!mounted) return;
+    // First, register the user
+    if (onboardingState.email != null &&
+        onboardingState.password != null &&
+        onboardingState.name != null) {
+      // Register user (intent and preferred genders will be set during profile update)
+      final result = await ref
+          .read(authProvider.notifier)
+          .register(
+            email: onboardingState.email!,
+            password: onboardingState.password!,
+            name: onboardingState.name!,
+          );
 
-    if (success) {
-      CustomSnackbar.show(
-        context,
-        message: 'Profile completed successfully!',
-        type: SnackbarType.success,
+      if (!mounted) return;
+
+      await result.fold(
+        (failure) async {
+          setState(() => _isCompleting = false);
+
+          // Check if it's a password error
+          if (failure.message.toLowerCase().contains('password')) {
+            PasswordErrorBottomSheet.show(
+              context,
+              errorMessage: failure.message,
+              onRetry: () {
+                // Go back to register page
+                context.go('/register');
+              },
+            );
+          } else {
+            CustomSnackbar.show(
+              context,
+              message: failure.message,
+              type: SnackbarType.error,
+            );
+          }
+        },
+        (_) async {
+          // Registration successful, now update profile
+          final success = await ref
+              .read(onboardingProvider.notifier)
+              .completeOnboarding();
+
+          if (!mounted) return;
+
+          if (success) {
+            CustomSnackbar.show(
+              context,
+              message: 'Profile completed successfully!',
+              type: SnackbarType.success,
+            );
+
+            // Navigate to home
+            context.go('/encounters');
+          } else {
+            setState(() => _isCompleting = false);
+
+            final error = ref.read(onboardingProvider).error;
+            CustomSnackbar.show(
+              context,
+              message: error ?? 'Failed to complete profile',
+              type: SnackbarType.error,
+            );
+          }
+        },
       );
-
-      // Navigate to home
-      context.go('/encounters');
     } else {
       setState(() => _isCompleting = false);
-
-      final error = ref.read(onboardingProvider).error;
       CustomSnackbar.show(
         context,
-        message: error ?? 'Failed to complete profile',
+        message: 'Missing registration data. Please start over.',
         type: SnackbarType.error,
       );
+      context.go('/register');
     }
   }
 

@@ -37,7 +37,7 @@ class _UniversitySelectionPageState
     if (selectedUniversity != null) {
       HapticFeedback.mediumImpact();
       // Navigate back with the selected university
-      context.pop(selectedUniversity);
+      context.push('/onboarding/intent');
     }
   }
 

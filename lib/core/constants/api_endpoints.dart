@@ -17,8 +17,8 @@ class ApiEndpoints {
       '/api/v1.0/users/universities/$slug/';
 
   // Users
-  static const String currentUser = '/api/v1.0/users/me/';
-  static String updateUser() => '/api/users/v1.0/me/';
+  static const String currentUser = '/auth/users/me/';
+  static String updateUser() => '/auth/users/me/';
 
   // Profiles
   static const String profiles = '/api/v1.0/profiles/';

@@ -4,6 +4,9 @@ import '../../../../main.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 
 class OnboardingState {
+  final String? name;
+  final String? email;
+  final String? password;
   final String? gender;
   final String? genderPreference;
   final String? datingGoal;
@@ -12,11 +15,15 @@ class OnboardingState {
   final int? age;
   final String? course;
   final String? bio;
+  final int? graduationYear;
   final bool isCompleted;
   final bool isLoading;
   final String? error;
 
   OnboardingState({
+    this.name,
+    this.email,
+    this.password,
     this.gender,
     this.genderPreference,
     this.datingGoal,
@@ -25,12 +32,16 @@ class OnboardingState {
     this.age,
     this.course,
     this.bio,
+    this.graduationYear,
     this.isCompleted = false,
     this.isLoading = false,
     this.error,
   });
 
   OnboardingState copyWith({
+    String? name,
+    String? email,
+    String? password,
     String? gender,
     String? genderPreference,
     String? datingGoal,
@@ -39,11 +50,15 @@ class OnboardingState {
     int? age,
     String? course,
     String? bio,
+    int? graduationYear,
     bool? isCompleted,
     bool? isLoading,
     String? error,
   }) {
     return OnboardingState(
+      name: name ?? this.name,
+      email: email ?? this.email,
+      password: password ?? this.password,
       gender: gender ?? this.gender,
       genderPreference: genderPreference ?? this.genderPreference,
       datingGoal: datingGoal ?? this.datingGoal,
@@ -52,6 +67,7 @@ class OnboardingState {
       age: age ?? this.age,
       course: course ?? this.course,
       bio: bio ?? this.bio,
+      graduationYear: graduationYear ?? this.graduationYear,
       isCompleted: isCompleted ?? this.isCompleted,
       isLoading: isLoading ?? this.isLoading,
       error: error,
@@ -70,6 +86,14 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   void _loadOnboardingStatus() {
     final isCompleted = _prefs.getBool('onboarding_completed') ?? false;
     state = state.copyWith(isCompleted: isCompleted);
+  }
+
+  void setRegistrationData({
+    required String name,
+    required String email,
+    required String password,
+  }) {
+    state = state.copyWith(name: name, email: email, password: password);
   }
 
   void setGender(String gender) {
@@ -112,6 +136,10 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(bio: bio);
   }
 
+  void setGraduationYear(int year) {
+    state = state.copyWith(graduationYear: year);
+  }
+
   Future<bool> completeOnboarding() async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -123,6 +151,8 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       if (state.course != null) profileData['course'] = state.course;
       if (state.interests.isNotEmpty)
         profileData['interests'] = state.interests;
+      if (state.graduationYear != null)
+        profileData['graduation_year'] = state.graduationYear;
 
       // Calculate date of birth from age if provided
       if (state.age != null) {

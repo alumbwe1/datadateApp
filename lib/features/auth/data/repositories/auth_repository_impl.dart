@@ -59,8 +59,8 @@ class AuthRepositoryImpl implements AuthRepository {
         intent: 'dating', // Default, will update in onboarding
       );
 
-      // Auto-login after registration
-      final tokens = await remoteDataSource.login(email, password);
+      // Auto-login after registration using username (not email)
+      final tokens = await remoteDataSource.login(username, password);
       await localDataSource.saveAuthToken(tokens['access']!);
       await localDataSource.saveRefreshToken(tokens['refresh']!);
       await localDataSource.saveUserId(user.id.toString());
