@@ -89,9 +89,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       }
 
       // Auto-login (Step 2: POST /auth/jwt/create/)
+      // Use username (not email) for login as backend requires it
       final loginSuccess = await ref
           .read(authProvider.notifier)
-          .login(email: email, password: password);
+          .login(email: username, password: password);
 
       if (!loginSuccess) {
         if (mounted) {
