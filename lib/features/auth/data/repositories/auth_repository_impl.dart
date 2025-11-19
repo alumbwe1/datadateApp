@@ -53,17 +53,7 @@ class AuthRepositoryImpl implements AuthRepository {
         username: username,
         email: email,
         password: password,
-        university: 1, // Default university, will update in onboarding
-        gender: 'male', // Default, will update in onboarding
-        preferredGenders: ['female'], // Default, will update in onboarding
-        intent: 'dating', // Default, will update in onboarding
       );
-
-      // Auto-login after registration using username (not email)
-      final tokens = await remoteDataSource.login(username, password);
-      await localDataSource.saveAuthToken(tokens['access']!);
-      await localDataSource.saveRefreshToken(tokens['refresh']!);
-      await localDataSource.saveUserId(user.id.toString());
 
       return Right(user);
     } on AuthFailure catch (e) {

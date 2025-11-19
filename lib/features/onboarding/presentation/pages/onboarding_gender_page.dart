@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/onboarding_progress.dart';
 import '../providers/onboarding_provider.dart';
 
 class OnboardingGenderPage extends ConsumerWidget {
@@ -36,6 +37,8 @@ class OnboardingGenderPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const OnboardingProgress(currentStep: 2, totalSteps: 8),
+                    SizedBox(height: 24.h),
                     Text(
                       'I am a',
                       style: appStyle(

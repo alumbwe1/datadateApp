@@ -32,18 +32,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      await ref
+      final success = await ref
           .read(authProvider.notifier)
-          .login(_usernameController.text.trim(), _passwordController.text);
+          .login(
+            email: _usernameController.text.trim(),
+            password: _passwordController.text,
+          );
 
       if (mounted) {
-        final authState = ref.read(authProvider);
-        if (authState.user != null) {
+        if (success) {
           context.go('/encounters');
-        } else if (authState.error != null) {
+        } else {
+          final authState = ref.read(authProvider);
           CustomSnackbar.show(
             context,
-            message: authState.error!,
+            message: authState.error ?? 'Login failed. Please try again.',
             type: SnackbarType.error,
           );
         }

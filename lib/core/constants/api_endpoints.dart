@@ -3,7 +3,7 @@ class ApiEndpoints {
   // Base URL - should be loaded from environment
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:7000',
+    defaultValue: 'http://192.168.240.145:7000',
   );
 
   // Authentication

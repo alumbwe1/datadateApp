@@ -9,6 +9,7 @@ import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/password_error_bottom_sheet.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../onboarding/presentation/providers/onboarding_provider.dart';
+import '../providers/auth_provider.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -59,17 +60,73 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       return;
     }
 
-    // Store registration data in onboarding provider
-    ref
-        .read(onboardingProvider.notifier)
-        .setRegistrationData(
-          name: _nameController.text.trim(),
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+    setState(() => _isLoading = true);
 
-    // Navigate to gender selection first
-    context.push('/onboarding/gender');
+    try {
+      // Create account and login immediately
+      final username = _nameController.text.trim().toLowerCase().replaceAll(
+        ' ',
+        '_',
+      );
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+
+      // Register user (Step 1: POST /auth/users/)
+      final registerSuccess = await ref
+          .read(authProvider.notifier)
+          .register(username: username, email: email, password: password);
+
+      if (!registerSuccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration failed. Please try again.'),
+            ),
+          );
+        }
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Auto-login (Step 2: POST /auth/jwt/create/)
+      final loginSuccess = await ref
+          .read(authProvider.notifier)
+          .login(email: email, password: password);
+
+      if (!loginSuccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login failed. Please try again.')),
+          );
+        }
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Store name for profile update later
+      ref
+          .read(onboardingProvider.notifier)
+          .setRegistrationData(
+            name: _nameController.text.trim(),
+            email: email,
+            password: password,
+          );
+
+      // Navigate to onboarding flow (Step 3: Complete profile)
+      if (mounted) {
+        context.go('/onboarding/university');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override

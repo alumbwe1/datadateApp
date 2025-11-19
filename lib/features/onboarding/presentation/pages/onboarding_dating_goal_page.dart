@@ -11,7 +11,7 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedGoal = ref.watch(onboardingProvider).datingGoal;
+    final selectedGoal = ref.watch(onboardingProvider).intent;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -58,22 +58,22 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
                       emoji: '☕',
                       title: 'Here to date',
                       description: 'I want to go on dates and have a good time',
-                      isSelected: selectedGoal == 'date',
+                      isSelected: selectedGoal == 'dating',
                       onTap: () => ref
                           .read(onboardingProvider.notifier)
-                          .setDatingGoal('date'),
+                          .setIntent('dating'),
                     ),
 
                     SizedBox(height: 16.h),
 
                     _DatingGoalOption(
-                      emoji: '💬',
-                      title: 'Open to chat',
-                      description: 'I\'m here to chat and see where it goes',
-                      isSelected: selectedGoal == 'chat',
+                      emoji: '�',
+                      title: 'Looking for friends',
+                      description: 'I\'m here to make new friends',
+                      isSelected: selectedGoal == 'friends',
                       onTap: () => ref
                           .read(onboardingProvider.notifier)
-                          .setDatingGoal('chat'),
+                          .setIntent('friends'),
                     ),
 
                     SizedBox(height: 16.h),
@@ -85,7 +85,7 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
                       isSelected: selectedGoal == 'relationship',
                       onTap: () => ref
                           .read(onboardingProvider.notifier)
-                          .setDatingGoal('relationship'),
+                          .setIntent('relationship'),
                     ),
                   ],
                 ),

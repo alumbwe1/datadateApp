@@ -9,15 +9,14 @@ class OnboardingState {
   final String? email;
   final String? password;
   final String? gender;
-  final String? genderPreference;
-  final String? datingGoal;
+  final List<String> preferredGenders;
+  final String? intent;
   final List<String> interests;
   final int? universityId;
-  final int? age;
   final String? course;
   final String? bio;
   final int? graduationYear;
-  final File? profilePhoto;
+  final List<File> photos; // Changed to list for multiple photos (2-4)
   final DateTime? dateOfBirth;
   final bool isCompleted;
   final bool isLoading;
@@ -28,15 +27,14 @@ class OnboardingState {
     this.email,
     this.password,
     this.gender,
-    this.genderPreference,
-    this.datingGoal,
+    this.preferredGenders = const [],
+    this.intent,
     this.interests = const [],
     this.universityId,
-    this.age,
     this.course,
     this.bio,
     this.graduationYear,
-    this.profilePhoto,
+    this.photos = const [],
     this.dateOfBirth,
     this.isCompleted = false,
     this.isLoading = false,
@@ -48,15 +46,14 @@ class OnboardingState {
     String? email,
     String? password,
     String? gender,
-    String? genderPreference,
-    String? datingGoal,
+    List<String>? preferredGenders,
+    String? intent,
     List<String>? interests,
     int? universityId,
-    int? age,
     String? course,
     String? bio,
     int? graduationYear,
-    File? profilePhoto,
+    List<File>? photos,
     DateTime? dateOfBirth,
     bool? isCompleted,
     bool? isLoading,
@@ -67,15 +64,14 @@ class OnboardingState {
       email: email ?? this.email,
       password: password ?? this.password,
       gender: gender ?? this.gender,
-      genderPreference: genderPreference ?? this.genderPreference,
-      datingGoal: datingGoal ?? this.datingGoal,
+      preferredGenders: preferredGenders ?? this.preferredGenders,
+      intent: intent ?? this.intent,
       interests: interests ?? this.interests,
       universityId: universityId ?? this.universityId,
-      age: age ?? this.age,
       course: course ?? this.course,
       bio: bio ?? this.bio,
       graduationYear: graduationYear ?? this.graduationYear,
-      profilePhoto: profilePhoto ?? this.profilePhoto,
+      photos: photos ?? this.photos,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       isCompleted: isCompleted ?? this.isCompleted,
       isLoading: isLoading ?? this.isLoading,
@@ -109,12 +105,28 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(gender: gender);
   }
 
-  void setGenderPreference(String preference) {
-    state = state.copyWith(genderPreference: preference);
+  void addPreferredGender(String gender) {
+    if (!state.preferredGenders.contains(gender)) {
+      state = state.copyWith(
+        preferredGenders: [...state.preferredGenders, gender],
+      );
+    }
   }
 
-  void setDatingGoal(String goal) {
-    state = state.copyWith(datingGoal: goal);
+  void removePreferredGender(String gender) {
+    state = state.copyWith(
+      preferredGenders: state.preferredGenders
+          .where((g) => g != gender)
+          .toList(),
+    );
+  }
+
+  void setPreferredGenders(List<String> genders) {
+    state = state.copyWith(preferredGenders: genders);
+  }
+
+  void setIntent(String intent) {
+    state = state.copyWith(intent: intent);
   }
 
   void addInterest(String interest) {
@@ -133,10 +145,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(universityId: universityId);
   }
 
-  void setAge(int age) {
-    state = state.copyWith(age: age);
-  }
-
   void setCourse(String course) {
     state = state.copyWith(course: course);
   }
@@ -149,8 +157,16 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(graduationYear: year);
   }
 
-  void setProfilePhoto(File photo) {
-    state = state.copyWith(profilePhoto: photo);
+  void addPhoto(File photo) {
+    if (state.photos.length < 4) {
+      state = state.copyWith(photos: [...state.photos, photo]);
+    }
+  }
+
+  void removePhoto(int index) {
+    final photos = List<File>.from(state.photos);
+    photos.removeAt(index);
+    state = state.copyWith(photos: photos);
   }
 
   void setDateOfBirth(DateTime date) {
@@ -158,13 +174,27 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   }
 
   Future<bool> completeOnboarding() async {
-    print('📝 Starting completeOnboarding...');
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // Build profile update data
+      // Build profile update data (Step 3: PATCH /api/v1.0/profiles/me/)
       final Map<String, dynamic> profileData = {};
 
+      // Required fields
+      if (state.universityId != null) {
+        profileData['university'] = state.universityId;
+      }
+      if (state.gender != null) {
+        profileData['gender'] = state.gender;
+      }
+      if (state.preferredGenders.isNotEmpty) {
+        profileData['preferred_genders'] = state.preferredGenders;
+      }
+      if (state.intent != null) {
+        profileData['intent'] = state.intent;
+      }
+
+      // Optional fields
       if (state.bio != null) {
         profileData['bio'] = state.bio;
       }
@@ -177,52 +207,35 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       if (state.graduationYear != null) {
         profileData['graduation_year'] = state.graduationYear;
       }
+      if (state.name != null) {
+        profileData['real_name'] = state.name;
+      }
 
-      // Use date of birth if provided, otherwise calculate from age
+      // Date of birth (required, must be 18+)
       if (state.dateOfBirth != null) {
         final dob = state.dateOfBirth!;
         profileData['date_of_birth'] =
             '${dob.year}-${dob.month.toString().padLeft(2, '0')}-${dob.day.toString().padLeft(2, '0')}';
-      } else if (state.age != null) {
-        final now = DateTime.now();
-        final birthYear = now.year - state.age!;
-        profileData['date_of_birth'] = '$birthYear-01-01';
       }
 
-      print('📦 Profile data to update: $profileData');
+      // Privacy settings
+      profileData['is_private'] = false;
+      profileData['show_real_name_on_match'] = true;
 
       // Update profile
       final success = await _ref
           .read(profileProvider.notifier)
           .updateProfile(profileData);
 
-      print('📊 Update profile result: $success');
-
       if (success) {
-        // Upload profile photo if provided
-        if (state.profilePhoto != null) {
-          print('📸 Uploading profile photo...');
-          final photoSuccess = await _ref
-              .read(profileProvider.notifier)
-              .uploadPhoto(state.profilePhoto!.path);
+        // Upload photos if provided (Step 4: POST /api/v1.0/profiles/me/photos/)
+        // Note: This would require Cloudinary integration
+        // For now, we'll skip photo upload and handle it separately
 
-          if (photoSuccess) {
-            print('✅ Profile photo uploaded successfully');
-          } else {
-            print('⚠️ Profile photo upload failed, but continuing...');
-            // Don't fail the whole onboarding if photo upload fails
-          }
-        } else {
-          print('ℹ️ No profile photo to upload');
-        }
-
-        print('✅ Saving onboarding_completed to SharedPreferences');
         await _prefs.setBool('onboarding_completed', true);
         state = state.copyWith(isCompleted: true, isLoading: false);
-        print('✅ completeOnboarding returning true');
         return true;
       } else {
-        print('❌ Profile update failed');
         state = state.copyWith(
           isLoading: false,
           error: 'Failed to complete onboarding',
@@ -230,7 +243,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         return false;
       }
     } catch (e) {
-      print('❌ Exception in completeOnboarding: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
       return false;
     }

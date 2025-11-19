@@ -12,8 +12,8 @@ class OnboardingGenderPreferencePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final genderPreference = ref.watch(
-      onboardingProvider.select((state) => state.genderPreference),
+    final preferredGenders = ref.watch(
+      onboardingProvider.select((state) => state.preferredGenders),
     );
 
     return Scaffold(
@@ -61,12 +61,14 @@ class OnboardingGenderPreferencePage extends ConsumerWidget {
                       emoji: '👨',
                       title: 'Men',
                       description: 'Show me men',
-                      isSelected: genderPreference == 'male',
+                      isSelected:
+                          preferredGenders.contains('male') &&
+                          preferredGenders.length == 1,
                       onTap: () {
                         HapticFeedback.selectionClick();
                         ref
                             .read(onboardingProvider.notifier)
-                            .setGenderPreference('male');
+                            .setPreferredGenders(['male']);
                       },
                     ),
                     SizedBox(height: 16.h),
@@ -74,12 +76,14 @@ class OnboardingGenderPreferencePage extends ConsumerWidget {
                       emoji: '👩',
                       title: 'Women',
                       description: 'Show me women',
-                      isSelected: genderPreference == 'female',
+                      isSelected:
+                          preferredGenders.contains('female') &&
+                          preferredGenders.length == 1,
                       onTap: () {
                         HapticFeedback.selectionClick();
                         ref
                             .read(onboardingProvider.notifier)
-                            .setGenderPreference('female');
+                            .setPreferredGenders(['female']);
                       },
                     ),
                     SizedBox(height: 16.h),
@@ -87,12 +91,14 @@ class OnboardingGenderPreferencePage extends ConsumerWidget {
                       emoji: '🌈',
                       title: 'Everyone',
                       description: 'Show me everyone',
-                      isSelected: genderPreference == 'everyone',
+                      isSelected:
+                          preferredGenders.length > 1 ||
+                          preferredGenders.contains('other'),
                       onTap: () {
                         HapticFeedback.selectionClick();
                         ref
                             .read(onboardingProvider.notifier)
-                            .setGenderPreference('everyone');
+                            .setPreferredGenders(['male', 'female', 'other']);
                       },
                     ),
                   ],
@@ -100,10 +106,10 @@ class OnboardingGenderPreferencePage extends ConsumerWidget {
               ),
               CustomButton(
                 text: 'Continue',
-                onPressed: genderPreference != null
+                onPressed: preferredGenders.isNotEmpty
                     ? () {
                         HapticFeedback.mediumImpact();
-                        context.push('/onboarding/traits');
+                        context.push('/onboarding/intent');
                       }
                     : null,
               ),

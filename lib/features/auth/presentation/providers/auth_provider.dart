@@ -1,6 +1,4 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/auth_local_datasource.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
@@ -56,7 +54,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier(this._authRepository) : super(AuthState());
 
-  Future<void> login(String email, String password) async {
+  Future<bool> login({required String email, required String password}) async {
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _authRepository.login(email, password);
@@ -67,19 +65,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
       (user) =>
           state = state.copyWith(isLoading: false, user: user, error: null),
     );
+
+    return result.isRight();
   }
 
-  Future<Either<Failure, User>> register({
+  Future<bool> register({
     required String email,
     required String password,
-    required String name,
+    required String username,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _authRepository.register(
       email: email,
       password: password,
-      name: name,
+      name: username,
     );
 
     result.fold(
@@ -89,7 +89,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           state = state.copyWith(isLoading: false, user: user, error: null),
     );
 
-    return result;
+    return result.isRight();
   }
 
   Future<void> logout() async {

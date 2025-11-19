@@ -12,7 +12,7 @@ class OnboardingIntentPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedIntent = ref.watch(onboardingProvider).datingGoal;
+    final selectedIntent = ref.watch(onboardingProvider).intent;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -65,7 +65,7 @@ class OnboardingIntentPage extends ConsumerWidget {
                         HapticFeedback.selectionClick();
                         ref
                             .read(onboardingProvider.notifier)
-                            .setDatingGoal('relationship');
+                            .setIntent('relationship');
                       },
                     ),
 
@@ -81,7 +81,7 @@ class OnboardingIntentPage extends ConsumerWidget {
                         HapticFeedback.selectionClick();
                         ref
                             .read(onboardingProvider.notifier)
-                            .setDatingGoal('dating');
+                            .setIntent('dating');
                       },
                     ),
 
@@ -97,7 +97,7 @@ class OnboardingIntentPage extends ConsumerWidget {
                         HapticFeedback.selectionClick();
                         ref
                             .read(onboardingProvider.notifier)
-                            .setDatingGoal('friends');
+                            .setIntent('friends');
                       },
                     ),
                   ],

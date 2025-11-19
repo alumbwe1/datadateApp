@@ -240,7 +240,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
                 child: CardSwiper(
                   controller: _controller,
                   cardsCount: profiles.length,
-                  numberOfCardsDisplayed: 2,
+                  numberOfCardsDisplayed: 1,
                   backCardOffset: const Offset(0, -20),
                   padding: EdgeInsets.zero,
                   onSwipe: (previousIndex, currentIndex, direction) {

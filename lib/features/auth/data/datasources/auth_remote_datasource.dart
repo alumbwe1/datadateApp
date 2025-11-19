@@ -8,10 +8,6 @@ abstract class AuthRemoteDataSource {
     required String username,
     required String email,
     required String password,
-    required int university,
-    required String gender,
-    required List<String> preferredGenders,
-    required String intent,
   });
   Future<String> refreshToken(String refreshToken);
   Future<UserModel> getCurrentUser();
@@ -42,12 +38,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String username,
     required String email,
     required String password,
-    required int university,
-    required String gender,
-    required List<String> preferredGenders,
-    required String intent,
   }) async {
     // Note: Registration doesn't require authentication
+    // Step 1: Create account with basic info only
     final response = await apiClient.postPublic<Map<String, dynamic>>(
       ApiEndpoints.register,
       data: {
@@ -55,11 +48,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'email': email,
         'password': password,
         're_password': password,
-        'university': university,
-        'gender': gender,
-        'preferred_genders': preferredGenders,
-        'intent': intent,
-        "is_private": false,
       },
     );
 

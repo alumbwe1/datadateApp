@@ -33,9 +33,11 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _selectedYear = now.year - 18;
-    _selectedMonth = now.month;
-    _selectedDay = now.day;
+    // Set to 18 years and 1 day ago to ensure user is definitely 18+
+    final eighteenYearsAgo = DateTime(now.year - 18, now.month, now.day);
+    _selectedYear = eighteenYearsAgo.year;
+    _selectedMonth = eighteenYearsAgo.month;
+    _selectedDay = eighteenYearsAgo.day;
   }
 
   @override
@@ -287,10 +289,25 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
               SizedBox(height: 16.h),
               CustomButton(
                 text: 'Continue',
-                onPressed: dateOfBirth != null
+                onPressed:
+                    dateOfBirth != null && _calculateAge(dateOfBirth!) >= 18
                     ? () {
                         HapticFeedback.mediumImpact();
-                        context.push('/onboarding/profile/bio');
+                        // Double-check age before navigation
+                        final age = _calculateAge(dateOfBirth!);
+                        if (age >= 18) {
+                          print(
+                            '✅ Age validated: $age years old (DOB: ${dateOfBirth!.year}-${dateOfBirth!.month.toString().padLeft(2, '0')}-${dateOfBirth!.day.toString().padLeft(2, '0')})',
+                          );
+                          context.push('/onboarding/profile/bio');
+                        } else {
+                          print('❌ Age validation failed: $age years old');
+                          setState(() {
+                            _errorMessage =
+                                'You must be at least 18 years old to use this platform.';
+                            _selectedDate = null;
+                          });
+                        }
                       }
                     : null,
               ),

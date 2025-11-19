@@ -44,7 +44,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 }
 ```
 
-### POST `/auth/users/` - Register
+### POST `/auth/users/` - Register (Step 1: Create Account)
 
 **Request:**
 
@@ -53,10 +53,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
   "username": "john_doe",
   "email": "john@university.edu",
   "password": "securePassword123",
-  "university": 1,
-  "gender": "male",
-  "preferred_genders": ["female"],
-  "intent": "dating"
+  "re_password": "securePassword123"
 }
 ```
 
@@ -66,30 +63,17 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 {
   "id": 1,
   "username": "john_doe",
-  "email": "john@university.edu",
-  "university": {
-    "id": 1,
-    "name": "Stanford University",
-    "slug": "stanford-university",
-    "logo": "http://api.example.com/media/universities/logos/stanford.png"
-  },
-  "gender": "male",
-  "preferred_genders": ["female"],
-  "intent": "dating",
-  "is_private": false,
-  "anon_handle": "abcd1234",
-  "show_real_name_on_match": true,
-  "subscription_active": false,
-  "remaining_profile_views": 10,
-  "display_name": "John Doe"
+  "email": "john@university.edu"
 }
 ```
+
+**Note:** After registration, login to get JWT token, then complete profile setup via `/api/v1.0/profiles/me/`
 
 ---
 
 ## Universities
 
-### GET `/api/universities/` - List Universities (No Authentication Required)
+### GET `/api/v1.0/profiles/universities/` - List Universities (No Authentication Required)
 
 **Response (200 OK):**
 
@@ -116,7 +100,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 ]
 ```
 
-### GET `/api/universities/{slug}/` - Get University by Slug (No Authentication Required)
+### GET `/api/v1.0/profiles/universities/{slug}/` - Get University by Slug (No Authentication Required)
 
 **Response (200 OK):**
 
@@ -131,24 +115,24 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 
 ---
 
-## Users
+## Profiles
 
-### GET `/api/users/me/` - Get Current User
-
-**Headers:**
-
-```
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
-```
+### GET `/api/v1.0/profiles/me/` - Get Current User's Profile
 
 **Response (200 OK):**
 
 ```json
 {
   "id": 1,
-  "username": "john_doe",
-  "email": "john@university.edu",
-  "university": {
+  "user": {
+    "id": 1,
+    "username": "john_doe",
+    "email": "john@university.edu",
+    "first_name": "John",
+    "last_name": "Doe"
+  },
+  "university": 1,
+  "university_data": {
     "id": 1,
     "name": "Stanford University",
     "slug": "stanford-university",
@@ -158,77 +142,8 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
   "preferred_genders": ["female"],
   "intent": "dating",
   "is_private": false,
-  "anon_handle": null,
+  "anon_handle": "abcd1234",
   "show_real_name_on_match": true,
-  "subscription_active": false,
-  "remaining_profile_views": 10,
-  "quota_reset_at": "2025-11-22T00:00:00Z",
-  "display_name": "John Doe"
-}
-```
-
-### PATCH `/api/users/me/` - Update User
-
-**Request:**
-
-```json
-{
-  "is_private": true,
-  "anon_handle": "mysterious_student",
-  "show_real_name_on_match": false,
-  "preferred_genders": ["female", "non-binary"]
-}
-```
-
-**Response (200 OK):**
-
-```json
-{
-  "id": 1,
-  "username": "john_doe",
-  "email": "john@university.edu",
-  "university": {
-    "id": 1,
-    "name": "Stanford University",
-    "slug": "stanford-university",
-    "logo": "http://api.example.com/media/universities/logos/stanford.png"
-  },
-  "gender": "male",
-  "preferred_genders": ["female", "non-binary"],
-  "intent": "dating",
-  "is_private": true,
-  "anon_handle": "mysterious_student",
-  "show_real_name_on_match": false,
-  "subscription_active": false,
-  "remaining_profile_views": 10,
-  "display_name": "mysterious_student"
-}
-```
-
----
-
-## Profiles
-
-### GET `/api/profiles/me/` - Get Current User's Profile
-
-**Response (200 OK):**
-
-```json
-{
-  "id": 1,
-  "user": {
-    "id": 1,
-    "display_name": "John Doe",
-    "university": {
-      "id": 1,
-      "name": "Stanford University",
-      "slug": "stanford-university",
-      "logo": "http://api.example.com/media/universities/logos/stanford.png"
-    },
-    "gender": "male",
-    "intent": "dating",
-    "is_private": false
-  },
   "bio": "Love hiking and coffee ☕",
   "real_name": "John Doe",
   "course": "Computer Science",
@@ -236,20 +151,33 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
   "age": 21,
   "graduation_year": 2026,
   "interests": ["hiking", "coffee", "coding", "AI"],
-  "profile_photo": "http://api.example.com/media/profiles/photos/john_photo.jpg",
+  "imageUrls": [
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/john_photo1.jpg",
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/john_photo2.jpg"
+  ],
+  "imagePublicIds": [
+    "profiles/user1/photo1_abc123",
+    "profiles/user1/photo2_def456"
+  ],
   "last_active": "2025-11-17T10:30:00Z",
   "created_at": "2025-11-10T14:30:00Z",
   "updated_at": "2025-11-15T09:20:00Z"
 }
 ```
 
-### PATCH `/api/profiles/me/` - Update Current User's Profile
+### PATCH `/api/v1.0/profiles/me/` - Update Current User's Profile (Step 2: Complete Profile)
 
 **Request:**
 
 ```json
 {
-  "bio": "Updated bio - Love hiking, coffee, and coding!",
+  "university": 1,
+  "gender": "male",
+  "preferred_genders": ["female"],
+  "intent": "dating",
+  "is_private": false,
+  "show_real_name_on_match": true,
+  "bio": "Love hiking, coffee, and coding!",
   "real_name": "John Michael Doe",
   "course": "Computer Science & AI",
   "date_of_birth": "2003-05-15",
@@ -265,45 +193,124 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
   "id": 1,
   "user": {
     "id": 1,
-    "display_name": "John Doe",
-    "university": {
-      "id": 1,
-      "name": "Stanford University",
-      "slug": "stanford-university",
-      "logo": "http://api.example.com/media/universities/logos/stanford.png"
-    },
-    "gender": "male",
-    "intent": "dating",
-    "is_private": false
+    "username": "john_doe",
+    "email": "john@university.edu",
+    "first_name": "John",
+    "last_name": "Doe"
   },
-  "bio": "Updated bio - Love hiking, coffee, and coding!",
+  "university": 1,
+  "university_data": {
+    "id": 1,
+    "name": "Stanford University",
+    "slug": "stanford-university",
+    "logo": "http://api.example.com/media/universities/logos/stanford.png"
+  },
+  "gender": "male",
+  "preferred_genders": ["female"],
+  "intent": "dating",
+  "is_private": false,
+  "anon_handle": "abcd1234",
+  "show_real_name_on_match": true,
+  "bio": "Love hiking, coffee, and coding!",
   "real_name": "John Michael Doe",
   "course": "Computer Science & AI",
   "date_of_birth": "2003-05-15",
   "age": 21,
   "graduation_year": 2026,
   "interests": ["hiking", "coffee", "coding", "AI", "machine learning"],
-  "profile_photo": "http://api.example.com/media/profiles/photos/john_photo.jpg",
+  "imageUrls": [],
+  "imagePublicIds": [],
   "last_active": "2025-11-17T10:35:00Z",
   "created_at": "2025-11-10T14:30:00Z",
   "updated_at": "2025-11-17T10:35:00Z"
 }
 ```
 
-### POST `/api/profiles/me/photo/` - Upload Profile Photo
+### POST `/api/v1.0/profiles/me/photos/` - Add Profile Photos (Step 3: Optional)
 
-**Request (multipart/form-data):**
+**Request (JSON):**
 
-```
-profile_photo: <file>
+```json
+{
+  "imageUrls": [
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/photo1.jpg",
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/photo2.jpg"
+  ],
+  "imagePublicIds": [
+    "profiles/user1/photo1_abc123",
+    "profiles/user1/photo2_def456"
+  ]
+}
 ```
 
 **Response (200 OK):**
 
 ```json
 {
-  "id": 1,
-  "profile_photo": "http://api.example.com/media/profiles/photos/john_photo_new.jpg"
+  "detail": "Profile photos updated successfully.",
+  "profile": {
+    "id": 1,
+    "imageUrls": [
+      "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/photo1.jpg",
+      "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/photo2.jpg"
+    ],
+    "imagePublicIds": [
+      "profiles/user1/photo1_abc123",
+      "profiles/user1/photo2_def456"
+    ]
+  }
+}
+```
+
+**Note:** Maximum 6 photos allowed. POST appends to existing photos, PATCH replaces all photos.
+
+### PATCH `/api/v1.0/profiles/me/photos/` - Replace All Profile Photos
+
+**Request (JSON):**
+
+```json
+{
+  "imageUrls": [
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/new_photo.jpg"
+  ],
+  "imagePublicIds": ["profiles/user1/new_photo_xyz789"]
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "detail": "Profile photos updated successfully.",
+  "profile": {
+    "id": 1,
+    "imageUrls": [
+      "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/new_photo.jpg"
+    ],
+    "imagePublicIds": ["profiles/user1/new_photo_xyz789"]
+  }
+}
+```
+
+### DELETE `/api/v1.0/profiles/me/delete_photo/` - Delete Specific Photo
+
+**Request (JSON):**
+
+```json
+{
+  "publicId": "profiles/user1/photo1_abc123"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "detail": "Photo deleted successfully.",
+  "imageUrls": [
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/photo2.jpg"
+  ],
+  "imagePublicIds": ["profiles/user1/photo2_def456"]
 }
 ```
 
@@ -315,7 +322,7 @@ profile_photo: <file>
 }
 ```
 
-### GET `/api/profiles/` - List Profiles (Browse/Discovery)
+### GET `/api/v1.0/profiles/` - List Profiles (Browse/Discovery)
 
 **Query Parameters:**
 
@@ -336,23 +343,27 @@ profile_photo: <file>
       "display_name": "Jane S.",
       "user": {
         "id": 5,
-        "display_name": "Jane S.",
-        "university": {
-          "id": 1,
-          "name": "Stanford University",
-          "slug": "stanford-university",
-          "logo": "http://api.example.com/media/universities/logos/stanford.png"
-        },
-        "gender": "female",
-        "intent": "dating",
-        "is_private": false
+        "username": "jane_smith",
+        "email": "jane@university.edu",
+        "first_name": "Jane",
+        "last_name": "Smith"
+      },
+      "university_data": {
+        "id": 1,
+        "name": "Stanford University",
+        "slug": "stanford-university",
+        "logo": "http://api.example.com/media/universities/logos/stanford.png"
       },
       "display_bio": "Love hiking and coffee ☕",
+      "gender": "female",
+      "intent": "dating",
       "age": 21,
       "course": "Computer Science",
       "graduation_year": 2026,
       "interests": ["hiking", "coffee", "reading"],
-      "profile_photo": "http://api.example.com/media/profiles/photos/jane_photo.jpg",
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo1.jpg"
+      ],
       "last_active": "2025-11-17T09:15:00Z"
     },
     {
@@ -360,30 +371,33 @@ profile_photo: <file>
       "display_name": "anon_xyz123",
       "user": {
         "id": 8,
-        "display_name": "anon_xyz123",
-        "university": {
-          "id": 1,
-          "name": "Stanford University",
-          "slug": "stanford-university",
-          "logo": "http://api.example.com/media/universities/logos/stanford.png"
-        },
-        "gender": "female",
-        "intent": "dating",
-        "is_private": true
+        "username": "sarah_jones",
+        "email": "sarah@university.edu",
+        "first_name": "Sarah",
+        "last_name": "Jones"
+      },
+      "university_data": {
+        "id": 1,
+        "name": "Stanford University",
+        "slug": "stanford-university",
+        "logo": "http://api.example.com/media/universities/logos/stanford.png"
       },
       "display_bio": "Profile is private",
+      "gender": "female",
+      "intent": "dating",
       "age": 22,
       "course": "Biology",
       "graduation_year": 2027,
-      "interests": ["nature", "science"],
-      "profile_photo": "http://api.example.com/media/profiles/photos/anon_photo.jpg",
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/anon_photo.jpg"
+      ],
       "last_active": "2025-11-17T08:45:00Z"
     }
   ]
 }
 ```
 
-### GET `/api/profiles/{id}/` - Get Profile Detail
+### GET `/api/v1.0/profiles/{id}/` - Get Profile Detail
 
 **Response (200 OK) - Public Profile:**
 
@@ -393,23 +407,28 @@ profile_photo: <file>
   "display_name": "Jane Smith",
   "user": {
     "id": 5,
-    "display_name": "Jane Smith",
-    "university": {
-      "id": 1,
-      "name": "Stanford University",
-      "slug": "stanford-university",
-      "logo": "http://api.example.com/media/universities/logos/stanford.png"
-    },
-    "gender": "female",
-    "intent": "dating",
-    "is_private": false
+    "username": "jane_smith",
+    "email": "jane@university.edu",
+    "first_name": "Jane",
+    "last_name": "Smith"
+  },
+  "university_data": {
+    "id": 1,
+    "name": "Stanford University",
+    "slug": "stanford-university",
+    "logo": "http://api.example.com/media/universities/logos/stanford.png"
   },
   "display_bio": "Love hiking and coffee ☕",
+  "gender": "female",
+  "intent": "dating",
   "course": "Computer Science",
   "age": 21,
   "graduation_year": 2026,
   "interests": ["hiking", "coffee", "reading"],
-  "profile_photo": "http://api.example.com/media/profiles/photos/jane_photo.jpg",
+  "imageUrls": [
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo1.jpg",
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo2.jpg"
+  ],
   "last_active": "2025-11-17T09:15:00Z"
 }
 ```
@@ -422,23 +441,27 @@ profile_photo: <file>
   "display_name": "anon_xyz123",
   "user": {
     "id": 8,
-    "display_name": "anon_xyz123",
-    "university": {
-      "id": 1,
-      "name": "Stanford University",
-      "slug": "stanford-university",
-      "logo": "http://api.example.com/media/universities/logos/stanford.png"
-    },
-    "gender": "female",
-    "intent": "dating",
-    "is_private": true
+    "username": "sarah_jones",
+    "email": "sarah@university.edu",
+    "first_name": "Sarah",
+    "last_name": "Jones"
+  },
+  "university_data": {
+    "id": 1,
+    "name": "Stanford University",
+    "slug": "stanford-university",
+    "logo": "http://api.example.com/media/universities/logos/stanford.png"
   },
   "display_bio": "Profile is private",
+  "gender": "female",
+  "intent": "dating",
   "course": "Biology",
   "age": 22,
   "graduation_year": 2027,
   "interests": ["nature", "science"],
-  "profile_photo": "http://api.example.com/media/profiles/photos/anon_photo.jpg",
+  "imageUrls": [
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/anon_photo.jpg"
+  ],
   "last_active": "2025-11-17T08:45:00Z"
 }
 ```
@@ -451,23 +474,27 @@ profile_photo: <file>
   "display_name": "Sarah Johnson",
   "user": {
     "id": 8,
-    "display_name": "Sarah Johnson",
-    "university": {
-      "id": 1,
-      "name": "Stanford University",
-      "slug": "stanford-university",
-      "logo": "http://api.example.com/media/universities/logos/stanford.png"
-    },
-    "gender": "female",
-    "intent": "dating",
-    "is_private": true
+    "username": "sarah_jones",
+    "email": "sarah@university.edu",
+    "first_name": "Sarah",
+    "last_name": "Jones"
+  },
+  "university_data": {
+    "id": 1,
+    "name": "Stanford University",
+    "slug": "stanford-university",
+    "logo": "http://api.example.com/media/universities/logos/stanford.png"
   },
   "display_bio": "Love biology and nature walks 🌿",
+  "gender": "female",
+  "intent": "dating",
   "course": "Biology",
   "age": 22,
   "graduation_year": 2027,
   "interests": ["biology", "nature", "hiking"],
-  "profile_photo": "http://api.example.com/media/profiles/photos/sarah_photo.jpg",
+  "imageUrls": [
+    "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/sarah_photo.jpg"
+  ],
   "last_active": "2025-11-17T08:45:00Z"
 }
 ```
@@ -542,7 +569,9 @@ order: 1
       "id": 5,
       "username": "jane_smith",
       "display_name": "Jane S.",
-      "profile_photo": "http://api.example.com/media/profiles/jane_photo.jpg"
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
+      ]
     },
     "created_at": "2025-11-14T18:30:00Z"
   },
@@ -554,7 +583,9 @@ order: 1
       "id": 8,
       "username": "sarah_jones",
       "display_name": "Sarah J.",
-      "profile_photo": "http://api.example.com/media/profiles/sarah_photo.jpg"
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/sarah_photo.jpg"
+      ]
     },
     "created_at": "2025-11-13T12:15:00Z"
   }
@@ -582,7 +613,9 @@ order: 1
       "id": 7,
       "username": "emily_wilson",
       "display_name": "Emily W.",
-      "profile_photo": "http://api.example.com/media/profiles/emily_photo.jpg"
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/emily_photo.jpg"
+      ]
     },
     "created_at": "2025-11-15T10:20:00Z"
   }
@@ -626,7 +659,9 @@ order: 1
       "id": 9,
       "username": "alex_brown",
       "display_name": "Alex B.",
-      "profile_photo": "http://api.example.com/media/profiles/alex_photo.jpg"
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/alex_photo.jpg"
+      ]
     },
     "viewed_at": "2025-11-15T09:30:00Z"
   }
@@ -673,7 +708,9 @@ order: 1
       "id": 5,
       "username": "jane_smith",
       "display_name": "Jane S.",
-      "profile_photo": "http://api.example.com/media/profiles/jane_photo.jpg"
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
+      ]
     },
     "last_message": {
       "id": 156,
@@ -702,7 +739,9 @@ order: 1
     "id": 5,
     "username": "jane_smith",
     "display_name": "Jane S.",
-    "profile_photo": "http://api.example.com/media/profiles/jane_photo.jpg",
+    "imageUrls": [
+      "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
+    ],
     "is_online": true
   },
   "created_at": "2025-11-14T18:30:00Z"
@@ -1053,9 +1092,25 @@ or
 
 8. **Payment Status**: `pending`, `completed`, `failed`, `refunded`
 
-9. **Universities Endpoint**: `/api/universities/` is publicly accessible without authentication
+9. **Universities Endpoint**: `/api/v1.0/profiles/universities/` is publicly accessible without authentication
 
-10. **Profile Privacy**:
+10. **Registration Flow**:
+
+    - Step 1: POST `/auth/users/` (create account)
+    - Step 2: POST `/auth/jwt/create/` (login to get token)
+    - Step 3: PATCH `/api/v1.0/profiles/me/` (complete profile with university, gender, etc.)
+    - Step 4: POST `/api/v1.0/profiles/me/photos/` (optional - upload photos via Cloudinary URLs)
+
+11. **Profile Photos**:
+
+    - Photos are stored as Cloudinary URLs in `imageUrls` array
+    - `imagePublicIds` array stores Cloudinary public IDs for deletion
+    - Maximum 6 photos per profile
+    - POST `/api/v1.0/profiles/me/photos/` appends new photos
+    - PATCH `/api/v1.0/profiles/me/photos/` replaces all photos
+    - DELETE `/api/v1.0/profiles/me/delete_photo/` removes specific photo by publicId
+
+12. **Profile Privacy**:
     - Private profiles show `anon_handle` as `display_name` and hide bio until matched
     - When matched and `show_real_name_on_match=true`, real name is revealed
     - Age is calculated automatically from `date_of_birth` (must be 18+)

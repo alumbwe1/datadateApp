@@ -13,7 +13,6 @@ import '../../features/onboarding/presentation/pages/onboarding_complete_page.da
 import '../../features/onboarding/presentation/pages/profile/onboarding_bio_page.dart';
 import '../../features/onboarding/presentation/pages/profile/onboarding_course_page.dart';
 import '../../features/onboarding/presentation/pages/profile/onboarding_graduation_page.dart';
-import '../../features/onboarding/presentation/pages/profile/onboarding_age_page.dart';
 import '../../features/onboarding/presentation/pages/profile/onboarding_photo_page.dart';
 import '../../features/onboarding/presentation/pages/profile/onboarding_dob_page.dart';
 import '../../features/universities/presentation/pages/university_selection_page.dart';
@@ -75,10 +74,7 @@ class AppRouter {
         path: '/onboarding/profile/graduation',
         builder: (context, state) => const OnboardingGraduationPage(),
       ),
-      GoRoute(
-        path: '/onboarding/profile/age',
-        builder: (context, state) => const OnboardingAgePage(),
-      ),
+
       GoRoute(
         path: '/onboarding/interests',
         builder: (context, state) => const OnboardingInterestsPage(),

@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/onboarding_progress.dart';
+import '../../../onboarding/presentation/providers/onboarding_provider.dart';
 import '../providers/university_provider.dart';
 
 class UniversitySelectionPage extends ConsumerStatefulWidget {
@@ -36,8 +38,12 @@ class _UniversitySelectionPageState
         .selectedUniversity;
     if (selectedUniversity != null) {
       HapticFeedback.mediumImpact();
-      // Navigate back with the selected university
-      context.push('/onboarding/intent');
+      // Save university ID to onboarding provider
+      ref
+          .read(onboardingProvider.notifier)
+          .setUniversity(selectedUniversity.id);
+      // Navigate to gender selection (step 2)
+      context.push('/onboarding/gender');
     }
   }
 
@@ -66,6 +72,11 @@ class _UniversitySelectionPageState
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Progress indicator
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+            child: const OnboardingProgress(currentStep: 1, totalSteps: 8),
+          ),
           // Title and subtitle
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
