@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_style.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../../../../../core/widgets/custom_text_field.dart';
+import '../../../../../core/widgets/onboarding_progress.dart';
 import '../../providers/onboarding_provider.dart';
 
 class OnboardingCoursePage extends ConsumerStatefulWidget {
@@ -71,6 +72,8 @@ class _OnboardingCoursePageState extends ConsumerState<OnboardingCoursePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const OnboardingProgress(currentStep: 6, totalSteps: 10),
+                      SizedBox(height: 20.h),
                       Text(
                         'What are you\nstudying?',
                         style: appStyle(

@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/password_error_bottom_sheet.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../onboarding/presentation/providers/onboarding_provider.dart';
@@ -78,10 +79,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
       if (!registerSuccess) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Registration failed. Please try again.'),
-            ),
+          final authState = ref.read(authProvider);
+          final errorMessage =
+              authState.error ?? 'Registration failed. Please try again.';
+
+          CustomSnackbar.show(
+            context,
+            message: errorMessage,
+            type: SnackbarType.error,
           );
         }
         setState(() => _isLoading = false);
@@ -96,8 +101,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
       if (!loginSuccess) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login failed. Please try again.')),
+          final authState = ref.read(authProvider);
+          final errorMessage =
+              authState.error ?? 'Login failed. Please try again.';
+
+          CustomSnackbar.show(
+            context,
+            message: errorMessage,
+            type: SnackbarType.error,
           );
         }
         setState(() => _isLoading = false);
@@ -119,9 +130,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        CustomSnackbar.show(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+          message: 'An unexpected error occurred. Please try again.',
+          type: SnackbarType.error,
+        );
       }
     } finally {
       if (mounted) {

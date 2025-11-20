@@ -58,24 +58,14 @@ class _UniversitySelectionPageState
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            context.pop();
-          },
-        ),
-      ),
+      appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Progress indicator
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-            child: const OnboardingProgress(currentStep: 1, totalSteps: 8),
+            child: const OnboardingProgress(currentStep: 1, totalSteps: 10),
           ),
           // Title and subtitle
           Padding(
@@ -85,12 +75,12 @@ class _UniversitySelectionPageState
               children: [
                 SizedBox(height: 8.h),
                 Text(
-                  'Select Your\nUniversity',
+                  'Select \nUniversity',
                   style: appStyle(
-                    32,
+                    28,
                     Colors.black,
                     FontWeight.w900,
-                  ).copyWith(letterSpacing: -0.5, height: 1.2),
+                  ).copyWith(letterSpacing: -0.3, height: 1.2),
                 ),
                 SizedBox(height: 12.h),
                 Text(

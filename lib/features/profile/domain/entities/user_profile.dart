@@ -10,17 +10,25 @@ class UserProfile extends Equatable {
   final int? age;
   final int? graduationYear;
   final List<String> interests;
-  final String? profilePhoto;
+  final List<String> imageUrls;
+  final List<String> imagePublicIds;
   final String? lastActive;
   final String createdAt;
   final String updatedAt;
 
   // User info
   final int userId;
+  final String username;
+  final String email;
+  final int universityId;
   final String universityName;
+  final String? universityLogo;
   final String gender;
+  final List<String> preferredGenders;
   final String intent;
   final bool isPrivate;
+  final String anonHandle;
+  final bool showRealNameOnMatch;
 
   const UserProfile({
     required this.id,
@@ -32,16 +40,27 @@ class UserProfile extends Equatable {
     this.age,
     this.graduationYear,
     required this.interests,
-    this.profilePhoto,
+    required this.imageUrls,
+    required this.imagePublicIds,
     this.lastActive,
     required this.createdAt,
     required this.updatedAt,
     required this.userId,
+    required this.username,
+    required this.email,
+    required this.universityId,
     required this.universityName,
+    this.universityLogo,
     required this.gender,
+    required this.preferredGenders,
     required this.intent,
     required this.isPrivate,
+    required this.anonHandle,
+    required this.showRealNameOnMatch,
   });
+
+  // Helper getter for backward compatibility
+  String? get profilePhoto => imageUrls.isNotEmpty ? imageUrls.first : null;
 
   @override
   List<Object?> get props => [
@@ -54,14 +73,22 @@ class UserProfile extends Equatable {
     age,
     graduationYear,
     interests,
-    profilePhoto,
+    imageUrls,
+    imagePublicIds,
     lastActive,
     createdAt,
     updatedAt,
     userId,
+    username,
+    email,
+    universityId,
     universityName,
+    universityLogo,
     gender,
+    preferredGenders,
     intent,
     isPrivate,
+    anonHandle,
+    showRealNameOnMatch,
   ];
 }

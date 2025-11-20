@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/api_endpoints.dart';
 import '../constants/app_constants.dart';
 import '../errors/failures.dart';
+import '../utils/custom_logs.dart';
 
 /// Generic API Client with [interceptors for token management, logging, and error handling]
 class ApiClient {
@@ -49,29 +50,40 @@ class ApiClient {
           }
 
           // Log request details
-          print('🌐 REQUEST[${options.method}] => ${options.uri}');
-          print('📋 Headers: ${options.headers}');
-          if (options.data != null) {
-            print('📦 Data: ${options.data}');
-          }
-          print('🔓 Public Endpoint: $skipAuth');
+          CustomLogs.api(
+            options.uri.toString(),
+            method: options.method,
+            headers: options.headers.map((k, v) => MapEntry(k, v.toString())),
+            body: options.data,
+            tag: skipAuth ? 'API-PUBLIC' : 'API',
+          );
 
           return handler.next(options);
         },
         onResponse: (response, handler) {
           // Log response
-          print(
-            '✅ RESPONSE[${response.statusCode}] => ${response.requestOptions.uri}',
+          CustomLogs.api(
+            response.requestOptions.uri.toString(),
+            method: response.requestOptions.method,
+            statusCode: response.statusCode,
+            body: response.data,
+            tag: 'API-RESPONSE',
           );
-          print('📥 Response Data: ${response.data}');
           return handler.next(response);
         },
         onError: (error, handler) async {
-          print(
-            '❌ ERROR[${error.response?.statusCode}] => ${error.requestOptions.uri}',
+          // Log error
+          CustomLogs.error(
+            'API request failed',
+            tag: 'API-ERROR',
+            error: error.message,
+            metadata: {
+              'url': error.requestOptions.uri.toString(),
+              'method': error.requestOptions.method,
+              'statusCode': error.response?.statusCode,
+              'errorData': error.response?.data,
+            },
           );
-          print('❌ Error Response: ${error.response?.data}');
-          print('❌ Error Message: ${error.message}');
 
           // Handle 401 - Token expired or user not found
           if (error.response?.statusCode == 401) {
@@ -85,14 +97,22 @@ class ApiClient {
                         ) ==
                         true)) {
               // User doesn't exist in backend, clear tokens
-              print('🔒 User not found - clearing tokens');
+              CustomLogs.warning(
+                'User not found - clearing tokens',
+                tag: 'API-AUTH',
+              );
               await clearTokens();
               return handler.next(error);
             }
 
             // Try to refresh token
+            CustomLogs.info('Attempting token refresh', tag: 'API-AUTH');
             final refreshed = await _refreshToken();
             if (refreshed) {
+              CustomLogs.success(
+                'Token refreshed, retrying request',
+                tag: 'API-AUTH',
+              );
               // Retry the request
               final options = error.requestOptions;
               final token = await _secureStorage.read(
@@ -105,12 +125,22 @@ class ApiClient {
                 return handler.resolve(response);
               } catch (e) {
                 // Token refresh failed, clear tokens
+                CustomLogs.error(
+                  'Request retry failed after token refresh',
+                  tag: 'API-AUTH',
+                  error: e,
+                );
                 await clearTokens();
-                return handler.next(error);
+                return handler.reject(error);
               }
             } else {
-              // Token refresh failed, clear tokens
+              // Token refresh failed, clear tokens and reject immediately
+              CustomLogs.warning(
+                'Token refresh failed, clearing tokens',
+                tag: 'API-AUTH',
+              );
               await clearTokens();
+              return handler.reject(error);
             }
           }
 
@@ -125,7 +155,10 @@ class ApiClient {
       final refreshToken = await _secureStorage.read(
         key: AppConstants.keyRefreshToken,
       );
-      if (refreshToken == null) return false;
+      if (refreshToken == null) {
+        CustomLogs.warning('No refresh token found', tag: 'API-AUTH');
+        return false;
+      }
 
       final response = await _dio.post(
         ApiEndpoints.refreshToken,
@@ -138,11 +171,20 @@ class ApiClient {
           key: AppConstants.keyAuthToken,
           value: newAccessToken,
         );
+        CustomLogs.success(
+          'Access token refreshed successfully',
+          tag: 'API-AUTH',
+        );
         return true;
       }
       return false;
-    } catch (e) {
-      print('🔄 Token refresh failed: $e');
+    } catch (e, stackTrace) {
+      CustomLogs.error(
+        'Token refresh failed',
+        tag: 'API-AUTH',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }

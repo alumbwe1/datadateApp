@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_style.dart';
 import '../../../../../core/widgets/custom_button.dart';
+import '../../../../../core/widgets/onboarding_progress.dart';
 import '../../providers/onboarding_provider.dart';
 
 class OnboardingGraduationPage extends ConsumerStatefulWidget {
@@ -33,7 +34,7 @@ class _OnboardingGraduationPageState
     if (_selectedYear != null) {
       ref.read(onboardingProvider.notifier).setGraduationYear(_selectedYear!);
       HapticFeedback.mediumImpact();
-      context.push('/onboarding/profile/age');
+      context.push('/onboarding/profile/photo');
     }
   }
 
@@ -61,6 +62,8 @@ class _OnboardingGraduationPageState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const OnboardingProgress(currentStep: 7, totalSteps: 10),
+                    SizedBox(height: 20.h),
                     Text(
                       'When do you\ngraduate?',
                       style: appStyle(

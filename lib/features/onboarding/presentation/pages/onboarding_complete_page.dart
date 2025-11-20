@@ -23,35 +23,47 @@ class _OnboardingCompletePageState
   Future<void> _completeOnboarding() async {
     setState(() => _isCompleting = true);
 
-    // User is already registered and logged in at this point
-    // Just need to update profile with collected data
-    final success = await ref
-        .read(onboardingProvider.notifier)
-        .completeOnboarding();
-
-    if (!mounted) return;
-
-    if (success) {
-      CustomSnackbar.show(
-        context,
-        message: 'Profile completed successfully!',
-        type: SnackbarType.success,
-      );
-
-      // Small delay to ensure snackbar shows
-      await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      // User is already registered and logged in at this point
+      // Just need to update profile with collected data
+      final success = await ref
+          .read(onboardingProvider.notifier)
+          .completeOnboarding();
 
       if (!mounted) return;
 
-      // Navigate to home
-      context.go('/encounters');
-    } else {
+      if (success) {
+        CustomSnackbar.show(
+          context,
+          message: 'Profile completed successfully!',
+          type: SnackbarType.success,
+        );
+
+        // Small delay to ensure snackbar shows
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        if (!mounted) return;
+
+        // Navigate to home
+        context.go('/encounters');
+      } else {
+        setState(() => _isCompleting = false);
+
+        final error = ref.read(onboardingProvider).error;
+        CustomSnackbar.show(
+          context,
+          message: error ?? 'Failed to complete profile',
+          type: SnackbarType.error,
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
       setState(() => _isCompleting = false);
 
-      final error = ref.read(onboardingProvider).error;
       CustomSnackbar.show(
         context,
-        message: error ?? 'Failed to complete profile',
+        message: 'Error: ${e.toString()}',
         type: SnackbarType.error,
       );
     }

@@ -54,10 +54,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier(this._authRepository) : super(AuthState());
 
-  Future<bool> login({required String email, required String password}) async {
+  Future<bool> login({
+    required String username,
+    required String password,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _authRepository.login(email, password);
+    final result = await _authRepository.login(username, password);
 
     result.fold(
       (failure) =>
@@ -101,10 +104,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final isLoggedIn = await _authRepository.isLoggedIn();
     if (isLoggedIn) {
       final result = await _authRepository.getCurrentUser();
-      result.fold(
-        (failure) => state = state.copyWith(error: failure.message),
-        (user) => state = state.copyWith(user: user),
-      );
+      result.fold((failure) {
+        // If token validation fails, clear auth state
+        // This handles cases where tokens are invalid/expired
+        state = AuthState(user: null, error: null);
+      }, (user) => state = state.copyWith(user: user));
+    } else {
+      // Ensure state is cleared if not logged in
+      state = AuthState(user: null, error: null);
     }
   }
 

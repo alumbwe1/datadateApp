@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/onboarding_progress.dart';
 import '../providers/onboarding_provider.dart';
 
 class OnboardingInterestsPage extends ConsumerWidget {
@@ -20,7 +21,7 @@ class OnboardingInterestsPage extends ConsumerWidget {
     {'name': 'Gaming', 'emoji': '🎮'},
     {'name': 'Movies', 'emoji': '🎬'},
     {'name': 'Sports', 'emoji': '⚽'},
-    {'name': 'Dancing', 'emoji': '�'},
+    {'name': 'Dancing', 'emoji': '🕺'},
     {'name': 'Technology', 'emoji': '💻'},
     {'name': 'Fashion', 'emoji': '👗'},
     {'name': 'Nature', 'emoji': '🌿'},
@@ -28,6 +29,25 @@ class OnboardingInterestsPage extends ConsumerWidget {
     {'name': 'Coffee', 'emoji': '☕'},
     {'name': 'Pets', 'emoji': '🐶'},
     {'name': 'Wine', 'emoji': '🍷'},
+
+    {'name': 'Cycling', 'emoji': '🚴'},
+    {'name': 'Hiking', 'emoji': '🥾'},
+    {'name': 'Swimming', 'emoji': '🏊'},
+    {'name': 'Podcasts', 'emoji': '🎧'},
+    {'name': 'Writing', 'emoji': '✍️'},
+    {'name': 'Cars', 'emoji': '🚗'},
+    {'name': 'Volunteering', 'emoji': '🤝'},
+    {'name': 'Meditation', 'emoji': '🧠'},
+    {'name': 'Karaoke', 'emoji': '🎤'},
+    {'name': 'Baking', 'emoji': '🧁'},
+    {'name': 'Shopping', 'emoji': '🛍️'},
+    {'name': 'Board Games', 'emoji': '🎲'},
+    {'name': 'Anime', 'emoji': '🉐'},
+    {'name': 'Photography Editing', 'emoji': '🖼️'},
+    {'name': 'Coding', 'emoji': '👨‍💻'},
+    {'name': 'Entrepreneurship', 'emoji': '📈'},
+    {'name': 'Skincare', 'emoji': '🧴'},
+    {'name': 'Gardening', 'emoji': '🌱'},
   ];
 
   @override
@@ -52,6 +72,8 @@ class OnboardingInterestsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const OnboardingProgress(currentStep: 10, totalSteps: 10),
+                  SizedBox(height: 12.h),
                   Text(
                     'Select your\ninterests',
                     style: appStyle(

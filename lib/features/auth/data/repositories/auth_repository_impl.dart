@@ -15,10 +15,10 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<Either<Failure, User>> login(String email, String password) async {
+  Future<Either<Failure, User>> login(String username, String password) async {
     try {
       // Get tokens from API
-      final tokens = await remoteDataSource.login(email, password);
+      final tokens = await remoteDataSource.login(username, password);
 
       // Save tokens
       await localDataSource.saveAuthToken(tokens['access']!);
@@ -87,9 +87,17 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Left(AuthFailure('No user logged in'));
       }
 
-      final user = await remoteDataSource.getCurrentUser();
+      // Add timeout to prevent hanging
+      final user = await remoteDataSource.getCurrentUser().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw AuthFailure('Request timeout - please check your connection');
+        },
+      );
       return Right(user);
     } on AuthFailure catch (e) {
+      // Clear local tokens if auth fails
+      await localDataSource.clearAuthData();
       return Left(e);
     } on NetworkFailure catch (e) {
       return Left(e);

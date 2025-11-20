@@ -25,27 +25,48 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
     if (!mounted) return;
 
-    // Check if user is logged in
-    await ref.read(authProvider.notifier).checkAuthStatus();
-    final authState = ref.read(authProvider);
+    try {
+      // Check if user is logged in with timeout
+      await ref
+          .read(authProvider.notifier)
+          .checkAuthStatus()
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              // If auth check times out, assume not logged in
+              debugPrint('⏱️ Auth check timed out - redirecting to login');
+            },
+          );
 
-    if (authState.user != null) {
-      // User is logged in, check if onboarding is completed
-      final hasCompletedOnboarding = await ref
-          .read(onboardingProvider.notifier)
-          .hasCompletedOnboarding();
+      if (!mounted) return;
 
-      if (mounted) {
-        if (hasCompletedOnboarding) {
-          // Go directly to home
-          context.go('/encounters');
-        } else {
-          // Complete onboarding
-          context.go('/onboarding/welcome');
+      final authState = ref.read(authProvider);
+
+      if (authState.user != null) {
+        // User is logged in, check if onboarding is completed
+        final hasCompletedOnboarding = await ref
+            .read(onboardingProvider.notifier)
+            .hasCompletedOnboarding();
+
+        if (mounted) {
+          if (hasCompletedOnboarding) {
+            // Go directly to home
+            context.go('/encounters');
+          } else {
+            // Complete onboarding
+            context.go('/onboarding/welcome');
+          }
+        }
+      } else {
+        // Not logged in or token validation failed, go to login
+        if (mounted) {
+          debugPrint('🔓 No user found - redirecting to login');
+          context.go('/login');
         }
       }
-    } else {
-      // Not logged in, go to login
+    } catch (e) {
+      // If any error occurs during auth check, redirect to login
+      debugPrint('❌ Auth check failed: $e');
       if (mounted) {
         context.go('/login');
       }

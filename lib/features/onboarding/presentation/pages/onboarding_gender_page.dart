@@ -37,7 +37,7 @@ class OnboardingGenderPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const OnboardingProgress(currentStep: 2, totalSteps: 8),
+                    const OnboardingProgress(currentStep: 2, totalSteps: 10),
                     SizedBox(height: 24.h),
                     Text(
                       'I am a',
@@ -107,10 +107,11 @@ class OnboardingGenderPage extends ConsumerWidget {
               padding: EdgeInsets.all(24.w),
               child: CustomButton(
                 text: 'Continue',
+
                 onPressed: selectedGender != null
                     ? () {
                         HapticFeedback.mediumImpact();
-                        context.push('/onboarding/university');
+                        context.push('/onboarding/gender-preference');
                       }
                     : null,
               ),

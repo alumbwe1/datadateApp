@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/onboarding_progress.dart';
 import '../providers/onboarding_provider.dart';
 
 class OnboardingGenderPreferencePage extends ConsumerWidget {
@@ -35,6 +36,7 @@ class OnboardingGenderPreferencePage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const OnboardingProgress(currentStep: 3, totalSteps: 10),
               SizedBox(height: 20.h),
               Text(
                 'Who would you\nlike to date?',

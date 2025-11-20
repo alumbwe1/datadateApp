@@ -6,10 +6,29 @@ import '../../../../core/constants/app_style.dart';
 import '../../domain/entities/profile.dart';
 import '../pages/profile_details_page.dart';
 
-class ProfileCard extends StatelessWidget {
+class ProfileCard extends StatefulWidget {
   final Profile profile;
 
   const ProfileCard({super.key, required this.profile});
+
+  @override
+  State<ProfileCard> createState() => _ProfileCardState();
+}
+
+class _ProfileCardState extends State<ProfileCard> {
+  int _currentImageIndex = 0;
+
+  void _nextImage() {
+    if (_currentImageIndex < widget.profile.photos.length - 1) {
+      setState(() => _currentImageIndex++);
+    }
+  }
+
+  void _previousImage() {
+    if (_currentImageIndex > 0) {
+      setState(() => _currentImageIndex--);
+    }
+  }
 
   void _showCrushBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -111,7 +130,7 @@ class ProfileCard extends StatelessWidget {
                                 child: CircleAvatar(
                                   radius: 60,
                                   backgroundImage: CachedNetworkImageProvider(
-                                    profile.photos.first,
+                                    widget.profile.photos.first,
                                   ),
                                 ),
                               ),
@@ -172,7 +191,7 @@ class ProfileCard extends StatelessWidget {
                         Column(
                           children: [
                             Text(
-                              'Send ${profile.name} a Crush',
+                              'Send ${widget.profile.name} a Crush',
                               style: appStyle(
                                 30,
                                 Colors.black,
@@ -269,7 +288,7 @@ class ProfileCard extends StatelessWidget {
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
-                                          'Crush sent to ${profile.name}! 💕',
+                                          'Crush sent to ${widget.profile.name}! 💕',
                                           style: appStyle(
                                             14,
                                             Colors.white,
@@ -446,12 +465,25 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Safety check for empty photos
+    if (widget.profile.photos.isEmpty) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.grey[200],
+        ),
+        child: const Center(
+          child: Icon(Icons.person_outline, size: 120, color: Colors.grey),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProfileDetailsPage(profile: profile),
+            builder: (context) => ProfileDetailsPage(profile: widget.profile),
           ),
         );
       },
@@ -474,34 +506,86 @@ class ProfileCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Stack(
             children: [
-              // Profile Image
+              // Profile Image with PageView for swiping
               Positioned.fill(
-                child: CachedNetworkImage(
-                  imageUrl: profile.photos.first,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: Container(color: Colors.grey[300]),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Colors.grey[300]!, Colors.grey[200]!],
+                child: GestureDetector(
+                  onTapUp: (details) {
+                    if (widget.profile.photos.length <= 1) return;
+
+                    final width = context.size?.width ?? 0;
+                    if (details.localPosition.dx < width / 2) {
+                      _previousImage();
+                    } else {
+                      _nextImage();
+                    }
+                  },
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: CachedNetworkImage(
+                      key: ValueKey(_currentImageIndex),
+                      imageUrl: widget.profile.photos[_currentImageIndex],
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(color: Colors.grey[300]),
                       ),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.person_outline,
-                        size: 120,
-                        color: Colors.grey,
+                      errorWidget: (context, url, error) => Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Colors.grey[300]!, Colors.grey[200]!],
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.person_outline,
+                            size: 120,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
+
+              // Image indicators (like Tinder)
+              if (widget.profile.photos.length > 1)
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  right: 12,
+                  child: Row(
+                    children: List.generate(
+                      widget.profile.photos.length,
+                      (index) => Expanded(
+                        child: Container(
+                          height: 3,
+                          margin: EdgeInsets.only(
+                            right: index < widget.profile.photos.length - 1
+                                ? 6
+                                : 0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: index == _currentImageIndex
+                                ? Colors.white
+                                : Colors.white.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
               // Gradient overlay at top
               Positioned(
@@ -529,7 +613,7 @@ class ProfileCard extends StatelessWidget {
               Positioned(
                 left: 20,
                 right: 70,
-                top: 20,
+                top: widget.profile.photos.length > 1 ? 32 : 20,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -538,7 +622,7 @@ class ProfileCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            '${profile.name}, ${profile.age}',
+                            '${widget.profile.name}, ${widget.profile.age}',
                             style: appStyle(28, Colors.white, FontWeight.w800)
                                 .copyWith(
                                   letterSpacing: -0.5,
@@ -557,7 +641,7 @@ class ProfileCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (profile.isOnline)
+                        if (widget.profile.isOnline)
                           Container(
                             width: 14,
                             height: 14,
@@ -610,7 +694,7 @@ class ProfileCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 7),
                           Text(
-                            'Here for ${profile.relationshipGoal}',
+                            'Here for ${widget.profile.relationshipGoal}',
                             style: appStyle(
                               13,
                               Colors.black,
@@ -652,7 +736,7 @@ class ProfileCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 7),
                           Text(
-                            profile.university,
+                            widget.profile.university,
                             style: appStyle(
                               13,
                               Colors.white,

@@ -177,7 +177,27 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // Build profile update data (Step 3: PATCH /api/v1.0/profiles/me/)
+      print('🚀 Starting onboarding completion...');
+
+      // Step 1: Upload photos FIRST (if provided)
+      if (state.photos.isNotEmpty) {
+        print('📸 Uploading ${state.photos.length} photos...');
+        final photoUploadSuccess = await _uploadPhotos();
+
+        if (!photoUploadSuccess) {
+          print('❌ Photo upload failed');
+          state = state.copyWith(
+            isLoading: false,
+            error: 'Failed to upload photos',
+          );
+          return false;
+        }
+        print('✅ Photos uploaded successfully');
+      } else {
+        print('⚠️ No photos to upload');
+      }
+
+      // Step 2: Build profile update data (PATCH /api/v1.0/profiles/me/)
       final Map<String, dynamic> profileData = {};
 
       // Required fields
@@ -222,20 +242,36 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       profileData['is_private'] = false;
       profileData['show_real_name_on_match'] = true;
 
-      // Update profile
+      // Debug: Print the data being sent
+      print('📦 Profile data to be sent:');
+      print('  - University ID: ${profileData['university']}');
+      print('  - Gender: ${profileData['gender']}');
+      print('  - Preferred Genders: ${profileData['preferred_genders']}');
+      print('  - Intent: ${profileData['intent']}');
+      print('  - Bio: ${profileData['bio']}');
+      print('  - Course: ${profileData['course']}');
+      print('  - Interests: ${profileData['interests']}');
+      print('  - Graduation Year: ${profileData['graduation_year']}');
+      print('  - Real Name: ${profileData['real_name']}');
+      print('  - Date of Birth: ${profileData['date_of_birth']}');
+      print('  - Is Private: ${profileData['is_private']}');
+      print(
+        '  - Show Real Name on Match: ${profileData['show_real_name_on_match']}',
+      );
+
+      // Step 3: Update profile
+      print('🔄 Updating profile...');
       final success = await _ref
           .read(profileProvider.notifier)
           .updateProfile(profileData);
 
       if (success) {
-        // Upload photos if provided (Step 4: POST /api/v1.0/profiles/me/photos/)
-        // Note: This would require Cloudinary integration
-        // For now, we'll skip photo upload and handle it separately
-
+        print('✅ Profile updated successfully');
         await _prefs.setBool('onboarding_completed', true);
         state = state.copyWith(isCompleted: true, isLoading: false);
         return true;
       } else {
+        print('❌ Profile update failed');
         state = state.copyWith(
           isLoading: false,
           error: 'Failed to complete onboarding',
@@ -243,7 +279,37 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         return false;
       }
     } catch (e) {
+      print('❌ Error during onboarding completion: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> _uploadPhotos() async {
+    try {
+      final profileRepo = _ref.read(profileProvider.notifier);
+
+      // Get all photo paths
+      final photoPaths = state.photos.map((photo) => photo.path).toList();
+
+      print('📤 Uploading ${photoPaths.length} photos in a single request');
+      print('📁 Photo paths:');
+      for (int i = 0; i < photoPaths.length; i++) {
+        print('   ${i + 1}. ${photoPaths[i]}');
+      }
+
+      // Upload all photos at once
+      final success = await profileRepo.uploadPhotos(photoPaths);
+
+      if (!success) {
+        print('❌ Failed to upload photos');
+        return false;
+      }
+
+      print('✅ All photos uploaded successfully');
+      return true;
+    } catch (e) {
+      print('❌ Error uploading photos: $e');
       return false;
     }
   }

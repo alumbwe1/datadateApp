@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_style.dart';
 import '../../../../../core/widgets/custom_button.dart';
+import '../../../../../core/widgets/onboarding_progress.dart';
 import '../../providers/onboarding_provider.dart';
 
 class OnboardingBioPage extends ConsumerStatefulWidget {
@@ -67,6 +68,8 @@ class _OnboardingBioPageState extends ConsumerState<OnboardingBioPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const OnboardingProgress(currentStep: 5, totalSteps: 10),
+                      SizedBox(height: 20.h),
                       Text(
                         'Tell us about\nyourself',
                         style: appStyle(

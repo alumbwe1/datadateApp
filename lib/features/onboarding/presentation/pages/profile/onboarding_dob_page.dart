@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_style.dart';
 import '../../../../../core/widgets/custom_button.dart';
+import '../../../../../core/widgets/onboarding_progress.dart';
 import '../../providers/onboarding_provider.dart';
 
 class OnboardingDobPage extends ConsumerStatefulWidget {
@@ -137,6 +138,7 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const OnboardingProgress(currentStep: 9, totalSteps: 10),
               SizedBox(height: 20.h),
               Text(
                 'When\'s your\nbirthday?',
@@ -167,7 +169,7 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
                       color: _selectedDate != null
                           ? Colors.black
                           : Colors.grey.shade300,
-                      width: _selectedDate != null ? 2 : 1.5,
+                      width: _selectedDate != null ? 2 : 0.7,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -210,7 +212,7 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
                                 _selectedDate != null
                                     ? Colors.black
                                     : Colors.grey[600]!,
-                                FontWeight.w700,
+                                FontWeight.w600,
                               ).copyWith(letterSpacing: -0.3),
                             ),
                             if (_selectedDate != null) ...[
@@ -296,10 +298,7 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
                         // Double-check age before navigation
                         final age = _calculateAge(dateOfBirth!);
                         if (age >= 18) {
-                          print(
-                            '✅ Age validated: $age years old (DOB: ${dateOfBirth!.year}-${dateOfBirth!.month.toString().padLeft(2, '0')}-${dateOfBirth!.day.toString().padLeft(2, '0')})',
-                          );
-                          context.push('/onboarding/profile/bio');
+                          context.push('/onboarding/interests');
                         } else {
                           print('❌ Age validation failed: $age years old');
                           setState(() {

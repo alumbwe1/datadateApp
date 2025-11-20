@@ -120,7 +120,7 @@ class _OnboardingPhotoPageState extends ConsumerState<OnboardingPhotoPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 12.h),
-              const OnboardingProgress(currentStep: 7, totalSteps: 8),
+              const OnboardingProgress(currentStep: 8, totalSteps: 10),
               SizedBox(height: 24.h),
               Text(
                 'Add your\nphotos',

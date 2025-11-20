@@ -3,7 +3,7 @@ class ApiEndpoints {
   // Base URL - should be loaded from environment
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:7000',
+    defaultValue: 'http://192.168.240.145:7000',
   );
 
   // Authentication
@@ -12,9 +12,9 @@ class ApiEndpoints {
   static const String refreshToken = '/auth/jwt/refresh/';
 
   // Universities (No authentication required)
-  static const String universities = '/api/v1.0/users/universities/';
+  static const String universities = '/api/v1.0/profiles/universities/';
   static String universityBySlug(String slug) =>
-      '/api/v1.0/users/universities/$slug/';
+      '/api/v1.0/profiles/universities/$slug/';
 
   // Users
   static const String currentUser = '/auth/users/me/';
@@ -25,8 +25,9 @@ class ApiEndpoints {
   static String profileDetail(int id) => '/api/v1.0/profiles/profiles/$id/';
   static String likeProfile(int id) => '/api/v1.0/profiles/$id/like/';
   static const String myProfile = '/api/v1.0/profiles/profiles/me/';
-  static const String uploadProfilePhoto =
-      '/api/v1.0/profiles/profiles/me/photo/';
+
+  static const String uploadProfilePhotos =
+      '/api/v1.0/profiles/profiles/upload_photos/';
 
   // Gallery
   static const String gallery = '/api/v1.0/gallery/';

@@ -237,47 +237,53 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
                   horizontal: 12,
                   vertical: 8,
                 ),
-                child: CardSwiper(
-                  controller: _controller,
-                  cardsCount: profiles.length,
-                  numberOfCardsDisplayed: 1,
-                  backCardOffset: const Offset(0, -20),
-                  padding: EdgeInsets.zero,
-                  onSwipe: (previousIndex, currentIndex, direction) {
-                    final profile = profiles[previousIndex];
+                child: Stack(
+                  children: [
+                    CardSwiper(
+                      controller: _controller,
+                      cardsCount: profiles.length,
+                      numberOfCardsDisplayed: 1,
+                      backCardOffset: const Offset(0, -20),
+                      padding: EdgeInsets.zero,
+                      onSwipe: (previousIndex, currentIndex, direction) {
+                        final profile = profiles[previousIndex];
 
-                    if (direction == CardSwiperDirection.right) {
-                      ref
-                          .read(encountersProvider.notifier)
-                          .likeProfile(profile.id);
-                    } else if (direction == CardSwiperDirection.left) {
-                      ref
-                          .read(encountersProvider.notifier)
-                          .skipProfile(profile.id);
-                    }
+                        if (direction == CardSwiperDirection.right) {
+                          ref
+                              .read(encountersProvider.notifier)
+                              .likeProfile(profile.id);
+                        } else if (direction == CardSwiperDirection.left) {
+                          ref
+                              .read(encountersProvider.notifier)
+                              .skipProfile(profile.id);
+                        }
 
-                    _handleSwipe(
-                      direction,
-                      profile.id,
-                      profile.name,
-                      profile.photos.first,
-                    );
-                    return true;
-                  },
-                  cardBuilder:
-                      (context, index, percentThresholdX, percentThresholdY) {
-                        return Stack(
-                          children: [
-                            ProfileCard(profile: profiles[index]),
-                            Positioned(
-                              bottom: 20,
-                              left: 0,
-                              right: 0,
-                              child: _buildActionButtons(),
-                            ),
-                          ],
+                        _handleSwipe(
+                          direction,
+                          profile.id,
+                          profile.name,
+                          profile.photos.first,
                         );
+                        return true;
                       },
+                      cardBuilder:
+                          (
+                            context,
+                            index,
+                            percentThresholdX,
+                            percentThresholdY,
+                          ) {
+                            return ProfileCard(profile: profiles[index]);
+                          },
+                    ),
+                    // Action buttons on top of the card swiper
+                    Positioned(
+                      bottom: 20,
+                      left: 0,
+                      right: 0,
+                      child: _buildActionButtons(),
+                    ),
+                  ],
                 ),
               ),
             ),

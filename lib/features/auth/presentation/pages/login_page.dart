@@ -35,7 +35,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final success = await ref
           .read(authProvider.notifier)
           .login(
-            email: _usernameController.text.trim(),
+            username: _usernameController.text.trim(),
             password: _passwordController.text,
           );
 
@@ -109,14 +109,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 SizedBox(height: 48.h),
 
-                // Username or Email field
+                // Username field
                 CustomTextField(
-                  label: 'Email or Username',
-                  hintText: 'Enter your email or username',
+                  label: 'Username',
+                  hintText: 'Enter your username',
                   controller: _usernameController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Email or username is required';
+                      return 'Username is required';
                     }
                     return null;
                   },

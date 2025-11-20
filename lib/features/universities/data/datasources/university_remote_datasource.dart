@@ -15,7 +15,7 @@ class UniversityRemoteDataSourceImpl implements UniversityRemoteDataSource {
   @override
   Future<List<UniversityModel>> getUniversities() async {
     // Note: This endpoint doesn't require authentication
-    final response = await apiClient.getPublic<Map<String, dynamic>>(
+    final response = await apiClient.get<Map<String, dynamic>>(
       ApiEndpoints.universities,
     );
 
@@ -30,7 +30,7 @@ class UniversityRemoteDataSourceImpl implements UniversityRemoteDataSource {
   @override
   Future<UniversityModel> getUniversityBySlug(String slug) async {
     // Note: This endpoint doesn't require authentication
-    final response = await apiClient.getPublic<Map<String, dynamic>>(
+    final response = await apiClient.get<Map<String, dynamic>>(
       ApiEndpoints.universityBySlug(slug),
     );
 

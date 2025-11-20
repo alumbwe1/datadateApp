@@ -16,18 +16,46 @@ class ProfileModel extends Profile {
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
+    // Extract university name from nested university_data
+    final universityData = json['university_data'] as Map<String, dynamic>?;
+    final universityName =
+        universityData?['name'] as String? ??
+        json['university'] as String? ??
+        'Unknown University';
+
+    // Get display name (could be real name or display_name)
+    final displayName =
+        json['display_name'] as String? ?? json['name'] as String? ?? 'Unknown';
+
+    // Get bio (could be display_bio or bio)
+    final bio = json['display_bio'] as String? ?? json['bio'] as String?;
+
+    // Parse photos from imageUrls (API format) or photos (old format)
+    final photosList =
+        json['imageUrls'] as List<dynamic>? ??
+        json['photos'] as List<dynamic>? ??
+        [];
+
     return ProfileModel(
       id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
-      age: json['age'] ?? 18,
-      gender: json['gender'] ?? '',
-      university: json['university'] ?? '',
-      location: json['location'] ?? '',
-      relationshipGoal: json['relationshipGoal'] ?? 'Dating',
-      bio: json['bio'],
-      photos: List<String>.from(json['photos'] ?? []),
-      interests: List<String>.from(json['interests'] ?? []),
-      isOnline: json['isOnline'] ?? false,
+      name: displayName,
+      age: json['age'] as int? ?? 18,
+      gender: json['gender'] as String? ?? '',
+      university: universityName,
+      location: json['location'] as String? ?? universityName,
+      relationshipGoal:
+          json['intent'] as String? ??
+          json['relationshipGoal'] as String? ??
+          'dating',
+      bio: bio,
+      photos: photosList.map((e) => e.toString()).toList(),
+      interests:
+          (json['interests'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      isOnline:
+          json['isOnline'] as bool? ?? json['is_online'] as bool? ?? false,
     );
   }
 

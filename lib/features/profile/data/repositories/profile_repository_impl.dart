@@ -48,6 +48,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, List<String>>> uploadProfilePhotos(
+    List<String> filePaths,
+  ) async {
+    try {
+      final photoUrls = await remoteDataSource.uploadProfilePhotos(filePaths);
+      return Right(photoUrls);
+    } on DioException catch (e) {
+      return Left(ServerFailure(_handleDioError(e)));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred'));
+    }
+  }
+
   String _handleDioError(DioException e) {
     if (e.response != null) {
       final data = e.response!.data;
