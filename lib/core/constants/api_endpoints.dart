@@ -10,6 +10,7 @@ class ApiEndpoints {
   static const String login = '/auth/jwt/create/';
   static const String register = '/auth/users/';
   static const String refreshToken = '/auth/jwt/refresh/';
+  static const String updateFcmToken = '/auth/fcm-token/';
 
   // Universities (No authentication required)
   static const String universities = '/api/v1.0/profiles/universities/';

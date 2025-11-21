@@ -1,12 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_style.dart';
-import '../../../encounters/domain/entities/profile.dart';
-import '../../../encounters/presentation/pages/profile_details_page.dart';
-import '../../../encounters/presentation/providers/encounters_provider.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/widgets/loading_shimmer.dart';
+import '../providers/likes_provider.dart';
 
 class LikesPage extends ConsumerStatefulWidget {
   const LikesPage({super.key});
@@ -15,277 +12,294 @@ class LikesPage extends ConsumerStatefulWidget {
   ConsumerState<LikesPage> createState() => _LikesPageState();
 }
 
-class _LikesPageState extends ConsumerState<LikesPage> {
+class _LikesPageState extends ConsumerState<LikesPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+
+    // Load likes when page opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = ref.read(authProvider).user;
-      if (user != null) {
-        ref.read(encountersProvider.notifier).loadProfiles(user.gender);
-      }
+      ref.read(likesProvider.notifier).loadAllLikes();
     });
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final encountersState = ref.watch(encountersProvider);
-    final profiles = encountersState.profiles;
+    final likesState = ref.watch(likesProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Text(
-                  'Likes',
-                  style: appStyle(
-                    25,
-                    Colors.black,
-                    FontWeight.w800,
-                  ).copyWith(letterSpacing: -0.3),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.tune_rounded,
-                    size: 20,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'Likes',
+          style: appStyle(
+            24,
+            Colors.black,
+            FontWeight.w700,
+          ).copyWith(letterSpacing: -0.5),
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.grey,
+          labelStyle: appStyle(15, Colors.black, FontWeight.w600),
+          unselectedLabelStyle: appStyle(15, Colors.grey, FontWeight.w500),
+          indicatorColor: Colors.black,
+          indicatorWeight: 3,
+          tabs: [
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Received'),
+                  if (likesState.receivedLikes.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${likesState.receivedLikes.length}',
+                        style: appStyle(12, Colors.white, FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Sent'),
+                  if (likesState.sentLikes.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${likesState.sentLikes.length}',
+                        style: appStyle(12, Colors.black87, FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      body: encountersState.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.black))
-          : encountersState.error != null
+      body: likesState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : likesState.error != null
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
-                    encountersState.error!,
-                    style: appStyle(14, Colors.grey.shade600, FontWeight.w400),
+                    likesState.error!,
+                    style: appStyle(14, Colors.grey, FontWeight.w500),
                   ),
-                ],
-              ),
-            )
-          : profiles.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '💝',
-                    style: appStyle(80, Colors.black, FontWeight.normal),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'No likes yet',
-                    style: appStyle(24, Colors.black, FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Keep swiping to find your matches',
-                    style: appStyle(14, Colors.grey.shade600, FontWeight.w400),
-                  ),
-                ],
-              ),
-            )
-          : Column(
-              children: [
-                Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'People who liked you',
-                        style: appStyle(
-                          20,
-                          Colors.black,
-                          FontWeight.bold,
-                        ).copyWith(letterSpacing: -0.3),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${profiles.length} profiles',
-                        style: appStyle(14, Colors.grey[600]!, FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(12),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.7,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                    itemCount: profiles.length,
-                    itemBuilder: (context, index) {
-                      return _buildLikeCard(context, profiles[index]);
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.read(likesProvider.notifier).loadAllLikes();
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(
+                      'Retry',
+                      style: appStyle(14, Colors.white, FontWeight.w600),
+                    ),
                   ),
-                ),
+                ],
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildLikesList(likesState.receivedLikes, isReceived: true),
+                _buildLikesList(likesState.sentLikes, isReceived: false),
               ],
             ),
     );
   }
 
-  Widget _buildLikeCard(BuildContext context, Profile profile) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProfileDetailsPage(profile: profile),
-          ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+  Widget _buildLikesList(List likes, {required bool isReceived}) {
+    if (likes.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  isReceived ? '💝' : '💌',
+                  style: const TextStyle(fontSize: 60),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              isReceived ? 'No Likes Yet' : 'No Likes Sent',
+              style: appStyle(
+                24,
+                Colors.black,
+                FontWeight.w700,
+              ).copyWith(letterSpacing: -0.5),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                isReceived
+                    ? 'When someone likes you,\nthey\'ll appear here'
+                    : 'Start swiping to like profiles\nand find your match',
+                style: appStyle(
+                  14,
+                  Colors.grey[600]!,
+                  FontWeight.w400,
+                ).copyWith(height: 1.5),
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Image
-              CachedNetworkImage(
-                imageUrl: profile.photos.first,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Colors.black),
-                  ),
-                ),
-              ),
+      );
+    }
 
-              // Gradient overlay
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.1),
-                      Colors.black.withOpacity(0.8),
-                    ],
-                    stops: const [0.5, 0.75, 1.0],
-                  ),
-                ),
-              ),
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(likesProvider.notifier).loadAllLikes();
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: likes.length,
+        itemBuilder: (context, index) {
+          final like = likes[index];
+          final profileInfo = like.profileInfo;
 
-              // Profile info
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${profile.displayName}, ${profile.age}',
-                        style: appStyle(17, Colors.white, FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+          if (profileInfo == null) {
+            return const SizedBox.shrink();
+          }
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(12),
+              leading: CircleAvatar(
+                radius: 30,
+                backgroundColor: Colors.grey[200],
+                backgroundImage: profileInfo.profilePhoto != null
+                    ? CachedNetworkImageProvider(profileInfo.profilePhoto!)
+                    : null,
+                child: profileInfo.profilePhoto == null
+                    ? Text(
+                        profileInfo.displayName[0].toUpperCase(),
+                        style: appStyle(20, Colors.black, FontWeight.w600),
+                      )
+                    : null,
+              ),
+              title: Text(
+                profileInfo.displayName,
+                style: appStyle(16, Colors.black, FontWeight.w600),
+              ),
+              subtitle: Text(
+                '@${profileInfo.username}',
+                style: appStyle(13, Colors.grey[600]!, FontWeight.w400),
+              ),
+              trailing: isReceived
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                      const SizedBox(height: 4),
-                      Row(
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.school,
-                            size: 12,
-                            color: Colors.white.withOpacity(0.9),
+                          const Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 16,
                           ),
                           const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              profile.universityName,
-                              style: appStyle(
-                                12,
-                                Colors.white.withOpacity(0.9),
-                                FontWeight.w400,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          Text(
+                            'Like Back',
+                            style: appStyle(12, Colors.white, FontWeight.w600),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 4,
-                          children: [
-                            Icon(Iconsax.heart, size: 17, color: Colors.black),
-                            Text(
-                              'Here for ${profile.intent}',
-                              style: appStyle(
-                                10,
-                                Colors.black,
-                                FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    )
+                  : Icon(Icons.favorite, color: Colors.grey[400], size: 24),
+              onTap: () {
+                // TODO: Navigate to profile detail
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'View ${profileInfo.displayName}\'s profile',
+                      style: appStyle(14, Colors.white, FontWeight.w600),
+                    ),
+                    backgroundColor: Colors.black,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
