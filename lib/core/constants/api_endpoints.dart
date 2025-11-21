@@ -23,7 +23,6 @@ class ApiEndpoints {
   // Profiles
   static const String profiles = '/api/v1.0/profiles/profiles/';
   static String profileDetail(int id) => '/api/v1.0/profiles/profiles/$id/';
-  static String likeProfile(int id) => '/api/v1.0/profiles/$id/like/';
   static const String myProfile = '/api/v1.0/profiles/profiles/me/';
 
   static const String uploadProfilePhotos =
@@ -35,7 +34,7 @@ class ApiEndpoints {
 
   // Interactions
   static const String matches = '/api/v1.0/matches/';
-  static const String likes = '/api/v1.0/likes/';
+  static const String likes = '/api/v1.0/interactions/likes/';
   static const String profileViews = '/api/v1.0/profile-views/';
 
   // Chat

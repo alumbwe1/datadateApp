@@ -70,6 +70,8 @@ dependencies:
   dartz: ^0.10.1
   flutter_launcher_icons: ^0.14.4
   flutter_dotenv: ^6.0.0
+  firebase_core: ^4.2.1
+  firebase_messaging: ^16.0.4
 
 
   #Icons

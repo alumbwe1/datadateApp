@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_style.dart';
@@ -191,7 +192,7 @@ class _ProfileCardState extends State<ProfileCard> {
                         Column(
                           children: [
                             Text(
-                              'Send ${widget.profile.name} a Crush',
+                              'Send ${widget.profile.displayName} a Crush',
                               style: appStyle(
                                 30,
                                 Colors.black,
@@ -288,7 +289,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
-                                          'Crush sent to ${widget.profile.name}! 💕',
+                                          'Crush sent to ${widget.profile.displayName}! 💕',
                                           style: appStyle(
                                             14,
                                             Colors.white,
@@ -504,11 +505,12 @@ class _ProfileCardState extends State<ProfileCard> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            children: [
-              // Profile Image with PageView for swiping
-              Positioned.fill(
-                child: GestureDetector(
+          child: SizedBox.expand(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Profile Image with PageView for swiping
+                GestureDetector(
                   onTapUp: (details) {
                     if (widget.profile.photos.length <= 1) return;
 
@@ -525,6 +527,8 @@ class _ProfileCardState extends State<ProfileCard> {
                       key: ValueKey(_currentImageIndex),
                       imageUrl: widget.profile.photos[_currentImageIndex],
                       fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
                       placeholder: (context, url) => Shimmer.fromColors(
                         baseColor: Colors.grey[300]!,
                         highlightColor: Colors.grey[100]!,
@@ -549,209 +553,456 @@ class _ProfileCardState extends State<ProfileCard> {
                     ),
                   ),
                 ),
-              ),
 
-              // Image indicators (like Tinder)
-              if (widget.profile.photos.length > 1)
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  right: 12,
-                  child: Row(
-                    children: List.generate(
-                      widget.profile.photos.length,
-                      (index) => Expanded(
-                        child: Container(
-                          height: 3,
-                          margin: EdgeInsets.only(
-                            right: index < widget.profile.photos.length - 1
-                                ? 6
-                                : 0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: index == _currentImageIndex
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 4,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                // Image indicators (like Tinder)
+                if (widget.profile.photos.length > 1)
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    right: 16,
+                    child: Row(
+                      children: List.generate(widget.profile.photos.length, (
+                        index,
+                      ) {
+                        final isActive = index == _currentImageIndex;
 
-              // Gradient overlay at top
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 280,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.75),
-                        Colors.black.withValues(alpha: 0.4),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.5, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Profile Info - NOW AT TOP
-              Positioned(
-                left: 20,
-                right: 70,
-                top: widget.profile.photos.length > 1 ? 32 : 20,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${widget.profile.name}, ${widget.profile.age}',
-                            style: appStyle(28, Colors.white, FontWeight.w800)
-                                .copyWith(
-                                  letterSpacing: -0.5,
-                                  height: 1.2,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                      offset: const Offset(0, 2),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (widget.profile.isOnline)
-                          Container(
-                            width: 14,
-                            height: 14,
-                            margin: const EdgeInsets.only(left: 8),
+                        return Expanded(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            height: 6,
+                            margin: EdgeInsets.only(
+                              right: index < widget.profile.photos.length - 1
+                                  ? 8
+                                  : 0,
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00FF94),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2.5,
-                              ),
+                              color: isActive
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.35),
+                              borderRadius: BorderRadius.circular(8),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(
-                                    0xFF00FF94,
-                                  ).withValues(alpha: 0.5),
-                                  blurRadius: 8,
-                                  spreadRadius: 1,
+                                  color: Colors.black.withOpacity(
+                                    isActive ? 0.28 : 0.15,
+                                  ),
+                                  blurRadius: isActive ? 6 : 3,
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
                           ),
+                        );
+                      }),
+                    ),
+                  ),
+
+                // Gradient overlay at bottom
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 290.h,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.85),
+                          Colors.black.withValues(alpha: 0.6),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.6, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Profile Info - AT BOTTOM (Tinder style)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.3),
+                          Colors.black.withOpacity(0.85),
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                    padding: EdgeInsets.fromLTRB(20.w, 60.h, 20.w, 24.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Name, age and verification
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      '${widget.profile.displayName}, ${widget.profile.age}',
+                                      style:
+                                          appStyle(
+                                            28.sp,
+                                            Colors.white,
+                                            FontWeight.w900,
+                                          ).copyWith(
+                                            letterSpacing: -0.8,
+                                            height: 1.1,
+                                            shadows: [
+                                              Shadow(
+                                                color: Colors.black.withOpacity(
+                                                  0.3,
+                                                ),
+                                                offset: const Offset(0, 2),
+                                                blurRadius: 8,
+                                              ),
+                                            ],
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.verified,
+                                    color: Colors.blue[400],
+                                    size: 24,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        offset: const Offset(0, 2),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+
+                                  //Image for campus
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    const Color(0xFF00FF94),
+                                    const Color(0xFF00D977),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(
+                                      0xFF00FF94,
+                                    ).withOpacity(0.4),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Online',
+                                    style: appStyle(
+                                      12,
+                                      Colors.black,
+                                      FontWeight.w800,
+                                    ).copyWith(letterSpacing: 0.2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 5.h),
+
+                        // Container(
+                        //   padding: const EdgeInsets.all(10),
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.white.withOpacity(0.12),
+                        //     borderRadius: BorderRadius.circular(30),
+                        //     border: Border.all(
+                        //       color: Colors.white.withOpacity(0.2),
+                        //       width: 1,
+                        //     ),
+                        //     boxShadow: [
+                        //       BoxShadow(
+                        //         color: Colors.black.withOpacity(0.1),
+                        //         blurRadius: 12,
+                        //         offset: const Offset(0, 4),
+                        //       ),
+                        //     ],
+                        //   ),
+                        //   child: Text(
+                        //     widget.profile.university,
+                        //     style: appStyle(15, Colors.white, FontWeight.w600)
+                        //         .copyWith(
+                        //           letterSpacing: -0.2,
+                        //           shadows: [
+                        //             Shadow(
+                        //               color: Colors.black.withOpacity(0.3),
+                        //               offset: const Offset(0, 1),
+                        //               blurRadius: 4,
+                        //             ),
+                        //           ],
+                        //         ),
+                        //     maxLines: 1,
+                        //     overflow: TextOverflow.ellipsis,
+                        //   ),
+                        // ),
+                        // Info
+                        Row(
+                          children: [
+                            _buildTinderTag(
+                              icon: Iconsax.heart,
+                              label: 'Here for ${widget.profile.intent}',
+                            ),
+                            const SizedBox(width: 10), // spacing between tags
+                          ],
+                        ),
+
+                        // Interests
+                        if (widget.profile.interests.isNotEmpty) ...[
+                          SizedBox(height: 8.w),
+                          Wrap(
+                            spacing: 4.w,
+                            runSpacing: 4,
+                            children: widget.profile.interests
+                                .take(4)
+                                .map(
+                                  (interest) => Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.white.withOpacity(0.25),
+                                          Colors.white.withOpacity(0.15),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.4),
+                                        width: 0.7.w,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Text(
+                                      interest,
+                                      style:
+                                          appStyle(
+                                            13,
+                                            Colors.white,
+                                            FontWeight.w700,
+                                          ).copyWith(
+                                            letterSpacing: 0.2,
+                                            shadows: [
+                                              Shadow(
+                                                color: Colors.black.withOpacity(
+                                                  0.3,
+                                                ),
+                                                offset: const Offset(0, 1),
+                                                blurRadius: 4,
+                                              ),
+                                            ],
+                                          ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ],
+                        SizedBox(height: 50.h),
+
+                        // Quick actions or extra info badge (optional)
                       ],
                     ),
-                    const SizedBox(height: 14),
-                    // Relationship goal badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Iconsax.heart,
-                            color: Colors.black,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 7),
-                          Text(
-                            'Here for ${widget.profile.relationshipGoal}',
-                            style: appStyle(
-                              13,
-                              Colors.black,
-                              FontWeight.w600,
-                            ).copyWith(letterSpacing: -0.2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Location badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.school_outlined,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 7),
-                          Text(
-                            widget.profile.university,
-                            style: appStyle(
-                              13,
-                              Colors.white,
-                              FontWeight.w600,
-                            ).copyWith(letterSpacing: -0.2),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Helper widget for info rows
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color iconColor;
+
+  const _InfoRow({
+    required this.icon,
+    required this.text,
+    required this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: iconColor,
+            size: 18,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.2),
+                offset: const Offset(0, 1),
+                blurRadius: 4,
               ),
             ],
           ),
         ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: appStyle(15, Colors.white, FontWeight.w600).copyWith(
+              letterSpacing: -0.2,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.3),
+                  offset: const Offset(0, 1),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+Widget _buildTinderTag({required IconData icon, required String label}) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(30),
+      gradient: LinearGradient(
+        colors: [
+          Colors.white.withOpacity(0.12),
+          Colors.white.withOpacity(0.06),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      border: Border.all(color: Colors.white.withOpacity(0.20), width: 1.0),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.25),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        Icon(icon, color: Colors.white, size: 18),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: appStyle(15, Colors.white, FontWeight.w600).copyWith(
+            letterSpacing: -0.2,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.35),
+                offset: const Offset(0, 1),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    ),
+  );
+}
+
+// Helper widget for quick info badges
+class _QuickInfoBadge extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color? color;
+
+  const _QuickInfoBadge({required this.icon, required this.text, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: (color ?? Colors.white).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: (color ?? Colors.white).withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color ?? Colors.white, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: appStyle(
+              12,
+              Colors.white,
+              FontWeight.w700,
+            ).copyWith(letterSpacing: 0.2),
+          ),
+        ],
       ),
     );
   }

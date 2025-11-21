@@ -73,9 +73,19 @@ class EncountersNotifier extends StateNotifier<EncountersState> {
     );
   }
 
-  Future<void> likeProfile(String profileId) async {
-    await _profileRepository.likeProfile(profileId);
+  Future<Map<String, dynamic>?> likeProfile(String profileId) async {
+    final result = await _profileRepository.likeProfile(profileId);
+
+    Map<String, dynamic>? matchInfo;
+    result.fold(
+      (failure) => print('Error liking profile: ${failure.message}'),
+      (response) {
+        matchInfo = response;
+      },
+    );
+
     _moveToNext();
+    return matchInfo;
   }
 
   Future<void> skipProfile(String profileId) async {

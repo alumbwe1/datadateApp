@@ -269,7 +269,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
                                           children: [
                                             Flexible(
                                               child: Text(
-                                                '${widget.profile.name}, ${widget.profile.age}',
+                                                '${widget.profile.displayName}, ${widget.profile.age}',
                                                 style: appStyle(
                                                   28,
                                                   Colors.black,
@@ -277,32 +277,6 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
                                                 ).copyWith(letterSpacing: -0.5),
                                               ),
                                             ),
-                                            if (widget.profile.isOnline) ...[
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                width: 12,
-                                                height: 12,
-                                                decoration: BoxDecoration(
-                                                  color: const Color(
-                                                    0xFF4CAF50,
-                                                  ),
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                    width: 2,
-                                                  ),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: const Color(
-                                                        0xFF4CAF50,
-                                                      ).withValues(alpha: 0.5),
-                                                      blurRadius: 8,
-                                                      spreadRadius: 2,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
                                           ],
                                         ),
                                         const SizedBox(height: 8),
@@ -316,7 +290,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
                                             const SizedBox(width: 6),
                                             Flexible(
                                               child: Text(
-                                                widget.profile.university,
+                                                widget.profile.universityName,
                                                 style: appStyle(
                                                   14,
                                                   Colors.grey[700]!,
@@ -337,7 +311,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
                                             ),
                                             const SizedBox(width: 6),
                                             Text(
-                                              widget.profile.location,
+                                              widget.profile.universityName,
                                               style: appStyle(
                                                 14,
                                                 Colors.grey[700]!,
@@ -486,7 +460,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
                                 Expanded(
                                   child: _buildInfoItem(
                                     'University',
-                                    widget.profile.university,
+                                    widget.profile.universityName,
                                   ),
                                 ),
                               ],

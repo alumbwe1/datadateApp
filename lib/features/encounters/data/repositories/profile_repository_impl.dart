@@ -67,7 +67,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, void>> likeProfile(String profileId) async {
+  Future<Either<Failure, Map<String, dynamic>>> likeProfile(
+    String profileId,
+  ) async {
     try {
       final id = int.tryParse(profileId);
       if (id == null) {
@@ -78,11 +80,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       // Check if it's a match
       if (result['matched'] == true) {
-        // You can emit a match event here or return match info
         print('🎉 It\'s a match! Match ID: ${result['match_id']}');
       }
 
-      return const Right(null);
+      return Right(result);
     } on NetworkFailure catch (e) {
       return Left(e);
     } on ServerFailure catch (e) {

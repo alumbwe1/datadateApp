@@ -8,6 +8,6 @@ abstract class ProfileRepository {
     String? relationshipGoal,
     int count,
   });
-  Future<Either<Failure, void>> likeProfile(String profileId);
+  Future<Either<Failure, Map<String, dynamic>>> likeProfile(String profileId);
   Future<Either<Failure, void>> skipProfile(String profileId);
 }

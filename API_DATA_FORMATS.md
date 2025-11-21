@@ -26,6 +26,86 @@ This document shows the exact JSON format for all API endpoints based on the Dja
 }
 ```
 
+### POST `/auth/google/` - Google OAuth Login
+
+**Request:**
+
+```json
+{
+  "token": "google_oauth_id_token_here"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "status": "success",
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "user": {
+    "id": 1,
+    "email": "user@gmail.com",
+    "username": "user",
+    "first_name": "John",
+    "last_name": "Doe"
+  },
+  "created": true
+}
+```
+
+**Response (400 Bad Request):**
+
+```json
+{
+  "error": "Invalid token"
+}
+```
+
+### DELETE `/auth/delete/` - Delete Account
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "User deleted successfully"
+}
+```
+
+**Response (401 Unauthorized):**
+
+```json
+{
+  "error": "Authentication required"
+}
+```
+
+### POST `/auth/fcm-token/` - Update FCM Token for Push Notifications
+
+**Request:**
+
+```json
+{
+  "fcm_token": "firebase_cloud_messaging_token_here"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "FCM token updated successfully"
+}
+```
+
+**Response (400 Bad Request):**
+
+```json
+{
+  "error": "fcm_token is required"
+}
+```
+
 ### POST `/auth/jwt/refresh/` - Refresh Token
 
 **Request:**
@@ -273,7 +353,9 @@ This document shows the exact JSON format for all API endpoints based on the Dja
   "imageUrls": [
     "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/new_photo.jpg"
   ],
-  "imagePublicIds": ["profiles/user1/new_photo_xyz789"]
+  "imagePublicIds": [
+    "profiles/user1/new_photo_xyz789"
+  ]
 }
 ```
 
@@ -287,7 +369,9 @@ This document shows the exact JSON format for all API endpoints based on the Dja
     "imageUrls": [
       "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/new_photo.jpg"
     ],
-    "imagePublicIds": ["profiles/user1/new_photo_xyz789"]
+    "imagePublicIds": [
+      "profiles/user1/new_photo_xyz789"
+    ]
   }
 }
 ```
@@ -310,7 +394,9 @@ This document shows the exact JSON format for all API endpoints based on the Dja
   "imageUrls": [
     "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/photo2.jpg"
   ],
-  "imagePublicIds": ["profiles/user1/photo2_def456"]
+  "imagePublicIds": [
+    "profiles/user1/photo2_def456"
+  ]
 }
 ```
 
@@ -569,9 +655,7 @@ order: 1
       "id": 5,
       "username": "jane_smith",
       "display_name": "Jane S.",
-      "imageUrls": [
-        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
-      ]
+      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"]
     },
     "created_at": "2025-11-14T18:30:00Z"
   },
@@ -583,9 +667,7 @@ order: 1
       "id": 8,
       "username": "sarah_jones",
       "display_name": "Sarah J.",
-      "imageUrls": [
-        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/sarah_photo.jpg"
-      ]
+      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/sarah_photo.jpg"]
     },
     "created_at": "2025-11-13T12:15:00Z"
   }
@@ -613,9 +695,7 @@ order: 1
       "id": 7,
       "username": "emily_wilson",
       "display_name": "Emily W.",
-      "imageUrls": [
-        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/emily_photo.jpg"
-      ]
+      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/emily_photo.jpg"]
     },
     "created_at": "2025-11-15T10:20:00Z"
   }
@@ -659,9 +739,7 @@ order: 1
       "id": 9,
       "username": "alex_brown",
       "display_name": "Alex B.",
-      "imageUrls": [
-        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/alex_photo.jpg"
-      ]
+      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/alex_photo.jpg"]
     },
     "viewed_at": "2025-11-15T09:30:00Z"
   }
@@ -708,9 +786,7 @@ order: 1
       "id": 5,
       "username": "jane_smith",
       "display_name": "Jane S.",
-      "imageUrls": [
-        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
-      ]
+      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"]
     },
     "last_message": {
       "id": 156,
@@ -739,9 +815,7 @@ order: 1
     "id": 5,
     "username": "jane_smith",
     "display_name": "Jane S.",
-    "imageUrls": [
-      "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
-    ],
+    "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"],
     "is_online": true
   },
   "created_at": "2025-11-14T18:30:00Z"
@@ -842,7 +916,9 @@ order: 1
 
 ### Connection
 
-**URL:** `wss://api.example.com/ws/chat/{room_id}/`
+**URL:** `ws://localhost:8000/ws/chat/{room_id}/?token={jwt_token}`
+
+**Production URL:** `wss://api.example.com/ws/chat/{room_id}/?token={jwt_token}`
 
 **Query Parameter:**
 
@@ -867,8 +943,7 @@ order: 1
   "message": {
     "id": 157,
     "room": 3,
-    "sender": 5,
-    "sender_info": {
+    "sender": {
       "id": 5,
       "username": "jane_smith",
       "display_name": "Jane S."
@@ -895,6 +970,7 @@ order: 1
 {
   "type": "typing",
   "user_id": 5,
+  "username": "jane_smith",
   "is_typing": true
 }
 ```
@@ -915,6 +991,85 @@ order: 1
   "type": "message_read",
   "message_id": 156,
   "read_by": 1
+}
+```
+
+---
+
+## WebSocket - Real-time Notifications
+
+### Connection
+
+**URL:** `ws://localhost:8000/ws/notifications/?token={jwt_token}`
+
+**Production URL:** `wss://api.example.com/ws/notifications/?token={jwt_token}`
+
+**Query Parameter:**
+
+```
+?token=eyJ0eXAiOiJKV1QiLCJhbGc...
+```
+
+### Connection Confirmation (Server → Client)
+
+```json
+{
+  "type": "connection",
+  "message": "Connected to notifications"
+}
+```
+
+### Match Notification (Server → Client)
+
+Sent when two users like each other and create a match.
+
+```json
+{
+  "type": "match",
+  "match_id": 12,
+  "user": {
+    "id": 5,
+    "username": "jane_smith",
+    "display_name": "Jane Smith",
+    "image_url": "https://res.cloudinary.com/.../photo.jpg"
+  },
+  "message": "You matched with Jane Smith!"
+}
+```
+
+### Profile Like Notification (Server → Client)
+
+Sent when someone likes your profile.
+
+```json
+{
+  "type": "like",
+  "like_type": "profile",
+  "liker": {
+    "id": 7,
+    "username": "emily_wilson",
+    "display_name": "Emily Wilson",
+    "image_url": "https://res.cloudinary.com/.../photo.jpg"
+  },
+  "message": "Emily Wilson liked your profile!"
+}
+```
+
+### Gallery Like Notification (Server → Client)
+
+Sent when someone likes your gallery photo.
+
+```json
+{
+  "type": "like",
+  "like_type": "gallery",
+  "liker": {
+    "id": 8,
+    "username": "alex_brown",
+    "display_name": "Alex Brown",
+    "image_url": "https://res.cloudinary.com/.../photo.jpg"
+  },
+  "message": "Alex Brown liked your gallery!"
 }
 ```
 
@@ -1094,15 +1249,20 @@ or
 
 9. **Universities Endpoint**: `/api/v1.0/profiles/universities/` is publicly accessible without authentication
 
-10. **Registration Flow**:
-
-    - Step 1: POST `/auth/users/` (create account)
-    - Step 2: POST `/auth/jwt/create/` (login to get token)
-    - Step 3: PATCH `/api/v1.0/profiles/me/` (complete profile with university, gender, etc.)
-    - Step 4: POST `/api/v1.0/profiles/me/photos/` (optional - upload photos via Cloudinary URLs)
+10. **Registration Flow**: 
+    - **Traditional:**
+      - Step 1: POST `/auth/users/` (create account)
+      - Step 2: POST `/auth/jwt/create/` (login to get token)
+      - Step 3: PATCH `/api/v1.0/profiles/me/` (complete profile with university, gender, etc.)
+      - Step 4: POST `/api/v1.0/profiles/me/photos/` (optional - upload photos via Cloudinary URLs)
+    - **Google OAuth:**
+      - Step 1: POST `/auth/google/` (authenticate with Google token)
+      - Step 2: PATCH `/api/v1.0/profiles/me/` (complete profile)
+      - Step 3: POST `/api/v1.0/profiles/me/photos/` (optional - upload photos)
+    - **FCM Token:**
+      - POST `/auth/fcm-token/` (update FCM token for push notifications)
 
 11. **Profile Photos**:
-
     - Photos are stored as Cloudinary URLs in `imageUrls` array
     - `imagePublicIds` array stores Cloudinary public IDs for deletion
     - Maximum 6 photos per profile
@@ -1114,3 +1274,27 @@ or
     - Private profiles show `anon_handle` as `display_name` and hide bio until matched
     - When matched and `show_real_name_on_match=true`, real name is revealed
     - Age is calculated automatically from `date_of_birth` (must be 18+)
+
+13. **Real-time Notifications**:
+    - WebSocket endpoint: `ws://localhost:8000/ws/notifications/?token={jwt_token}`
+    - Receives real-time notifications for matches, likes, and other events
+    - Requires JWT token for authentication
+    - See WEBSOCKET_SETUP_GUIDE.md for detailed implementation
+
+14. **Push Notifications**:
+    - Firebase Cloud Messaging (FCM) for offline/background notifications
+    - Update FCM token via POST `/auth/fcm-token/`
+    - Automatically sent when user is offline or app is in background
+    - Includes match notifications, like notifications, and message alerts
+
+15. **Google OAuth**:
+    - Client ID: `87342870814-ophi6dp8lc2kt7njgle8jgfc1hq6vug7.apps.googleusercontent.com`
+    - Authenticate via POST `/auth/google/` with Google ID token
+    - Creates new user if doesn't exist
+    - Returns JWT tokens for API access
+
+16. **Account Deletion**:
+    - DELETE `/auth/delete/` to permanently delete account
+    - Cascades to profile, likes, matches, messages, etc.
+    - Requires authentication
+    - Cannot be undone

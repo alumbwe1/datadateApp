@@ -97,7 +97,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       // Use username (not email) for login as backend requires it
       final loginSuccess = await ref
           .read(authProvider.notifier)
-          .login(email: username, password: password);
+          .login(username: username, password: password);
 
       if (!loginSuccess) {
         if (mounted) {

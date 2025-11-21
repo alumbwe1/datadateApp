@@ -222,15 +222,23 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> likeProfile(int profileId) async {
-    final response = await apiClient.post<Map<String, dynamic>>(
-      ApiEndpoints.likeProfile(profileId),
-    );
+    try {
+      final response = await apiClient.post<Map<String, dynamic>>(
+        ApiEndpoints.likes,
+        data: {'liked': profileId, 'like_type': 'profile'},
+      );
 
-    return {
-      'matched': response['matched'] ?? false,
-      'match_id': response['match_id'],
-      'detail': response['detail'] ?? '',
-    };
+      // Check if it's a match by looking at the response
+      // The API returns a Like object, but may include match info
+      return {
+        'matched': response['matched'] ?? false,
+        'match_id': response['match_id'],
+        'detail': response['detail'] ?? 'Profile liked successfully',
+      };
+    } catch (e) {
+      print('Error liking profile: $e');
+      rethrow;
+    }
   }
 
   @override
@@ -270,19 +278,22 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     final shuffled = List<Map<String, dynamic>>.from(sourceProfiles)..shuffle();
 
     return shuffled.take(10).map((profile) {
+      final id = DateTime.now().millisecondsSinceEpoch;
       return ProfileModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString() + profile['name'],
-        name: profile['name'],
+        id: id,
+        displayName: profile['name'],
+        username: profile['name'].toString().toLowerCase(),
+        email: '${profile['name'].toString().toLowerCase()}@example.com',
+        universityName: profile['university'],
+        universityLogo: '',
         age: profile['age'],
         gender: oppositeGender,
-        university: profile['university'],
-        location: profile['location'],
-        relationshipGoal: (_relationshipGoals..shuffle()).first,
+        intent: (_relationshipGoals..shuffle()).first,
         bio:
             'Love to travel, explore new places, and meet interesting people. Looking for someone to share adventures with! 🌍✨',
         photos: [profile['photo']],
         interests: (_interests..shuffle()).take(3).toList(),
-        isOnline: DateTime.now().second % 2 == 0,
+        lastActive: DateTime.now().second % 2 == 0 ? DateTime.now() : null,
       );
     }).toList();
   }

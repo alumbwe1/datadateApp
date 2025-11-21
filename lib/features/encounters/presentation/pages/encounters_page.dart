@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
@@ -74,20 +76,12 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
+        preferredSize: Size.fromHeight(55.h),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                // Image.asset(
-                //   'assets/images/dataDate.png',
-                //   height: 25,
-                //   width: 25,
-                //   fit: BoxFit.cover,
-                //   color: Colors.black,
-                // ),
-                // const SizedBox(width: 4),
                 Text(
                   'DataDate',
                   style: appStyle(
@@ -233,10 +227,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
             )
           : SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
                 child: Stack(
                   children: [
                     CardSwiper(
@@ -251,17 +242,17 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
                         if (direction == CardSwiperDirection.right) {
                           ref
                               .read(encountersProvider.notifier)
-                              .likeProfile(profile.id);
+                              .likeProfile(profile.id.toString());
                         } else if (direction == CardSwiperDirection.left) {
                           ref
                               .read(encountersProvider.notifier)
-                              .skipProfile(profile.id);
+                              .skipProfile(profile.id.toString());
                         }
 
                         _handleSwipe(
                           direction,
-                          profile.id,
-                          profile.name,
+                          profile.id.toString(),
+                          profile.displayName,
                           profile.photos.first,
                         );
                         return true;
@@ -278,7 +269,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
                     ),
                     // Action buttons on top of the card swiper
                     Positioned(
-                      bottom: 20,
+                      bottom: 2.h,
                       left: 0,
                       right: 0,
                       child: _buildActionButtons(),
@@ -291,62 +282,107 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
   }
 
   Widget _buildActionButtons() {
+    // Get screen width for responsive sizing
+    final screenWidth = MediaQuery.of(context).size.width;
+    final buttonSpacing = screenWidth * 0.02; // 2% of screen width
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50),
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Rewind button
           _AnimatedActionButton(
-            icon: Icons.close,
-            color: Colors.red,
-            backgroundColor: Colors.white,
-            size: 60,
-            iconSize: 30,
+            icon: Icons.replay_rounded,
+            iconColor: const Color(0xFFFFC107),
+            size: screenWidth * 0.13,
+            iconSize: screenWidth * 0.06,
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Rewound last swipe',
+                    style: appStyle(14, Colors.white, FontWeight.w600),
+                  ),
+                  backgroundColor: Colors.black,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            },
+          ),
+          SizedBox(width: buttonSpacing),
+
+          // Pass button
+          _AnimatedActionButton(
+            icon: Icons.close_rounded,
+            iconColor: Color(0xFFFF4458),
+            size: screenWidth * 0.15,
+            iconSize: screenWidth * 0.08,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.left);
             },
           ),
+          SizedBox(width: buttonSpacing),
+
+          // Like button (larger)
           _AnimatedActionButton(
             icon: Iconsax.heart,
-            color: Colors.pink,
-            backgroundColor: Colors.white,
-            size: 70,
-            iconSize: 35,
+            iconColor: Colors.redAccent,
+            size: screenWidth * 0.18,
+            iconSize: screenWidth * 0.10,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.right);
             },
           ),
+          SizedBox(width: buttonSpacing),
+
+          // Super Like button
           _AnimatedActionButton(
-            icon: Iconsax.star,
-            color: Colors.amber,
-            backgroundColor: Colors.white,
-            size: 60,
-            iconSize: 30,
+            icon: Icons.star_rounded,
+            iconColor: const Color(0xFF2196F3),
+            size: screenWidth * 0.13,
+            iconSize: screenWidth * 0.06,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.right);
-              // Show super like animation
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
                     children: [
-                      const Icon(Iconsax.star, color: Colors.amber, size: 20),
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Super Like sent! ⭐',
-                        style: appStyle(14, Colors.black, FontWeight.w600),
+                        style: appStyle(14, Colors.white, FontWeight.w600),
                       ),
                     ],
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 10),
-
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.black,
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(seconds: 2),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               );
+            },
+          ),
+          SizedBox(width: buttonSpacing),
+
+          _AnimatedActionButton(
+            icon: IconlyBold.send,
+            iconColor: Color(0xFF9B59FF),
+            size: screenWidth * 0.15,
+            iconSize: screenWidth * 0.08,
+            onPressed: () {
+              _controller.swipe(CardSwiperDirection.left);
             },
           ),
         ],
@@ -545,8 +581,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
     );
   }
 
-  // Helper widget for feature items
-
   @override
   void dispose() {
     _controller.dispose();
@@ -556,16 +590,14 @@ class _EncountersPageState extends ConsumerState<EncountersPage> {
 
 class _AnimatedActionButton extends StatefulWidget {
   final IconData icon;
-  final Color color;
-  final Color backgroundColor;
+  final Color iconColor;
   final double size;
   final double iconSize;
   final VoidCallback onPressed;
 
   const _AnimatedActionButton({
     required this.icon,
-    required this.color,
-    required this.backgroundColor,
+    required this.iconColor,
     required this.size,
     required this.iconSize,
     required this.onPressed,
@@ -614,250 +646,41 @@ class _AnimatedActionButtonState extends State<_AnimatedActionButton>
         width: widget.size,
         height: widget.size,
         decoration: BoxDecoration(
-          color: widget.backgroundColor,
           shape: BoxShape.circle,
+          color: Colors.white,
           boxShadow: [
+            // Outer soft glow
             BoxShadow(
-              color: widget.color.withValues(alpha: 0.3),
-              blurRadius: 20,
+              color: Colors.black.withOpacity(0.20),
+              blurRadius: 18,
               spreadRadius: 2,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 6),
+            ),
+
+            // Inner glossy light
+            BoxShadow(
+              color: Colors.white.withOpacity(0.12),
+              blurRadius: 4,
+              spreadRadius: -2,
+              offset: const Offset(-2, -2),
             ),
           ],
         ),
         child: Material(
-          color: Colors.transparent,
+          type: MaterialType.transparency,
+          shape: const CircleBorder(),
           child: InkWell(
-            onTap: _handleTap,
             customBorder: const CircleBorder(),
+            splashColor: widget.iconColor.withOpacity(0.25),
+            highlightColor: widget.iconColor.withOpacity(0.10),
+            onTap: _handleTap,
             child: Center(
               child: Icon(
                 widget.icon,
-                color: widget.color,
+                color: widget.iconColor,
                 size: widget.iconSize,
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MatchDialog extends StatefulWidget {
-  final String profileName;
-  final String profilePhoto;
-
-  const _MatchDialog({required this.profileName, required this.profilePhoto});
-
-  @override
-  State<_MatchDialog> createState() => _MatchDialogState();
-}
-
-class _MatchDialogState extends State<_MatchDialog>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
-      ),
-    );
-
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.zero,
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.pink.withValues(alpha: 0.3),
-                Colors.purple.withValues(alpha: 0.3),
-              ],
-            ),
-          ),
-          child: Stack(
-            children: [
-              // Close button
-              Positioned(
-                top: 50,
-                left: 20,
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-
-              // Content
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Animated hearts
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: const Text(
-                          '💕',
-                          style: TextStyle(fontSize: 100),
-                        ),
-                      ),
-
-                      const SizedBox(height: 40),
-
-                      // Match text
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Text(
-                          'It\'s a Match!',
-                          style: appStyle(48, Colors.white, FontWeight.w900)
-                              .copyWith(
-                                letterSpacing: -1,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black.withValues(alpha: 0.3),
-                                    offset: const Offset(0, 4),
-                                    blurRadius: 8,
-                                  ),
-                                ],
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Text(
-                          '${widget.profileName} likes you back – get those sparks flying ✨',
-                          style: appStyle(18, Colors.white, FontWeight.w500)
-                              .copyWith(
-                                height: 1.4,
-                                letterSpacing: -0.3,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black.withValues(alpha: 0.3),
-                                    offset: const Offset(0, 2),
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-
-                      const SizedBox(height: 60),
-
-                      // Profile image
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 4),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                            image: DecorationImage(
-                              image: NetworkImage(widget.profilePhoto),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 60),
-
-                      // Send message button
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              // Navigate to chat
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(vertical: 18),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                            child: Text(
-                              'Send Message',
-                              style: appStyle(
-                                18,
-                                Colors.black,
-                                FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Keep swiping button
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            'Keep Swiping',
-                            style: appStyle(16, Colors.white, FontWeight.w600),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
       ),
@@ -991,7 +814,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                         const SizedBox(width: 8),
                         const Icon(Icons.verified, size: 24),
                         const SizedBox(width: 4),
-                        Icon(
+                        const Icon(
                           Iconsax.diamonds,
                           color: Colors.purpleAccent,
                           size: 24,
@@ -1035,7 +858,7 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                           : [
                               'Everything in Standard',
                               'Unlimited Super Likes',
-                              'Tired of broke girlfriends or boyfriends? Meet Zambia’s elite only',
+                              'Tired of broke girlfriends or boyfriends? Meet Zambia\'s elite only',
                               'Match with verified rich singles',
                               'VIP badge on your profile',
                               'Top priority in search results',
@@ -1045,14 +868,17 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                         (feature) => Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: Row(
-                            spacing: 12,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                color: Colors.black,
-                                size: 24,
+                              const Padding(
+                                padding: EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.check_circle_rounded,
+                                  color: Colors.black,
+                                  size: 24,
+                                ),
                               ),
-
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   feature,
@@ -1066,7 +892,8 @@ class _PremiumBottomSheetState extends State<_PremiumBottomSheet> {
                             ],
                           ),
                         ),
-                      ),
+                      )
+                      .toList(),
                 ],
               ),
             ),

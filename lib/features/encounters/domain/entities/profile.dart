@@ -1,44 +1,86 @@
 import 'package:equatable/equatable.dart';
 
 class Profile extends Equatable {
-  final String id;
-  final String name;
-  final int age;
-  final String gender;
-  final String university;
-  final String location;
-  final String relationshipGoal;
+  final int id;
+  final String displayName;
+  final String username;
+  final String email;
+  final String? firstName;
+  final String? lastName;
+  final String universityName;
+  final String universityLogo;
   final String? bio;
-  final List<String> photos;
+  final String gender;
+  final String intent;
+  final int age;
+  final String? course;
+  final int? graduationYear;
   final List<String> interests;
-  final bool isOnline;
+  final List<String> photos;
+  final DateTime? lastActive;
 
   const Profile({
     required this.id,
-    required this.name,
-    required this.age,
-    required this.gender,
-    required this.university,
-    required this.location,
-    required this.relationshipGoal,
+    required this.displayName,
+    required this.username,
+    required this.email,
+    this.firstName,
+    this.lastName,
+    required this.universityName,
+    required this.universityLogo,
     this.bio,
-    required this.photos,
+    required this.gender,
+    required this.intent,
+    required this.age,
+    this.course,
+    this.graduationYear,
     this.interests = const [],
-    this.isOnline = false,
+    this.photos = const [],
+    this.lastActive,
   });
+
+  factory Profile.fromJson(Map<String, dynamic> json) {
+    return Profile(
+      id: json['id'],
+      displayName: json['display_name'],
+      username: json['user']['username'],
+      email: json['user']['email'],
+      firstName: json['user']['first_name'],
+      lastName: json['user']['last_name'],
+      universityName: json['university_data']['name'],
+      universityLogo: json['university_data']['logo'],
+      bio: json['display_bio'],
+      gender: json['gender'],
+      intent: json['intent'],
+      age: json['age'],
+      course: json['course'],
+      graduationYear: json['graduation_year'],
+      interests: List<String>.from(json['interests'] ?? []),
+      photos: List<String>.from(json['imageUrls'] ?? []),
+      lastActive: json['last_active'] != null
+          ? DateTime.parse(json['last_active'])
+          : null,
+    );
+  }
 
   @override
   List<Object?> get props => [
     id,
-    name,
-    age,
-    gender,
-    university,
-    location,
-    relationshipGoal,
+    displayName,
+    username,
+    email,
+    firstName,
+    lastName,
+    universityName,
+    universityLogo,
     bio,
-    photos,
+    gender,
+    intent,
+    age,
+    course,
+    graduationYear,
     interests,
-    isOnline,
+    photos,
+    lastActive,
   ];
 }

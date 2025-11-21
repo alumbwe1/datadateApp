@@ -204,22 +204,6 @@ class _LikesPageState extends ConsumerState<LikesPage> {
                 ),
               ),
 
-              // Online indicator
-              if (profile.isOnline)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-
               // Profile info
               Positioned(
                 bottom: 0,
@@ -232,7 +216,7 @@ class _LikesPageState extends ConsumerState<LikesPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${profile.name}, ${profile.age}',
+                        '${profile.displayName}, ${profile.age}',
                         style: appStyle(17, Colors.white, FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -248,7 +232,7 @@ class _LikesPageState extends ConsumerState<LikesPage> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              profile.location,
+                              profile.universityName,
                               style: appStyle(
                                 12,
                                 Colors.white.withOpacity(0.9),
@@ -283,7 +267,7 @@ class _LikesPageState extends ConsumerState<LikesPage> {
                           children: [
                             Icon(Iconsax.heart, size: 17, color: Colors.black),
                             Text(
-                              'Here for ${profile.relationshipGoal}',
+                              'Here for ${profile.intent}',
                               style: appStyle(
                                 10,
                                 Colors.black,
