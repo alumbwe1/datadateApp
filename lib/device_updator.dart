@@ -1,3 +1,4 @@
+import 'package:datadate/core/utils/custom_logs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/network/api_client.dart';
@@ -12,20 +13,20 @@ class DeviceInfoUpdater {
       final fcmToken = prefs.getString('fcmToken');
       if (fcmToken == null) {
         if (kDebugMode) {
-          print('ℹ️ No FCM token found, skipping update');
+          CustomLogs.info('ℹ️ No FCM token found, skipping update');
         }
         return;
       }
 
       final lastSentToken = prefs.getString('lastSentFcmToken');
 
-      // Only update if token has changed
-      if (lastSentToken == fcmToken) {
-        if (kDebugMode) {
-          print('ℹ️ FCM token unchanged, skipping backend update');
-        }
-        return;
-      }
+      // // Only update if token has changed
+      // if (lastSentToken == fcmToken) {
+      //   if (kDebugMode) {
+      //     CustomLogs.info('ℹ️ FCM token unchanged, skipping backend update');
+      //   }
+      //   return;
+      // }
 
       // Send to backend
       await apiClient.post('/auth/fcm-token/', data: {'fcm_token': fcmToken});
@@ -34,11 +35,11 @@ class DeviceInfoUpdater {
       await prefs.setString('lastSentFcmToken', fcmToken);
 
       if (kDebugMode) {
-        print('✅ FCM token updated on backend');
+        CustomLogs.success('✅ FCM token updated on backend');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error updating FCM token: $e');
+        CustomLogs.error('❌ Error updating FCM token: $e');
       }
     }
   }

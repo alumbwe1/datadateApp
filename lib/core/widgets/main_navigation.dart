@@ -86,10 +86,10 @@ class _MainNavigationState extends State<MainNavigation>
                   activeColor: Colors.blue,
                 ),
                 _buildNavItem(
-                  icon: Icons.favorite,
+                  icon: Iconsax.heart,
                   label: 'Likes',
                   index: 2,
-                  activeColor: Colors.red,
+                  activeColor: Colors.blue,
                 ),
                 _buildNavItem(
                   svgPath: 'assets/svgs/beacon.svg',

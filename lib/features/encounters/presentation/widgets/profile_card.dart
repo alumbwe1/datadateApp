@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../domain/entities/profile.dart';
 import '../pages/profile_details_page.dart';
+import 'crush_bottom_sheet.dart';
 
 class ProfileCard extends StatefulWidget {
   final Profile profile;
@@ -38,428 +39,9 @@ class _ProfileCardState extends State<ProfileCard> {
       isScrollControlled: true,
       isDismissible: true,
       enableDrag: true,
-      builder: (context) => TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutCubic,
-        builder: (context, value, child) {
-          return Transform.translate(
-            offset: Offset(0, 50 * (1 - value)),
-            child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
-          );
-        },
-        child: SafeArea(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 30,
-                  offset: const Offset(0, -10),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Drag handle
-                Container(
-                  margin: const EdgeInsets.only(top: 12),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-
-                Flexible(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Profile image with animated heart
-                        TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          duration: const Duration(milliseconds: 800),
-                          curve: Curves.elasticOut,
-                          builder: (context, value, child) {
-                            return Transform.scale(scale: value, child: child);
-                          },
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Outer glow ring
-                              Container(
-                                width: 140,
-                                height: 140,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.pink.withValues(alpha: 0.3),
-                                      Colors.red.withValues(alpha: 0.2),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              // Profile image
-                              Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 4,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: CircleAvatar(
-                                  radius: 60,
-                                  backgroundImage: CachedNetworkImageProvider(
-                                    widget.profile.photos.first,
-                                  ),
-                                ),
-                              ),
-                              // Heart badge with rotation
-                              Positioned(
-                                bottom: 0,
-                                right: 45,
-                                child: TweenAnimationBuilder<double>(
-                                  tween: Tween(begin: 0.0, end: 1.0),
-                                  duration: const Duration(milliseconds: 1000),
-                                  curve: Curves.elasticOut,
-                                  builder: (context, value, child) {
-                                    return Transform.scale(
-                                      scale: value,
-                                      child: Transform.rotate(
-                                        angle: (1 - value) * 0.5,
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFFFF6B9D),
-                                          Color(0xFFFE5196),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.pink.withValues(
-                                            alpha: 0.5,
-                                          ),
-                                          blurRadius: 16,
-                                          offset: const Offset(0, 6),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Iconsax.heart,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Title with badge
-                        Column(
-                          children: [
-                            Text(
-                              'Send ${widget.profile.displayName} a Crush',
-                              style: appStyle(
-                                30,
-                                Colors.black,
-                                FontWeight.w900,
-                              ).copyWith(letterSpacing: -0.5),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 7,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.pink.withValues(alpha: 0.15),
-                                    Colors.purple.withValues(alpha: 0.15),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    '✨',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Stand Out',
-                                    style: appStyle(
-                                      12,
-                                      Colors.pink[700]!,
-                                      FontWeight.w700,
-                                    ).copyWith(letterSpacing: 0.5),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Description with highlight
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              style: appStyle(
-                                15,
-                                Colors.grey.shade700,
-                                FontWeight.w400,
-                              ).copyWith(height: 1.6, letterSpacing: -0.2),
-                              children: [
-                                const TextSpan(
-                                  text:
-                                      'Don\'t just swipe right, stand out by sending a Crush and you\'re ',
-                                ),
-                                TextSpan(
-                                  text: 'up to 2.2x more likely',
-                                  style: appStyle(
-                                    15,
-                                    Colors.pink[600]!,
-                                    FontWeight.w800,
-                                  ),
-                                ),
-                                const TextSpan(text: ' to chat*'),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Primary button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Row(
-                                    children: [
-                                      const Icon(
-                                        Iconsax.heart,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          'Crush sent to ${widget.profile.displayName}! 💕',
-                                          style: appStyle(
-                                            14,
-                                            Colors.white,
-                                            FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  backgroundColor: Colors.black,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  margin: const EdgeInsets.all(16),
-                                  duration: const Duration(seconds: 3),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 18),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Iconsax.heart, size: 20),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Send a Crush',
-                                  style: appStyle(
-                                    17,
-                                    Colors.white,
-                                    FontWeight.w700,
-                                  ).copyWith(letterSpacing: -0.3),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Credits info card
-                        Container(
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.amber.withValues(alpha: 0.1),
-                                Colors.orange.withValues(alpha: 0.05),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.amber.withValues(alpha: 0.3),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFFFD700),
-                                      Color(0xFFFFA500),
-                                    ],
-                                  ),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.amber.withValues(
-                                        alpha: 0.4,
-                                      ),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.stars_rounded,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Out of Crushes',
-                                      style: appStyle(
-                                        15,
-                                        Colors.black,
-                                        FontWeight.w700,
-                                      ).copyWith(letterSpacing: -0.3),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Get another for 50 credits',
-                                      style: appStyle(
-                                        13,
-                                        Colors.grey[700]!,
-                                        FontWeight.w500,
-                                      ).copyWith(letterSpacing: -0.2),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                Icons.chevron_right,
-                                color: Colors.grey,
-                                size: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Secondary button
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: Text(
-                            'Maybe later',
-                            style: appStyle(
-                              16,
-                              Colors.grey.shade600,
-                              FontWeight.w600,
-                            ).copyWith(letterSpacing: -0.3),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Disclaimer
-                        Text(
-                          '*Based on top 10% of 2.7m users sample',
-                          style: appStyle(
-                            11,
-                            Colors.grey.shade400,
-                            FontWeight.w600,
-                          ).copyWith(letterSpacing: -0.2),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      builder: (context) => CrushBottomSheet(
+        profileName: widget.profile.displayName,
+        profilePhoto: widget.profile.photos.first,
       ),
     );
   }
@@ -645,103 +227,133 @@ class _ProfileCardState extends State<ProfileCard> {
                         Row(
                           children: [
                             Flexible(
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      '${widget.profile.displayName}, ${widget.profile.age}',
-                                      style:
-                                          appStyle(
-                                            28.sp,
-                                            Colors.white,
-                                            FontWeight.w900,
-                                          ).copyWith(
-                                            letterSpacing: -0.8,
-                                            height: 1.1,
-                                            shadows: [
-                                              Shadow(
-                                                color: Colors.black.withOpacity(
-                                                  0.3,
-                                                ),
-                                                offset: const Offset(0, 2),
-                                                blurRadius: 8,
-                                              ),
-                                            ],
+                              child: Text(
+                                '${widget.profile.displayName}, ${widget.profile.age}',
+                                style:
+                                    appStyle(
+                                      21.sp,
+                                      Colors.white,
+                                      FontWeight.w900,
+                                    ).copyWith(
+                                      letterSpacing: -0.8,
+                                      height: 1.1,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.3,
                                           ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                          offset: const Offset(0, 2),
+                                          blurRadius: 8,
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Icon(
-                                    Icons.verified,
-                                    color: Colors.blue[400],
-                                    size: 24,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        offset: const Offset(0, 2),
-                                        blurRadius: 4,
-                                      ),
-                                    ],
-                                  ),
-
-                                  //Image for campus
-                                ],
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(width: 12),
-
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    const Color(0xFF00FF94),
-                                    const Color(0xFF00D977),
-                                  ],
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.verified,
+                              color: Colors.blue[400],
+                              size: 24,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 4,
                                 ),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(
-                                      0xFF00FF94,
-                                    ).withOpacity(0.4),
-                                    blurRadius: 8,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
+                              ],
+                            ),
+                            const SizedBox(width: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4.r),
+                              child: CachedNetworkImage(
+                                imageUrl: widget.profile.universityLogo,
+                                width: 20,
+                                height: 20,
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) =>
+                                    const Icon(
+                                      Icons.school,
+                                      size: 20,
+                                      color: Colors.grey,
                                     ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Online',
-                                    style: appStyle(
-                                      12,
-                                      Colors.black,
-                                      FontWeight.w800,
-                                    ).copyWith(letterSpacing: 0.2),
-                                  ),
-                                ],
                               ),
                             ),
                           ],
                         ),
 
-                        SizedBox(height: 5.h),
+                        SizedBox(height: 10.h),
+
+                        // Course info
+                        if (widget.profile.course != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.school_rounded,
+                                  color: Colors.white,
+                                  size: 16,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    widget.profile.course!,
+                                    style:
+                                        appStyle(
+                                          14,
+                                          Colors.white,
+                                          FontWeight.w600,
+                                        ).copyWith(
+                                          letterSpacing: -0.2,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.3,
+                                              ),
+                                              offset: const Offset(0, 1),
+                                              blurRadius: 4,
+                                            ),
+                                          ],
+                                        ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        SizedBox(height: 10.h),
 
                         // Container(
                         //   padding: const EdgeInsets.all(10),
@@ -865,64 +477,6 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 }
 
-// Helper widget for info rows
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color iconColor;
-
-  const _InfoRow({
-    required this.icon,
-    required this.text,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 18,
-            shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.2),
-                offset: const Offset(0, 1),
-                blurRadius: 4,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: appStyle(15, Colors.white, FontWeight.w600).copyWith(
-              letterSpacing: -0.2,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withOpacity(0.3),
-                  offset: const Offset(0, 1),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 Widget _buildTinderTag({required IconData icon, required String label}) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -967,43 +521,4 @@ Widget _buildTinderTag({required IconData icon, required String label}) {
       ],
     ),
   );
-}
-
-// Helper widget for quick info badges
-class _QuickInfoBadge extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color? color;
-
-  const _QuickInfoBadge({required this.icon, required this.text, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: (color ?? Colors.white).withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: (color ?? Colors.white).withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color ?? Colors.white, size: 14),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: appStyle(
-              12,
-              Colors.white,
-              FontWeight.w700,
-            ).copyWith(letterSpacing: 0.2),
-          ),
-        ],
-      ),
-    );
-  }
 }

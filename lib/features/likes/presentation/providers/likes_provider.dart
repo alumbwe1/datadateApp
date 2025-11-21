@@ -1,14 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/api_providers.dart';
-import '../../../interactions/data/datasources/interactions_remote_datasource.dart';
+import '../../../interactions/data/datasources/interactions_remote_datasource.dart'
+    as interactions_ds;
 import '../../../interactions/data/models/like_model.dart';
 import '../../data/repositories/likes_repository_impl.dart';
 import '../../domain/repositories/likes_repository.dart';
 
 // Data source provider
 final interactionsRemoteDataSourceProvider =
-    Provider<InteractionsRemoteDataSource>((ref) {
-      return InteractionsRemoteDataSourceImpl(
+    Provider<interactions_ds.InteractionsRemoteDataSource>((ref) {
+      return interactions_ds.InteractionsRemoteDataSourceImpl(
         apiClient: ref.watch(apiClientProvider),
       );
     });

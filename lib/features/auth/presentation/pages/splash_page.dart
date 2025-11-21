@@ -43,20 +43,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       final authState = ref.read(authProvider);
 
       if (authState.user != null) {
-        // User is logged in, check if onboarding is completed
-        final hasCompletedOnboarding = await ref
-            .read(onboardingProvider.notifier)
-            .hasCompletedOnboarding();
-
-        if (mounted) {
-          if (hasCompletedOnboarding) {
-            // Go directly to home
-            context.go('/encounters');
-          } else {
-            // Complete onboarding
-            context.go('/onboarding/welcome');
-          }
-        }
+        context.go('/encounters');
       } else {
         // Not logged in or token validation failed, go to login
         if (mounted) {

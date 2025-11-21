@@ -1,83 +1,99 @@
+import 'package:dio/dio.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
-import '../../../../core/network/api_response.dart';
 import '../models/chat_room_model.dart';
 import '../models/message_model.dart';
 
-abstract class ChatRemoteDataSource {
-  Future<List<ChatRoomModel>> getChatRooms();
-  Future<ChatRoomModel> getChatRoomDetail(int roomId);
-  Future<PaginatedResponse<MessageModel>> getMessages({
-    required int roomId,
-    int page = 1,
-    int pageSize = 50,
-  });
-  Future<MessageModel> sendMessage({
-    required int roomId,
-    required String content,
-  });
-  Future<MessageModel> markMessageAsRead(int messageId);
-}
+class ChatRemoteDataSource {
+  final ApiClient _apiClient;
 
-class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
-  final ApiClient apiClient;
+  ChatRemoteDataSource({ApiClient? apiClient})
+    : _apiClient = apiClient ?? ApiClient();
 
-  ChatRemoteDataSourceImpl({required this.apiClient});
-
-  @override
+  /// Get all chat rooms for the current user
   Future<List<ChatRoomModel>> getChatRooms() async {
-    final response = await apiClient.get<List<dynamic>>(ApiEndpoints.chatRooms);
-
-    return response
-        .map((json) => ChatRoomModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+    try {
+      final response = await _apiClient.get(ApiEndpoints.chatRooms);
+      final List<dynamic> data = response.data as List<dynamic>;
+      return data
+          .map((json) => ChatRoomModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw Exception(
+        e.response?.data['detail'] ?? 'Failed to fetch chat rooms',
+      );
+    }
   }
 
-  @override
+  /// Get chat room details by ID
   Future<ChatRoomModel> getChatRoomDetail(int roomId) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiEndpoints.chatRoomDetail(roomId),
-    );
-
-    return ChatRoomModel.fromJson(response);
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.chatRoomDetail(roomId),
+      );
+      return ChatRoomModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(
+        e.response?.data['detail'] ?? 'Failed to fetch chat room details',
+      );
+    }
   }
 
-  @override
-  Future<PaginatedResponse<MessageModel>> getMessages({
+  /// Get messages for a specific chat room with pagination
+  Future<Map<String, dynamic>> getMessages({
     required int roomId,
     int page = 1,
     int pageSize = 50,
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiEndpoints.chatMessages(roomId),
-      queryParameters: {'page': page, 'page_size': pageSize},
-    );
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.chatMessages(roomId),
+        queryParameters: {'page': page, 'page_size': pageSize},
+      );
 
-    return PaginatedResponse.fromJson(
-      response,
-      (json) => MessageModel.fromJson(json),
-    );
+      final data = response.data as Map<String, dynamic>;
+      final List<dynamic> results = data['results'] as List<dynamic>;
+
+      return {
+        'count': data['count'] as int,
+        'next': data['next'] as String?,
+        'previous': data['previous'] as String?,
+        'messages': results
+            .map((json) => MessageModel.fromJson(json as Map<String, dynamic>))
+            .toList(),
+      };
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['detail'] ?? 'Failed to fetch messages');
+    }
   }
 
-  @override
+  /// Send a message via HTTP (for offline/fallback)
   Future<MessageModel> sendMessage({
     required int roomId,
     required String content,
   }) async {
-    final response = await apiClient.post<Map<String, dynamic>>(
-      ApiEndpoints.chatMessages(roomId),
-      data: {'content': content},
-    );
-
-    return MessageModel.fromJson(response);
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.chatMessages(roomId),
+        data: {'content': content},
+      );
+      return MessageModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['detail'] ?? 'Failed to send message');
+    }
   }
 
-  @override
+  /// Mark a message as read
   Future<MessageModel> markMessageAsRead(int messageId) async {
-    final response = await apiClient.patch<Map<String, dynamic>>(
-      ApiEndpoints.markMessageRead(messageId),
-    );
-
-    return MessageModel.fromJson(response);
+    try {
+      final response = await _apiClient.patch(
+        ApiEndpoints.markMessageRead(messageId),
+      );
+      return MessageModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(
+        e.response?.data['detail'] ?? 'Failed to mark message as read',
+      );
+    }
   }
 }
