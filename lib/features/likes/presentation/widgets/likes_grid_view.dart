@@ -6,6 +6,7 @@ import '../providers/likes_provider.dart';
 import 'likes_empty_state.dart';
 import 'received_like_card.dart';
 import 'sent_like_card.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 
 class LikesGridView extends ConsumerWidget {
@@ -28,7 +29,7 @@ class LikesGridView extends ConsumerWidget {
       onRefresh: () async {
         await ref.read(likesProvider.notifier).loadAllLikes();
       },
-      color: const Color(0xFFFF6B9D),
+      color: AppColors.secondaryLight,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
@@ -56,7 +57,7 @@ class LikesGridView extends ConsumerWidget {
                   }
 
                   final profile = userInfo.profile;
-                  final imageUrl = profile?.imageUrls?.isNotEmpty == true
+                  final imageUrl = profile?.imageUrls.isNotEmpty == true
                       ? profile!.imageUrls.first
                       : null;
 

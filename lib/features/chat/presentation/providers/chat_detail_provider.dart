@@ -84,6 +84,8 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   }
 
   Future<void> loadMessages({bool isLoadMore = false}) async {
+    print('📥 loadMessages called for room $roomId (isLoadMore: $isLoadMore)');
+
     if (isLoadMore) {
       if (!state.hasMore || state.isLoadingMore) return;
       state = state.copyWith(isLoadingMore: true);
@@ -92,6 +94,7 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
     }
 
     try {
+      print('   🌐 Fetching messages from API...');
       final result = await _repository.getMessages(
         roomId: roomId,
         page: isLoadMore ? state.currentPage + 1 : 1,
@@ -101,12 +104,18 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
       final newMessages = result['messages'] as List<MessageModel>;
       final hasMore = result['next'] != null;
 
+      print('   ✅ Received ${newMessages.length} messages from API');
+      print('   📊 Has more pages: $hasMore');
+
       if (isLoadMore) {
         state = state.copyWith(
           messages: [...state.messages, ...newMessages],
           isLoadingMore: false,
           hasMore: hasMore,
           currentPage: state.currentPage + 1,
+        );
+        print(
+          '   ✅ Added to existing messages. Total: ${state.messages.length}',
         );
       } else {
         state = state.copyWith(
@@ -115,8 +124,10 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
           hasMore: hasMore,
           currentPage: 1,
         );
+        print('   ✅ Set messages. Total: ${newMessages.length}');
       }
     } catch (e) {
+      print('   ❌ Error loading messages: $e');
       state = state.copyWith(
         isLoading: false,
         isLoadingMore: false,
@@ -126,43 +137,63 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   }
 
   Future<void> _connectWebSocket() async {
+    print('🔌 Attempting to connect WebSocket for room $roomId...');
     try {
       await _webSocketService.connect(roomId);
       state = state.copyWith(isConnected: true);
+      print('✅ WebSocket connected successfully');
 
       _wsSubscription = _webSocketService.messages.listen((data) {
+        print('📨 WebSocket message received: $data');
         _handleWebSocketMessage(data);
       });
     } catch (e) {
+      print('❌ WebSocket connection failed: $e');
       state = state.copyWith(isConnected: false);
     }
   }
 
   void _handleWebSocketMessage(Map<String, dynamic> data) {
     final type = data['type'] as String?;
+    print('🔄 Handling WebSocket message type: $type');
 
     switch (type) {
       case 'chat_message':
+        print('   💬 New chat message received');
         final messageData = data['message'] as Map<String, dynamic>;
         final message = MessageModel.fromJson(messageData);
+        print('   Adding message to UI: ${message.content}');
         _addNewMessage(message);
         break;
 
       case 'typing':
         final isTyping = data['is_typing'] as bool? ?? false;
+        print('   ⌨️ Typing indicator: $isTyping');
         state = state.copyWith(isTyping: isTyping);
         break;
 
       case 'message_read':
         final messageId = data['message_id'] as int;
+        print('   ✓✓ Message $messageId marked as read');
         _markMessageAsRead(messageId);
         break;
+
+      default:
+        print('   ⚠️ Unknown message type: $type');
     }
   }
 
   void _addNewMessage(MessageModel message) {
+    // Check if message already exists (prevent duplicates from WebSocket echo)
+    final exists = state.messages.any((msg) => msg.id == message.id);
+    if (exists) {
+      print('   ⚠️ Message ${message.id} already exists, skipping duplicate');
+      return;
+    }
+
     final updatedMessages = [message, ...state.messages];
     state = state.copyWith(messages: updatedMessages);
+    print('   ✅ Message added to UI (total: ${updatedMessages.length})');
   }
 
   void _markMessageAsRead(int messageId) {
@@ -178,19 +209,33 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   Future<void> sendMessage(String content) async {
     if (content.trim().isEmpty) return;
 
+    print('🟢 ChatDetailNotifier.sendMessage called');
+    print('   Content: "$content"');
+    print('   Room ID: $roomId');
+    print('   WebSocket connected: ${state.isConnected}');
+
     try {
+      // Always send via HTTP to ensure message is saved and appears in UI
+      print('   📤 Sending message via HTTP...');
+      final message = await _repository.sendMessage(
+        roomId: roomId,
+        content: content,
+      );
+      print('   ✅ HTTP send successful, adding to UI');
+      _addNewMessage(message);
+
+      // Also send via WebSocket if connected for real-time delivery to other user
       if (state.isConnected) {
-        // Send via WebSocket for real-time
-        _webSocketService.sendMessage(content);
-      } else {
-        // Fallback to HTTP
-        final message = await _repository.sendMessage(
-          roomId: roomId,
-          content: content,
-        );
-        _addNewMessage(message);
+        print('   📡 Also sending via WebSocket for real-time...');
+        try {
+          _webSocketService.sendMessage(content);
+        } catch (wsError) {
+          print('   ⚠️ WebSocket send failed (non-critical): $wsError');
+          // Non-critical error, message already sent via HTTP
+        }
       }
     } catch (e) {
+      print('   ❌ Error sending message: $e');
       // Show error to user
       state = state.copyWith(error: 'Failed to send message: ${e.toString()}');
     }

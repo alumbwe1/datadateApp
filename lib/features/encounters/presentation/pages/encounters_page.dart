@@ -6,6 +6,7 @@ import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
@@ -138,7 +139,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             child: Row(
               children: [
                 Text(
-                  'DataDate',
+                  'HeartLink',
                   style: appStyle(
                     25,
                     Colors.black,
@@ -359,7 +360,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
         children: [
           AnimatedActionButton(
             icon: Icons.replay_rounded,
-            iconColor: const Color(0xFFFFC107),
+            iconColor: AppColors.warning,
             size: screenWidth * 0.13,
             iconSize: screenWidth * 0.06,
             onPressed: () {
@@ -383,7 +384,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           SizedBox(width: buttonSpacing),
           AnimatedActionButton(
             icon: Icons.close_rounded,
-            iconColor: const Color(0xFFFF4458),
+            iconColor: AppColors.nope,
             size: screenWidth * 0.15,
             iconSize: screenWidth * 0.08,
             onPressed: () {
@@ -403,7 +404,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           SizedBox(width: buttonSpacing),
           AnimatedActionButton(
             icon: Icons.star_rounded,
-            iconColor: const Color(0xFF2196F3),
+            iconColor: AppColors.superLike,
             size: screenWidth * 0.13,
             iconSize: screenWidth * 0.06,
             onPressed: () {
@@ -437,7 +438,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           SizedBox(width: buttonSpacing),
           AnimatedActionButton(
             icon: IconlyBold.send,
-            iconColor: const Color(0xFF9B59FF),
+            iconColor: AppColors.like,
             size: screenWidth * 0.15,
             iconSize: screenWidth * 0.08,
             onPressed: () {

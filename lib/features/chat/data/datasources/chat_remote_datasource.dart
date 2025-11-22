@@ -58,21 +58,40 @@ class ChatRemoteDataSource {
     int pageSize = 50,
   }) async {
     try {
-      final data = await _apiClient.get<Map<String, dynamic>>(
+      final data = await _apiClient.get<dynamic>(
         ApiEndpoints.chatMessages(roomId),
         queryParameters: {'page': page, 'page_size': pageSize},
       );
 
-      final List<dynamic> results = data['results'] as List<dynamic>;
-
-      return {
-        'count': data['count'] as int,
-        'next': data['next'] as String?,
-        'previous': data['previous'] as String?,
-        'messages': results
-            .map((json) => MessageModel.fromJson(json as Map<String, dynamic>))
-            .toList(),
-      };
+      // Handle both paginated and non-paginated responses
+      if (data is List) {
+        // Direct list response (non-paginated)
+        return {
+          'count': data.length,
+          'next': null,
+          'previous': null,
+          'messages': data
+              .map(
+                (json) => MessageModel.fromJson(json as Map<String, dynamic>),
+              )
+              .toList(),
+        };
+      } else if (data is Map<String, dynamic>) {
+        // Paginated response
+        final List<dynamic> results = data['results'] as List<dynamic>;
+        return {
+          'count': data['count'] as int,
+          'next': data['next'] as String?,
+          'previous': data['previous'] as String?,
+          'messages': results
+              .map(
+                (json) => MessageModel.fromJson(json as Map<String, dynamic>),
+              )
+              .toList(),
+        };
+      } else {
+        throw Exception('Unexpected response format');
+      }
     } on DioException catch (e) {
       throw Exception(e.response?.data['detail'] ?? 'Failed to fetch messages');
     }
@@ -85,8 +104,8 @@ class ChatRemoteDataSource {
   }) async {
     try {
       final data = await _apiClient.post<Map<String, dynamic>>(
-        ApiEndpoints.chatMessages(roomId),
-        data: {'content': content},
+        ApiEndpoints.sendMessage,
+        data: {'room': roomId, 'content': content},
       );
       return MessageModel.fromJson(data);
     } on DioException catch (e) {

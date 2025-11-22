@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../interactions/data/models/like_model.dart';
 
@@ -62,7 +63,9 @@ class SentLikeCard extends StatelessWidget {
           color: Colors.grey[200],
           child: const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B9D)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.secondaryLight,
+              ),
             ),
           ),
         ),

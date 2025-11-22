@@ -46,6 +46,13 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
             .loadMessages(isLoadMore: true);
       }
     });
+
+    // Explicitly load messages when page opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('🔄 ChatDetailPage opened for room ${widget.roomId}');
+      print('🔄 Explicitly calling loadMessages...');
+      ref.read(chatDetailProvider(widget.roomId).notifier).loadMessages();
+    });
   }
 
   void _onTextChanged() {

@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:datadate/core/utils/custom_logs.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/api_endpoints.dart';
 import '../constants/app_constants.dart';
 
-/// WebSocket service for real-time chat
 class WebSocketService {
   WebSocketChannel? _channel;
   final FlutterSecureStorage _secureStorage;
@@ -40,21 +40,21 @@ class WebSocketService {
             final message = jsonDecode(data as String) as Map<String, dynamic>;
             _messageController.add(message);
           } catch (e) {
-            print('❌ Error parsing WebSocket message: $e');
+            CustomLogs.error('❌ Error parsing WebSocket message: $e');
           }
         },
         onError: (error) {
-          print('❌ WebSocket error: $error');
+          CustomLogs.info('❌ WebSocket error: $error');
           _messageController.addError(error);
         },
         onDone: () {
-          print('🔌 WebSocket connection closed');
+          CustomLogs.info('🔌 WebSocket connection closed');
         },
       );
 
-      print('✅ WebSocket connected to room $roomId');
+      CustomLogs.info('✅ WebSocket connected to room $roomId');
     } catch (e) {
-      print('❌ Failed to connect WebSocket: $e');
+      CustomLogs.error('❌ Failed to connect WebSocket: $e');
       rethrow;
     }
   }
@@ -92,7 +92,7 @@ class WebSocketService {
   void disconnect() {
     _channel?.sink.close();
     _channel = null;
-    print('🔌 WebSocket disconnected');
+    CustomLogs.info('🔌 WebSocket disconnected');
   }
 
   /// Dispose resources

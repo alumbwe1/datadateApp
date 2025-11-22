@@ -26,22 +26,50 @@ class InteractionsRemoteDataSourceImpl implements InteractionsRemoteDataSource {
       ApiEndpoints.matches,
     );
 
+    List<Map<String, dynamic>> matchesData = [];
+
     // Handle paginated response
     if (response.containsKey('results')) {
-      final results = response['results'] as List<dynamic>;
-      return results
-          .cast<Map<String, dynamic>>()
-          .map((json) => MatchModel.fromJson(json))
-          .toList();
+      matchesData = (response['results'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
     }
     // Fallback for non-paginated response
     else if (response is List) {
-      return (response as List<dynamic>)
-          .map((json) => MatchModel.fromJson(json as Map<String, dynamic>))
-          .toList();
+      matchesData = (response as List<dynamic>).cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Unexpected response format for matches');
     }
 
-    throw Exception('Unexpected response format for matches');
+    // Get current user ID from stored auth data
+    final currentUserId = await _getCurrentUserId();
+
+    return matchesData.map((json) {
+      final match = MatchModel.fromJson(json);
+      // Determine which user is the "other" user
+      final otherUser = match.user1.id == currentUserId
+          ? match.user2
+          : match.user1;
+
+      return MatchModel(
+        id: match.id,
+        user1: match.user1,
+        user2: match.user2,
+        otherUser: otherUser,
+        createdAt: match.createdAt,
+      );
+    }).toList();
+  }
+
+  Future<int?> _getCurrentUserId() async {
+    try {
+      // Get user ID from profile endpoint
+      final userData = await apiClient.get<Map<String, dynamic>>(
+        ApiEndpoints.myProfile,
+      );
+      return userData['user']?['id'] as int?;
+    } catch (e) {
+      return null;
+    }
   }
 
   @override

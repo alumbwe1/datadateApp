@@ -20,17 +20,42 @@ class MessageModel {
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
+    // Handle sender field - can be either int, object, or sender_id
+    int senderId;
+    SenderInfo? senderInfo;
+
+    // Check for sender_id first (used in last_message from chat rooms)
+    if (json.containsKey('sender_id')) {
+      senderId = json['sender_id'] as int;
+      senderInfo = null;
+    } else {
+      final senderField = json['sender'];
+      if (senderField is int) {
+        // sender is just an ID
+        senderId = senderField;
+        senderInfo = json['sender_info'] != null
+            ? SenderInfo.fromJson(json['sender_info'] as Map<String, dynamic>)
+            : null;
+      } else if (senderField is Map<String, dynamic>) {
+        // sender is an object with full info
+        senderId = senderField['id'] as int;
+        senderInfo = SenderInfo.fromJson(senderField);
+      } else {
+        throw Exception('Invalid sender field type');
+      }
+    }
+
     return MessageModel(
-      id: json['id'] as int,
-      room: json['room'] as int,
-      sender: json['sender'] as int,
-      senderInfo: json['sender_info'] != null
-          ? SenderInfo.fromJson(json['sender_info'] as Map<String, dynamic>)
-          : null,
+      id: json['id'] as int? ?? 0, // Default to 0 for last_message preview
+      room: json['room'] as int? ?? 0, // Default to 0 for last_message preview
+      sender: senderId,
+      senderInfo: senderInfo,
       content: json['content'] as String,
-      isRead: json['is_read'] as bool,
+      isRead: json['is_read'] as bool? ?? false, // Default to false
       createdAt: json['created_at'] as String,
-      updatedAt: json['updated_at'] as String,
+      updatedAt:
+          json['updated_at'] as String? ??
+          json['created_at'] as String, // Fallback to created_at
     );
   }
 

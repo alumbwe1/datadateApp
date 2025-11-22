@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 
 class LikesTabBar extends StatelessWidget {
@@ -22,13 +23,16 @@ class LikesTabBar extends StatelessWidget {
             FontWeight.w600,
           ),
           indicator: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFF6B9D), Color(0xFFFF8FB3)],
+            gradient: LinearGradient(
+              colors: [
+                AppColors.secondaryLight,
+                AppColors.secondaryLight.withOpacity(0.8),
+              ],
             ),
             borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF6B9D).withOpacity(0.3),
+                color: AppColors.secondaryLight.withOpacity(0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

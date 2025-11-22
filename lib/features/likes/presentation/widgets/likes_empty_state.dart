@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 
 class LikesEmptyState extends StatelessWidget {
@@ -21,8 +22,8 @@ class LikesEmptyState extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFFFF6B9D).withOpacity(0.1),
-                      const Color(0xFFFF8FB3).withOpacity(0.05),
+                      AppColors.secondaryLight.withOpacity(0.1),
+                      AppColors.secondaryLight.withOpacity(0.05),
                     ],
                   ),
                   shape: BoxShape.circle,

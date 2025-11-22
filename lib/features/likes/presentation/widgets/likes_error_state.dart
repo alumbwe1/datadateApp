@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 
 class LikesErrorState extends StatelessWidget {
@@ -45,7 +46,7 @@ class LikesErrorState extends StatelessWidget {
             ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B9D),
+                backgroundColor: AppColors.secondaryLight,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 40,
@@ -55,7 +56,7 @@ class LikesErrorState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
                 elevation: 4,
-                shadowColor: const Color(0xFFFF6B9D).withOpacity(0.4),
+                shadowColor: AppColors.secondaryLight.withOpacity(0.4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

@@ -18,7 +18,7 @@ class DeviceInfoUpdater {
         return;
       }
 
-      final lastSentToken = prefs.getString('lastSentFcmToken');
+      //final lastSentToken = prefs.getString('lastSentFcmToken');
 
       // // Only update if token has changed
       // if (lastSentToken == fcmToken) {

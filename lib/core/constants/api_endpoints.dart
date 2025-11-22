@@ -34,7 +34,7 @@ class ApiEndpoints {
   static String deleteGalleryPhoto(int id) => '/api/gallery/$id/';
 
   // Interactions
-  static const String matches = '/api/v1.0/matches/';
+  static const String matches = '/api/v1.0/interactions/matches/';
   static const String likes = '/api/v1.0/interactions/likes/';
   static const String profileViews = '/api/v1.0/profile-views/';
 
@@ -42,7 +42,9 @@ class ApiEndpoints {
   static const String chatRooms = '/api/v1.0/chat/rooms/';
   static String chatRoomDetail(int id) => '/api/v1.0/chat/rooms/$id/';
   static String chatMessages(int roomId) =>
-      '/api/v1.0/chat/rooms/$roomId/messages/';
+      '/api/v1.0/chat/rooms/$roomId/messages/'; // GET only - read messages
+  static const String sendMessage =
+      '/api/v1.0/chat/messages/'; // POST only - send message
   static String markMessageRead(int messageId) =>
       '/api/v1.0/chat/messages/$messageId/mark_read/';
 

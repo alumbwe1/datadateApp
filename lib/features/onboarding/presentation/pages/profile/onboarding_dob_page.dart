@@ -292,11 +292,11 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
               CustomButton(
                 text: 'Continue',
                 onPressed:
-                    dateOfBirth != null && _calculateAge(dateOfBirth!) >= 18
+                    dateOfBirth != null && _calculateAge(dateOfBirth) >= 18
                     ? () {
                         HapticFeedback.mediumImpact();
                         // Double-check age before navigation
-                        final age = _calculateAge(dateOfBirth!);
+                        final age = _calculateAge(dateOfBirth);
                         if (age >= 18) {
                           context.push('/onboarding/interests');
                         } else {
@@ -370,7 +370,6 @@ class _CustomDatePickerBottomSheetState
     _selectedYear = widget.initialYear;
 
     final now = DateTime.now();
-    final minYear = now.year - 100;
     final maxYear = now.year - 18;
 
     _dayController = FixedExtentScrollController(initialItem: _selectedDay - 1);

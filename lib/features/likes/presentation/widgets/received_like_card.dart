@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../interactions/data/models/like_model.dart';
 
@@ -26,10 +27,10 @@ class ReceivedLikeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = [
-      const Color(0xFFFF6B9D),
-      const Color(0xFFFFA500),
-      const Color(0xFF9B59B6),
-      const Color(0xFF3498DB),
+      AppColors.secondaryLight,
+      AppColors.warning,
+      AppColors.primaryLight,
+      AppColors.accentLight,
     ];
     final borderColor = colors[index % colors.length];
 
@@ -86,7 +87,9 @@ class ReceivedLikeCard extends StatelessWidget {
           color: Colors.grey[200],
           child: const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B9D)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.secondaryLight,
+              ),
             ),
           ),
         ),
