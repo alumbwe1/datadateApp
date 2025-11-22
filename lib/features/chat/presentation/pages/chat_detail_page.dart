@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:iconly/iconly.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../../core/constants/app_style.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/chat_detail_provider.dart';
 
 class ChatDetailPage extends ConsumerStatefulWidget {
@@ -72,12 +73,19 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
 
   void _sendMessage() {
     final content = _messageController.text.trim();
-    if (content.isEmpty) return;
+    print('🔵 _sendMessage called with content: "$content"');
 
+    if (content.isEmpty) {
+      print('⚠️ Message content is empty, aborting send');
+      return;
+    }
+
+    print('📤 Sending message to room ${widget.roomId}');
     ref.read(chatDetailProvider(widget.roomId).notifier).sendMessage(content);
     _messageController.clear();
     _scrollToBottom();
     HapticFeedback.lightImpact();
+    print('✅ Message send initiated');
   }
 
   @override
@@ -92,13 +100,15 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatDetailProvider(widget.roomId));
     final room = chatState.room;
+    final currentUser = ref.watch(authProvider).user;
 
     if (chatState.isLoading && room == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Colors.white,
         body: const Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B9D)),
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
           ),
         ),
       );
@@ -106,7 +116,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
 
     if (chatState.error != null && room == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Colors.white,
         body: Center(
           child: Text(
             chatState.error!,
@@ -116,8 +126,13 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
       );
     }
 
+    // Get current user ID as int
+    final currentUserId = currentUser != null
+        ? int.tryParse(currentUser.id)
+        : null;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(room),
       body: Column(
         children: [
@@ -134,7 +149,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                       controller: _scrollController,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 16,
+                        vertical: 20,
                       ),
                       physics: const BouncingScrollPhysics(),
                       reverse: true,
@@ -147,8 +162,9 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                             child: Padding(
                               padding: EdgeInsets.all(16.0),
                               child: CircularProgressIndicator(
+                                strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Color(0xFFFF6B9D),
+                                  Colors.black,
                                 ),
                               ),
                             ),
@@ -156,9 +172,10 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                         }
 
                         final message = chatState.messages[index];
+                        // Check if message is sent by current user
                         final isSent =
-                            message.sender == room?.participant1 ||
-                            message.sender == room?.participant2;
+                            currentUserId != null &&
+                            message.sender == currentUserId;
                         final showAvatar =
                             index == 0 ||
                             chatState.messages[index - 1].sender !=
@@ -166,16 +183,10 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
 
                         return TweenAnimationBuilder<double>(
                           tween: Tween(begin: 0.0, end: 1.0),
-                          duration: const Duration(milliseconds: 300),
+                          duration: const Duration(milliseconds: 200),
                           curve: Curves.easeOut,
                           builder: (context, value, child) {
-                            return Opacity(
-                              opacity: value,
-                              child: Transform.translate(
-                                offset: Offset(0, 20 * (1 - value)),
-                                child: child,
-                              ),
-                            );
+                            return Opacity(opacity: value, child: child);
                           },
                           child: _buildMessageBubble(
                             message,
@@ -204,141 +215,122 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
       elevation: 0,
       surfaceTintColor: Colors.white,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
-      leadingWidth: 40,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-        onPressed: () {
-          Navigator.pop(context);
-          HapticFeedback.lightImpact();
-        },
+      leadingWidth: 56,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: IconButton(
+          icon: const Icon(Icons.arrow_back, size: 22, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+            HapticFeedback.lightImpact();
+          },
+        ),
       ),
       title: Row(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey.shade200, width: 2),
-                ),
-                child: ClipOval(
-                  child: imageUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: imageUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) =>
-                              Container(color: Colors.grey[200]),
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[300],
-                            child: Center(
-                              child: Text(
-                                otherUser?.displayName[0].toUpperCase() ?? '?',
-                                style: appStyle(
-                                  18,
-                                  Colors.grey[600]!,
-                                  FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      : Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Text(
-                              otherUser?.displayName[0].toUpperCase() ?? '?',
-                              style: appStyle(
-                                18,
-                                Colors.grey[600]!,
-                                FontWeight.w700,
-                              ),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isOnline ? Colors.black : Colors.grey.shade300,
+                width: 1.5,
+              ),
+            ),
+            child: ClipOval(
+              child: imageUrl != null
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          Container(color: Colors.grey[100]),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[100],
+                        child: Center(
+                          child: Text(
+                            otherUser?.displayName[0].toUpperCase() ?? '?',
+                            style: appStyle(
+                              16,
+                              Colors.grey[700]!,
+                              FontWeight.w600,
                             ),
                           ),
                         ),
-                ),
-              ),
-              if (isOnline)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00D9A3),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey[100],
+                      child: Center(
+                        child: Text(
+                          otherUser?.displayName[0].toUpperCase() ?? '?',
+                          style: appStyle(
+                            16,
+                            Colors.grey[700]!,
+                            FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-            ],
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   otherUser?.displayName ?? 'Chat',
                   style: appStyle(
-                    17,
+                    16,
                     Colors.black,
-                    FontWeight.w700,
-                  ).copyWith(letterSpacing: -0.3),
+                    FontWeight.w600,
+                  ).copyWith(letterSpacing: -0.2),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  isOnline ? 'Online' : 'Offline',
-                  style: appStyle(
-                    12,
-                    isOnline ? const Color(0xFF00D9A3) : Colors.grey,
-                    FontWeight.w500,
+                if (isOnline)
+                  Text(
+                    'Active now',
+                    style: appStyle(12, Colors.grey[600]!, FontWeight.w400),
                   ),
-                ),
               ],
             ),
           ),
         ],
       ),
       actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 4),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.more_vert, size: 22, color: Colors.black87),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              _showOptionsBottomSheet();
-            },
-          ),
+        IconButton(
+          icon: const Icon(Icons.more_horiz, size: 24, color: Colors.black),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            _showOptionsBottomSheet();
+          },
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 4),
       ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(height: 0.5, color: Colors.grey[200]),
+      ),
     );
   }
 
   Widget _buildTypingIndicator() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[100]!, width: 1)),
+      ),
       child: Row(
         children: [
-          Text(
-            'Typing',
-            style: appStyle(12, Colors.grey[600]!, FontWeight.w500),
-          ),
-          const SizedBox(width: 4),
           SizedBox(
-            width: 20,
-            height: 12,
+            width: 40,
+            height: 16,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: List.generate(3, (index) {
                 return TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: 1.0),
@@ -348,7 +340,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                     return Transform.translate(
                       offset: Offset(
                         0,
-                        -4 * (value > 0.5 ? 1 - value : value) * 2,
+                        -3 * (value > 0.5 ? 1 - value : value) * 2,
                       ),
                       child: child,
                     );
@@ -357,8 +349,9 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                     if (mounted) setState(() {});
                   },
                   child: Container(
-                    width: 4,
-                    height: 4,
+                    width: 6,
+                    height: 6,
+                    margin: const EdgeInsets.only(right: 4),
                     decoration: BoxDecoration(
                       color: Colors.grey[400],
                       shape: BoxShape.circle,
@@ -378,9 +371,9 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
 
     return Padding(
       padding: EdgeInsets.only(
-        bottom: 8,
-        left: isSent ? 60 : 0,
-        right: isSent ? 0 : 60,
+        bottom: 2,
+        left: isSent ? 80 : 0,
+        right: isSent ? 0 : 80,
       ),
       child: Row(
         mainAxisAlignment: isSent
@@ -390,27 +383,27 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
         children: [
           if (!isSent && showAvatar)
             Container(
-              width: 32,
-              height: 32,
-              margin: const EdgeInsets.only(right: 8, bottom: 4),
+              width: 28,
+              height: 28,
+              margin: const EdgeInsets.only(right: 8, bottom: 2),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade200, width: 1.5),
+                border: Border.all(color: Colors.grey.shade300, width: 1),
               ),
               child: ClipOval(
                 child: imageUrl != null
                     ? CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover)
                     : Container(
-                        color: Colors.grey[300],
+                        color: Colors.grey[100],
                         child: Center(
                           child: Text(
                             room?.otherParticipant?.displayName[0]
                                     .toUpperCase() ??
                                 '?',
                             style: appStyle(
-                              14,
-                              Colors.grey[600]!,
-                              FontWeight.w700,
+                              12,
+                              Colors.grey[700]!,
+                              FontWeight.w600,
                             ),
                           ),
                         ),
@@ -418,32 +411,17 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
               ),
             )
           else if (!isSent)
-            const SizedBox(width: 40),
+            const SizedBox(width: 36),
           Flexible(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              margin: const EdgeInsets.only(bottom: 2),
               decoration: BoxDecoration(
-                gradient: isSent
-                    ? const LinearGradient(
-                        colors: [Color(0xFF000000), Color(0xFF2a2a2a)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      )
-                    : null,
-                color: isSent ? null : Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(20),
-                  topRight: const Radius.circular(20),
-                  bottomLeft: Radius.circular(isSent ? 20 : 4),
-                  bottomRight: Radius.circular(isSent ? 4 : 20),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                color: isSent ? Colors.black : Colors.grey[100],
+                borderRadius: BorderRadius.circular(20),
+                border: isSent
+                    ? null
+                    : Border.all(color: Colors.grey[200]!, width: 0.5),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -452,11 +430,11 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                     message.content,
                     style: appStyle(
                       15,
-                      isSent ? Colors.white : Colors.black87,
+                      isSent ? Colors.white : Colors.black,
                       FontWeight.w400,
-                    ).copyWith(height: 1.4, letterSpacing: -0.2),
+                    ).copyWith(height: 1.35, letterSpacing: -0.1),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -468,19 +446,19 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                         style: appStyle(
                           11,
                           isSent
-                              ? Colors.white.withValues(alpha: 0.7)
-                              : Colors.grey,
-                          FontWeight.w500,
+                              ? Colors.white.withValues(alpha: 0.6)
+                              : Colors.grey[600]!,
+                          FontWeight.w400,
                         ),
                       ),
                       if (isSent) ...[
                         const SizedBox(width: 4),
                         Icon(
-                          message.isRead ? Icons.done_all : Icons.done,
+                          message.isRead ? Icons.done_all : Icons.check,
                           size: 14,
                           color: message.isRead
-                              ? const Color(0xFF00D9A3)
-                              : Colors.white.withValues(alpha: 0.7),
+                              ? Colors.blue[400]
+                              : Colors.white.withValues(alpha: 0.6),
                         ),
                       ],
                     ],
@@ -496,85 +474,60 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
 
   Widget _buildMessageInput() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        border: Border(top: BorderSide(color: Colors.grey[200]!, width: 0.5)),
       ),
       child: SafeArea(
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.grey.shade200),
+                constraints: const BoxConstraints(minHeight: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        focusNode: _focusNode,
-                        maxLines: null,
-                        textCapitalization: TextCapitalization.sentences,
-                        decoration: InputDecoration(
-                          hintText: 'Type a message...',
-                          hintStyle: appStyle(
-                            15,
-                            Colors.grey.shade400,
-                            FontWeight.w400,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                          ),
-                        ),
-                        style: appStyle(15, Colors.black87, FontWeight.w400),
-                      ),
-                    ),
-                  ],
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                ),
+                child: TextField(
+                  controller: _messageController,
+                  focusNode: _focusNode,
+                  maxLines: 5,
+                  minLines: 1,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    hintText: 'Message...',
+                    hintStyle: appStyle(15, Colors.grey[500]!, FontWeight.w400),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: appStyle(15, Colors.black, FontWeight.w400),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             GestureDetector(
-              onTap: _sendMessage,
+              onTap: _isTyping ? _sendMessage : null,
               child: Container(
-                width: 48,
-                height: 48,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  gradient: _isTyping
-                      ? const LinearGradient(
-                          colors: [Color(0xFF000000), Color(0xFF2a2a2a)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                      : null,
-                  color: _isTyping ? null : Colors.grey.shade200,
+                  color: _isTyping ? Colors.black : Colors.transparent,
                   shape: BoxShape.circle,
-                  boxShadow: _isTyping
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
                 ),
-                child: Icon(
-                  IconlyBold.send,
-                  color: _isTyping ? Colors.white : Colors.grey.shade400,
-                  size: 22,
+                child: Center(
+                  child: Icon(
+                    IconlyBold.send,
+                    color: _isTyping ? Colors.white : Colors.grey[400],
+                    size: 20,
+                  ),
                 ),
               ),
             ),
@@ -592,26 +545,27 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 100,
-              height: 100,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Colors.grey[50],
                 shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey[200]!, width: 1),
               ),
               child: const Center(
-                child: Text('👋', style: TextStyle(fontSize: 50)),
+                child: Text('💬', style: TextStyle(fontSize: 40)),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Text(
-              'Start the Conversation',
-              style: appStyle(22, Colors.black, FontWeight.w800),
+              'No messages yet',
+              style: appStyle(20, Colors.black, FontWeight.w600),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
-              'Say hi and break the ice!',
-              style: appStyle(15, Colors.grey[600]!, FontWeight.w500),
+              'Send a message to start the conversation',
+              style: appStyle(14, Colors.grey[600]!, FontWeight.w400),
               textAlign: TextAlign.center,
             ),
           ],
@@ -624,48 +578,68 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
       builder: (context) => Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
+                margin: const EdgeInsets.only(top: 8),
+                width: 36,
                 height: 4,
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
+              const SizedBox(height: 8),
               ListTile(
-                leading: const Icon(Icons.block, color: Colors.red),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 4,
+                ),
+                leading: Icon(
+                  Icons.block_outlined,
+                  color: Colors.grey[800],
+                  size: 24,
+                ),
                 title: Text(
-                  'Block User',
-                  style: appStyle(15, Colors.red, FontWeight.w600),
+                  'Block',
+                  style: appStyle(16, Colors.black, FontWeight.w500),
                 ),
                 onTap: () {
                   Navigator.pop(context);
+                  HapticFeedback.lightImpact();
                 },
               ),
+              Divider(height: 1, color: Colors.grey[200]),
               ListTile(
-                leading: const Icon(Icons.report, color: Colors.orange),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 4,
+                ),
+                leading: Icon(
+                  Icons.report_outlined,
+                  color: Colors.grey[800],
+                  size: 24,
+                ),
                 title: Text(
                   'Report',
-                  style: appStyle(15, Colors.orange, FontWeight.w600),
+                  style: appStyle(16, Colors.black, FontWeight.w500),
                 ),
                 onTap: () {
                   Navigator.pop(context);
+                  HapticFeedback.lightImpact();
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
             ],
           ),
         ),

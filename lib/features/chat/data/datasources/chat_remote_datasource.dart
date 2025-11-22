@@ -13,11 +13,23 @@ class ChatRemoteDataSource {
   /// Get all chat rooms for the current user
   Future<List<ChatRoomModel>> getChatRooms() async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.chatRooms);
-      final List<dynamic> data = response.data as List<dynamic>;
-      return data
-          .map((json) => ChatRoomModel.fromJson(json as Map<String, dynamic>))
-          .toList();
+      final data = await _apiClient.get<dynamic>(ApiEndpoints.chatRooms);
+
+      // Handle paginated response
+      if (data is Map<String, dynamic> && data.containsKey('results')) {
+        // Paginated response
+        final List<dynamic> results = data['results'] as List<dynamic>;
+        return results
+            .map((json) => ChatRoomModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else if (data is List) {
+        // Direct list response
+        return data
+            .map((json) => ChatRoomModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Unexpected response format');
+      }
     } on DioException catch (e) {
       throw Exception(
         e.response?.data['detail'] ?? 'Failed to fetch chat rooms',
@@ -28,10 +40,10 @@ class ChatRemoteDataSource {
   /// Get chat room details by ID
   Future<ChatRoomModel> getChatRoomDetail(int roomId) async {
     try {
-      final response = await _apiClient.get(
+      final data = await _apiClient.get<Map<String, dynamic>>(
         ApiEndpoints.chatRoomDetail(roomId),
       );
-      return ChatRoomModel.fromJson(response.data as Map<String, dynamic>);
+      return ChatRoomModel.fromJson(data);
     } on DioException catch (e) {
       throw Exception(
         e.response?.data['detail'] ?? 'Failed to fetch chat room details',
@@ -46,12 +58,11 @@ class ChatRemoteDataSource {
     int pageSize = 50,
   }) async {
     try {
-      final response = await _apiClient.get(
+      final data = await _apiClient.get<Map<String, dynamic>>(
         ApiEndpoints.chatMessages(roomId),
         queryParameters: {'page': page, 'page_size': pageSize},
       );
 
-      final data = response.data as Map<String, dynamic>;
       final List<dynamic> results = data['results'] as List<dynamic>;
 
       return {
@@ -73,11 +84,11 @@ class ChatRemoteDataSource {
     required String content,
   }) async {
     try {
-      final response = await _apiClient.post(
+      final data = await _apiClient.post<Map<String, dynamic>>(
         ApiEndpoints.chatMessages(roomId),
         data: {'content': content},
       );
-      return MessageModel.fromJson(response.data as Map<String, dynamic>);
+      return MessageModel.fromJson(data);
     } on DioException catch (e) {
       throw Exception(e.response?.data['detail'] ?? 'Failed to send message');
     }
@@ -86,10 +97,10 @@ class ChatRemoteDataSource {
   /// Mark a message as read
   Future<MessageModel> markMessageAsRead(int messageId) async {
     try {
-      final response = await _apiClient.patch(
+      final data = await _apiClient.patch<Map<String, dynamic>>(
         ApiEndpoints.markMessageRead(messageId),
       );
-      return MessageModel.fromJson(response.data as Map<String, dynamic>);
+      return MessageModel.fromJson(data);
     } on DioException catch (e) {
       throw Exception(
         e.response?.data['detail'] ?? 'Failed to mark message as read',

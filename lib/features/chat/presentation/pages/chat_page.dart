@@ -48,6 +48,10 @@ class _ChatPageState extends ConsumerState<ChatPage>
     final chatRoomsState = ref.watch(chatRoomsProvider);
     final rooms = chatRoomsState.rooms;
 
+    print('🔍 Chat Page - Rooms loaded: ${rooms.length}');
+    print('🔍 Chat Page - Is loading: ${chatRoomsState.isLoading}');
+    print('🔍 Chat Page - Error: ${chatRoomsState.error}');
+
     // Filter rooms based on search
     final filteredRooms = _searchController.text.isEmpty
         ? rooms
@@ -71,41 +75,38 @@ class _ChatPageState extends ConsumerState<ChatPage>
         backgroundColor: Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.white,
-        centerTitle: true,
+        centerTitle: false,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        title: Text(
-          'Messages',
-          style: appStyle(
-            26,
-            Colors.black,
-            FontWeight.w800,
-          ).copyWith(letterSpacing: -0.5),
+        title: Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            'Messages',
+            style: appStyle(
+              24,
+              Colors.black,
+              FontWeight.w700,
+            ).copyWith(letterSpacing: -0.5),
+          ),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 4),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.tune_rounded,
-                size: 22,
-                color: Colors.black87,
-              ),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-              },
-            ),
+          IconButton(
+            icon: const Icon(Icons.edit_square, size: 24, color: Colors.black),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+            },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 0.5, color: Colors.grey[200]),
+        ),
       ),
       body: chatRoomsState.isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B9D)),
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
               ),
             )
           : chatRoomsState.error != null
@@ -114,7 +115,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
               onRefresh: () async {
                 await ref.read(chatRoomsProvider.notifier).loadChatRooms();
               },
-              color: const Color(0xFFFF6B9D),
+              color: Colors.black,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -122,11 +123,10 @@ class _ChatPageState extends ConsumerState<ChatPage>
                   if (newMatches.isNotEmpty) ...[
                     _buildNewMatchesHeader(newMatches.length),
                     _buildNewMatchesList(newMatches),
-                    const SizedBox(height: 12),
+                    Divider(height: 1, color: Colors.grey[200]),
                   ],
-                  _buildMessagesHeader(conversations.length),
                   Expanded(
-                    child: conversations.isEmpty
+                    child: conversations.isEmpty && newMatches.isEmpty
                         ? _buildEmptyState()
                         : _buildConversationsList(conversations),
                   ),
@@ -139,16 +139,11 @@ class _ChatPageState extends ConsumerState<ChatPage>
   Widget _buildSearchBar() {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: _isSearching ? Colors.black : Colors.transparent,
-            width: 1.5,
-          ),
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(10),
         ),
         child: TextField(
           controller: _searchController,
@@ -160,20 +155,16 @@ class _ChatPageState extends ConsumerState<ChatPage>
             setState(() {});
           },
           decoration: InputDecoration(
-            hintText: 'Search conversations',
-            hintStyle: appStyle(
-              15,
-              Colors.grey.shade400,
-              FontWeight.w400,
-            ).copyWith(letterSpacing: -0.2),
+            hintText: 'Search',
+            hintStyle: appStyle(16, Colors.grey[600]!, FontWeight.w400),
             prefixIcon: Icon(
               IconlyLight.search,
-              color: _isSearching ? Colors.black : Colors.grey[400],
-              size: 22,
+              color: Colors.grey[600],
+              size: 20,
             ),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
-                    icon: Icon(Icons.clear, color: Colors.grey[600], size: 20),
+                    icon: Icon(Icons.cancel, color: Colors.grey[600], size: 18),
                     onPressed: () {
                       _searchController.clear();
                       setState(() {});
@@ -182,7 +173,8 @@ class _ChatPageState extends ConsumerState<ChatPage>
                   )
                 : null,
             filled: false,
-            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(vertical: 10),
             border: InputBorder.none,
           ),
         ),
@@ -193,43 +185,14 @@ class _ChatPageState extends ConsumerState<ChatPage>
   Widget _buildNewMatchesHeader(int count) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF000000), Color(0xFF2a2a2a)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.favorite, size: 15, color: Colors.white),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'New Matches',
-            style: appStyle(
-              17,
-              Colors.black,
-              FontWeight.w700,
-            ).copyWith(letterSpacing: -0.4),
-          ),
-          const Spacer(),
-          Text(
-            '$count',
-            style: appStyle(14, Colors.grey.shade500, FontWeight.w600),
-          ),
-        ],
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      child: Text(
+        'New Matches',
+        style: appStyle(
+          15,
+          Colors.black,
+          FontWeight.w600,
+        ).copyWith(letterSpacing: -0.2),
       ),
     );
   }
@@ -237,10 +200,11 @@ class _ChatPageState extends ConsumerState<ChatPage>
   Widget _buildNewMatchesList(List rooms) {
     return Container(
       color: Colors.white,
-      height: 140,
+      height: 110,
+      padding: const EdgeInsets.only(bottom: 12),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         physics: const BouncingScrollPhysics(),
         itemCount: rooms.length,
         itemBuilder: (context, index) {

@@ -25,12 +25,10 @@ class WebSocketService {
         throw Exception('No authentication token found');
       }
 
-      // Build WebSocket URL
-      final wsUrl = ApiEndpoints.baseUrl
-          .replaceFirst('https://', 'wss://')
-          .replaceFirst('http://', 'ws://');
+      String base = 'ws://192.168.240.145:7000';
+
       final uri = Uri.parse(
-        '$wsUrl${ApiEndpoints.chatWebSocket(roomId)}?token=$token',
+        '$base${ApiEndpoints.chatWebSocket(roomId)}?token=$token',
       );
 
       _channel = WebSocketChannel.connect(uri);

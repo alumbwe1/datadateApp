@@ -2,8 +2,8 @@ import 'message_model.dart';
 
 class ChatRoomModel {
   final int id;
-  final int participant1;
-  final int participant2;
+  final ParticipantInfo participant1;
+  final ParticipantInfo participant2;
   final int? matchId;
   final ParticipantInfo otherParticipant;
   final MessageModel? lastMessage;
@@ -24,8 +24,12 @@ class ChatRoomModel {
   factory ChatRoomModel.fromJson(Map<String, dynamic> json) {
     return ChatRoomModel(
       id: json['id'] as int,
-      participant1: json['participant1'] as int,
-      participant2: json['participant2'] as int,
+      participant1: ParticipantInfo.fromJson(
+        json['participant1'] as Map<String, dynamic>,
+      ),
+      participant2: ParticipantInfo.fromJson(
+        json['participant2'] as Map<String, dynamic>,
+      ),
       matchId: json['match'] as int?,
       otherParticipant: ParticipantInfo.fromJson(
         json['other_participant'] as Map<String, dynamic>,
@@ -41,8 +45,8 @@ class ChatRoomModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'participant1': participant1,
-      'participant2': participant2,
+      'participant1': participant1.toJson(),
+      'participant2': participant2.toJson(),
       'match': matchId,
       'other_participant': otherParticipant.toJson(),
       'last_message': lastMessage?.toJson(),
@@ -56,23 +60,28 @@ class ParticipantInfo {
   final int id;
   final String username;
   final String displayName;
-  final String? profilePhoto;
+  final List<String> imageUrls;
   final bool? isOnline;
 
   ParticipantInfo({
     required this.id,
     required this.username,
     required this.displayName,
-    this.profilePhoto,
+    this.imageUrls = const [],
     this.isOnline,
   });
+
+  // Get first image URL or null
+  String? get profilePhoto => imageUrls.isNotEmpty ? imageUrls.first : null;
 
   factory ParticipantInfo.fromJson(Map<String, dynamic> json) {
     return ParticipantInfo(
       id: json['id'] as int,
       username: json['username'] as String,
       displayName: json['display_name'] as String,
-      profilePhoto: json['profile_photo'] as String?,
+      imageUrls: json['imageUrls'] != null
+          ? List<String>.from(json['imageUrls'] as List)
+          : [],
       isOnline: json['is_online'] as bool?,
     );
   }
@@ -82,7 +91,7 @@ class ParticipantInfo {
       'id': id,
       'username': username,
       'display_name': displayName,
-      'profile_photo': profilePhoto,
+      'imageUrls': imageUrls,
       'is_online': isOnline,
     };
   }
