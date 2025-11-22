@@ -317,10 +317,6 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
         ),
         const SizedBox(width: 4),
       ],
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
-        child: Container(height: 0.5, color: Colors.grey[200]),
-      ),
     );
   }
 

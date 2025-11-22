@@ -92,71 +92,185 @@ class _SplashPageState extends ConsumerState<SplashPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1565C0),
       body: Container(
-        decoration: const BoxDecoration(color: Color(0xFF1565C0)),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFFE91E63), // Pink
+              const Color(0xFFF06292), // Light Pink
+              const Color(0xFFFF4081), // Accent Pink
+            ],
+          ),
+        ),
         child: SafeArea(
-          child: Column(
+          child: Stack(
             children: [
-              const Spacer(flex: 2),
-
-              // Logo and Title Section
-              ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Image.asset(
-                        'assets/images/dataDate.png',
-                        height: 80,
-                        width: 80,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'DataDate',
-                      style: appStyle(42, Colors.white, FontWeight.w900)
-                          .copyWith(
-                            letterSpacing: -1.0,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.1),
-                                offset: const Offset(0, 2),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                    ),
-                  ],
+              // Animated background circles
+              Positioned(
+                top: -100,
+                right: -100,
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -150,
+                left: -150,
+                child: Container(
+                  width: 400,
+                  height: 400,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.08),
+                  ),
                 ),
               ),
 
-              const Spacer(flex: 3),
+              // Main content
+              Column(
+                children: [
+                  const Spacer(flex: 2),
 
-              // Custom Loading Indicator
-              AnimatedBuilder(
-                animation: _rotationController,
-                builder: (context, child) {
-                  return Transform.rotate(
-                    angle: _rotationController.value * 2 * math.pi,
-                    child: CustomPaint(
-                      size: const Size(50, 50),
-                      painter: CircularLoadingPainter(
-                        progress: _rotationController.value,
-                      ),
+                  // Logo and Title Section
+                  ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Logo container with gradient border
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white.withOpacity(0.4),
+                                Colors.white.withOpacity(0.2),
+                              ],
+                            ),
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(28),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              'assets/images/dataDate.png',
+                              height: 90,
+                              width: 90,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        // App name with gradient text effect
+                        ShaderMask(
+                          shaderCallback: (bounds) => LinearGradient(
+                            colors: [
+                              Colors.white,
+                              Colors.white.withOpacity(0.95),
+                            ],
+                          ).createShader(bounds),
+                          child: Text(
+                            'HeartLink',
+                            style: appStyle(48, Colors.white, FontWeight.w900)
+                                .copyWith(
+                                  letterSpacing: -1.5,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      offset: const Offset(0, 4),
+                                      blurRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Find Your Perfect Match',
+                          style: appStyle(16, Colors.white, FontWeight.w500)
+                              .copyWith(
+                                letterSpacing: 0.5,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.15),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
 
-              const SizedBox(height: 60),
+                  const Spacer(flex: 3),
+
+                  // Modern Loading Indicator
+                  Column(
+                    children: [
+                      AnimatedBuilder(
+                        animation: _rotationController,
+                        builder: (context, child) {
+                          return Transform.rotate(
+                            angle: _rotationController.value * 2 * math.pi,
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 3,
+                                ),
+                              ),
+                              child: CustomPaint(
+                                size: const Size(60, 60),
+                                painter: ModernLoadingPainter(
+                                  progress: _rotationController.value,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Loading...',
+                        style: appStyle(14, Colors.white, FontWeight.w600)
+                            .copyWith(
+                              letterSpacing: 1.0,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 80),
+                ],
+              ),
             ],
           ),
         ),
@@ -165,27 +279,18 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 }
 
-// Custom painter for the loading indicator
-class CircularLoadingPainter extends CustomPainter {
+// Modern loading painter with gradient effect
+class ModernLoadingPainter extends CustomPainter {
   final double progress;
 
-  CircularLoadingPainter({required this.progress});
+  ModernLoadingPainter({required this.progress});
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
+    final radius = (size.width / 2) - 6;
 
-    // Background circle
-    final bgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.0
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, bgPaint);
-
-    // Animated arc
+    // Animated arc with gradient effect
     final arcPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
@@ -202,10 +307,23 @@ class CircularLoadingPainter extends CustomPainter {
       false,
       arcPaint,
     );
+
+    // Add dots for modern effect
+    final dotPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 3; i++) {
+      final angle = startAngle + (sweepAngle * (i / 3));
+      final dotX = center.dx + radius * math.cos(angle);
+      final dotY = center.dy + radius * math.sin(angle);
+
+      canvas.drawCircle(Offset(dotX, dotY), 3.0, dotPaint);
+    }
   }
 
   @override
-  bool shouldRepaint(CircularLoadingPainter oldDelegate) {
+  bool shouldRepaint(ModernLoadingPainter oldDelegate) {
     return oldDelegate.progress != progress;
   }
 }

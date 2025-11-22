@@ -287,43 +287,25 @@ class _ChatPageState extends ConsumerState<ChatPage>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Messages',
-                style: appStyle(
-                  22,
-                  Colors.black,
-                  FontWeight.w800,
-                ).copyWith(letterSpacing: -0.5),
-              ),
-              if (matchesCount > 0)
-                Text(
-                  '$matchesCount new ${matchesCount == 1 ? 'match' : 'matches'}',
+              ShaderMask(
+                shaderCallback: (bounds) =>
+                    AppColors.heartGradient.createShader(
+                      Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                    ),
+                child: Text(
+                  'HeartLink',
                   style: appStyle(
-                    12,
-                    AppColors.secondaryLight,
-                    FontWeight.w600,
-                  ),
+                    25,
+                    Colors.white,
+                    FontWeight.w800,
+                  ).copyWith(letterSpacing: -0.3),
                 ),
+              ),
             ],
           ),
         ],
       ),
-      actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 12),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(40.r),
-          ),
-          child: IconButton(
-            icon: const Icon(IconlyLight.filter, size: 22),
-            color: Colors.black87,
-            onPressed: () {
-              HapticFeedback.lightImpact();
-            },
-          ),
-        ),
-      ],
+      actions: [],
     );
   }
 
@@ -375,78 +357,64 @@ class _ChatPageState extends ConsumerState<ChatPage>
   }
 
   Widget _buildMatchesSection(List matches) {
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'New Matches',
-                        style: appStyle(
-                          12.sp,
-                          Colors.grey.shade500,
-                          FontWeight.w700,
-                        ).copyWith(letterSpacing: -0.3, height: 1.2),
-                      ),
-                    ],
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'New Matches',
+                      style: appStyle(
+                        12.sp,
+                        Colors.grey.shade500,
+                        FontWeight.w700,
+                      ).copyWith(letterSpacing: -0.3, height: 1.2),
+                    ),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondaryLight.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${matches.length}',
-                    style: appStyle(
-                      12.sp,
-                      AppColors.secondaryLight,
-                      FontWeight.w700,
-                    ).copyWith(letterSpacing: -0.3),
-                  ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
                 ),
-              ],
-            ),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryLight.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${matches.length}',
+                  style: appStyle(
+                    12.sp,
+                    AppColors.secondaryLight,
+                    FontWeight.w700,
+                  ).copyWith(letterSpacing: -0.3),
+                ),
+              ),
+            ],
           ),
-          SizedBox(
-            height: 140.h,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              physics: const BouncingScrollPhysics(),
-              itemCount: matches.length,
-              itemBuilder: (context, index) {
-                final match = matches[index];
-                return _buildMatchCard(match, index);
-              },
-            ),
+        ),
+        SizedBox(
+          height: 140.h,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            physics: const BouncingScrollPhysics(),
+            itemCount: matches.length,
+            itemBuilder: (context, index) {
+              final match = matches[index];
+              return _buildMatchCard(match, index);
+            },
           ),
-          const SizedBox(height: 20),
-        ],
-      ),
+        ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 
@@ -479,41 +447,55 @@ class _ChatPageState extends ConsumerState<ChatPage>
                 Hero(
                   tag: 'match_${match.id}',
                   child: Container(
-                    width: 105,
-                    height: 105,
+                    width: 109,
+                    height: 109,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.secondaryLight.withOpacity(0.15),
-                          AppColors.secondaryLight.withOpacity(0.08),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+
+                      border: Border.all(
+                        color: AppColors.secondaryLight.withOpacity(0.3),
+                        width: 3,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
-                      child: imageUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: imageUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Shimmer.fromColors(
-                                baseColor: Colors.grey[200]!,
-                                highlightColor: Colors.grey[50]!,
-                                child: Container(color: Colors.white),
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  _buildAvatarPlaceholder(displayName),
-                            )
-                          : _buildAvatarPlaceholder(displayName),
+                    child: Container(
+                      width: 105,
+                      height: 105,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.white, width: 3),
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.secondaryLight.withOpacity(0.15),
+                            AppColors.secondaryLight.withOpacity(0.08),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: imageUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    Shimmer.fromColors(
+                                      baseColor: Colors.grey[200]!,
+                                      highlightColor: Colors.grey[50]!,
+                                      child: Container(color: Colors.white),
+                                    ),
+                                errorWidget: (context, url, error) =>
+                                    _buildAvatarPlaceholder(displayName),
+                              )
+                            : _buildAvatarPlaceholder(displayName),
+                      ),
                     ),
                   ),
                 ),
@@ -525,14 +507,14 @@ class _ChatPageState extends ConsumerState<ChatPage>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          AppColors.secondaryLight,
-                          AppColors.secondaryLight.withOpacity(0.9),
+                          AppColors.primaryLight,
+                          AppColors.primaryLight.withOpacity(0.9),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2.5),
+                      border: Border.all(color: Colors.white, width: 1.8.w),
                       boxShadow: [
                         BoxShadow(
                           color: AppColors.secondaryLight.withOpacity(0.4),
@@ -637,25 +619,8 @@ class _ChatPageState extends ConsumerState<ChatPage>
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: hasUnread
-              ? AppColors.secondaryLight.withOpacity(0.06)
-              : Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: hasUnread
-              ? Border.all(
-                  color: AppColors.secondaryLight.withOpacity(0.12),
-                  width: 1.5,
-                )
-              : null,
-          boxShadow: hasUnread
-              ? [
-                  BoxShadow(
-                    color: AppColors.secondaryLight.withOpacity(0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
         ),
         child: Row(
           children: [
@@ -666,34 +631,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
                   child: Container(
                     width: 62,
                     height: 62,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: hasUnread
-                          ? LinearGradient(
-                              colors: [
-                                AppColors.secondaryLight.withOpacity(0.15),
-                                AppColors.secondaryLight.withOpacity(0.08),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            )
-                          : null,
-                      border: Border.all(
-                        color: hasUnread
-                            ? AppColors.secondaryLight.withOpacity(0.3)
-                            : Colors.grey.shade200,
-                        width: 2.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: hasUnread
-                              ? AppColors.secondaryLight.withOpacity(0.15)
-                              : Colors.black.withOpacity(0.04),
-                          blurRadius: hasUnread ? 16 : 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
+                    decoration: BoxDecoration(shape: BoxShape.circle),
                     child: ClipOval(
                       child: imageUrl != null
                           ? CachedNetworkImage(
@@ -785,7 +723,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
                         ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 3.h),
                   Row(
                     children: [
                       Expanded(
@@ -795,7 +733,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
                             14,
                             hasUnread ? Colors.black87 : Colors.grey.shade500,
                             hasUnread ? FontWeight.w500 : FontWeight.w400,
-                          ).copyWith(letterSpacing: -0.2, height: 1.3),
+                          ).copyWith(letterSpacing: -0.3),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),

@@ -138,47 +138,69 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                Text(
-                  'HeartLink',
-                  style: appStyle(
-                    25,
-                    Colors.black,
-                    FontWeight.w800,
-                  ).copyWith(letterSpacing: -0.3),
+                // HeartLink Logo with gradient
+                ShaderMask(
+                  shaderCallback: (bounds) =>
+                      AppColors.heartGradient.createShader(
+                        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                      ),
+                  child: Text(
+                    'HeartLink',
+                    style: appStyle(
+                      25,
+                      Colors.white, // Color will be replaced by gradient
+                      FontWeight.w800,
+                    ).copyWith(letterSpacing: -0.3),
+                  ),
                 ),
                 const Spacer(),
-                ElevatedButton(
-                  onPressed: () => _showPremiumBottomSheet(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Iconsax.diamonds,
-                        color: Colors.purpleAccent,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Upgrade',
-                        style: appStyle(
-                          13,
-                          Colors.white,
-                          FontWeight.w600,
-                        ).copyWith(letterSpacing: -0.3),
+                // Premium Upgrade Button
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: AppColors.premiumGradient,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accentLight.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () => _showPremiumBottomSheet(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Iconsax.diamonds,
+                          color: Colors.black,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Upgrade',
+                          style: appStyle(
+                            13,
+                            Colors.black,
+                            FontWeight.w600,
+                          ).copyWith(letterSpacing: -0.3),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

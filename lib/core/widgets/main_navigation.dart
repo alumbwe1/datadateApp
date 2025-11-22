@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../features/encounters/presentation/pages/encounters_page.dart';
@@ -7,6 +8,7 @@ import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/discover/presentation/pages/discover_page.dart';
 import '../../features/likes/presentation/pages/likes_page.dart';
 import '../../features/chat/presentation/pages/chat_page.dart';
+import '../constants/app_colors.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -62,10 +64,21 @@ class _MainNavigationState extends State<MainNavigation>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -77,31 +90,41 @@ class _MainNavigationState extends State<MainNavigation>
                   svgPath: 'assets/svgs/star5.svg',
                   label: 'Encounters',
                   index: 0,
-                  activeColor: Colors.blue,
+                  activeColor: isDark
+                      ? AppColors.navEncountersDark
+                      : AppColors.navEncountersLight,
                 ),
                 _buildNavItem(
                   icon: Icons.grid_view_rounded,
                   label: 'Discover',
                   index: 1,
-                  activeColor: Colors.blue,
+                  activeColor: isDark
+                      ? AppColors.navDiscoverDark
+                      : AppColors.navDiscoverLight,
                 ),
                 _buildNavItem(
                   icon: Iconsax.heart,
                   label: 'Likes',
                   index: 2,
-                  activeColor: Colors.blue,
+                  activeColor: isDark
+                      ? AppColors.navLikesDark
+                      : AppColors.navLikesLight,
                 ),
                 _buildNavItem(
                   svgPath: 'assets/svgs/beacon.svg',
                   label: 'Chats',
                   index: 3,
-                  activeColor: Colors.blue,
+                  activeColor: isDark
+                      ? AppColors.navChatsDark
+                      : AppColors.navChatsLight,
                 ),
                 _buildNavItem(
                   icon: Iconsax.user,
                   label: 'Profile',
                   index: 4,
-                  activeColor: Colors.blue,
+                  activeColor: isDark
+                      ? AppColors.navProfileDark
+                      : AppColors.navProfileLight,
                 ),
               ],
             ),
@@ -120,6 +143,8 @@ class _MainNavigationState extends State<MainNavigation>
   }) {
     final isActive = _currentIndex == index;
     final animation = _animationControllers[index];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inactiveColor = isDark ? Colors.grey.shade600 : Colors.grey.shade400;
 
     return Expanded(
       child: InkWell(
@@ -135,7 +160,11 @@ class _MainNavigationState extends State<MainNavigation>
               builder: (context, child) {
                 return Transform.scale(
                   scale: 1.0 + (animation.value * 0.15),
-                  child: child,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+
+                    child: child,
+                  ),
                 );
               },
               child: svgPath != null
@@ -145,13 +174,13 @@ class _MainNavigationState extends State<MainNavigation>
                       height: 26,
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
-                        isActive ? activeColor : Colors.grey.shade400,
+                        isActive ? activeColor : inactiveColor,
                         BlendMode.srcIn,
                       ),
                     )
                   : Icon(
                       icon,
-                      color: isActive ? activeColor : Colors.grey.shade400,
+                      color: isActive ? activeColor : inactiveColor,
                       size: 28,
                     ),
             ),
