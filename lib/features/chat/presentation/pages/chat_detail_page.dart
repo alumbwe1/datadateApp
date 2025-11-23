@@ -507,10 +507,17 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.copy, color: Colors.black87),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.copy, color: Colors.blue, size: 20),
+                ),
                 title: Text(
-                  'Copy',
-                  style: appStyle(15, Colors.black, FontWeight.w500),
+                  'Copy Message',
+                  style: appStyle(15, Colors.black, FontWeight.w600),
                 ),
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: message.content));
@@ -518,9 +525,19 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                   HapticFeedback.lightImpact();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(
-                        'Message copied',
-                        style: appStyle(14, Colors.white, FontWeight.w600),
+                      content: Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Message copied to clipboard',
+                            style: appStyle(14, Colors.white, FontWeight.w600),
+                          ),
+                        ],
                       ),
                       backgroundColor: Colors.black,
                       behavior: SnackBarBehavior.floating,
@@ -533,12 +550,45 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                 },
               ),
               if (isSent) ...[
-                Divider(height: 1, color: Colors.grey[200]),
                 ListTile(
-                  leading: const Icon(Icons.delete_outline, color: Colors.red),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
+                  ),
                   title: Text(
-                    'Delete',
-                    style: appStyle(15, Colors.red, FontWeight.w500),
+                    'Edit Message',
+                    style: appStyle(15, Colors.black, FontWeight.w600),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    HapticFeedback.lightImpact();
+                    _showEditMessageDialog(message);
+                  },
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    'Delete Message',
+                    style: appStyle(15, Colors.red, FontWeight.w600),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -554,17 +604,105 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     );
   }
 
-  void _confirmDeleteMessage(message) {
+  void _showEditMessageDialog(message) {
+    final editController = TextEditingController(text: message.content);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Delete Message',
+          'Edit Message',
           style: appStyle(18, Colors.black, FontWeight.w700),
         ),
+        content: TextField(
+          controller: editController,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: 'Enter new message',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          style: appStyle(15, Colors.black, FontWeight.w400),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              editController.dispose();
+            },
+            child: Text(
+              'Cancel',
+              style: appStyle(15, Colors.grey[600]!, FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // TODO: Implement edit message API call
+              Navigator.pop(context);
+              editController.dispose();
+              HapticFeedback.lightImpact();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Message updated',
+                        style: appStyle(14, Colors.white, FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            },
+            child: Text(
+              'Save',
+              style: appStyle(15, Colors.blue, FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteMessage(message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.red,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Delete Message',
+              style: appStyle(18, Colors.black, FontWeight.w700),
+            ),
+          ],
+        ),
         content: Text(
-          'Are you sure you want to delete this message?',
+          'This message will be permanently deleted. This action cannot be undone.',
           style: appStyle(14, Colors.grey[700]!, FontWeight.w400),
         ),
         actions: [
@@ -575,16 +713,26 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
               style: appStyle(15, Colors.grey[600]!, FontWeight.w600),
             ),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               // TODO: Implement delete message API call
               Navigator.pop(context);
               HapticFeedback.mediumImpact();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    'Message deleted',
-                    style: appStyle(14, Colors.white, FontWeight.w600),
+                  content: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Message deleted',
+                        style: appStyle(14, Colors.white, FontWeight.w600),
+                      ),
+                    ],
                   ),
                   backgroundColor: Colors.red,
                   behavior: SnackBarBehavior.floating,
@@ -595,9 +743,15 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                 ),
               );
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             child: Text(
               'Delete',
-              style: appStyle(15, Colors.red, FontWeight.w700),
+              style: appStyle(15, Colors.white, FontWeight.w700),
             ),
           ),
         ],
@@ -712,69 +866,267 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
       context: context,
       backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                margin: const EdgeInsets.only(top: 8),
-                width: 36,
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
                 height: 4,
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 8),
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 4,
                 ),
-                leading: Icon(
-                  Icons.block_outlined,
-                  color: Colors.grey[800],
-                  size: 24,
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.person_outline,
+                    color: Colors.blue,
+                    size: 22,
+                  ),
                 ),
                 title: Text(
-                  'Block',
-                  style: appStyle(16, Colors.black, FontWeight.w500),
+                  'View Profile',
+                  style: appStyle(16, Colors.black, FontWeight.w600),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  HapticFeedback.lightImpact();
+                  // TODO: Navigate to profile
+                },
+              ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 4,
+                ),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_off_outlined,
+                    color: Colors.purple,
+                    size: 22,
+                  ),
+                ),
+                title: Text(
+                  'Mute Notifications',
+                  style: appStyle(16, Colors.black, FontWeight.w600),
                 ),
                 onTap: () {
                   Navigator.pop(context);
                   HapticFeedback.lightImpact();
                 },
               ),
-              Divider(height: 1, color: Colors.grey[200]),
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 4,
                 ),
-                leading: Icon(
-                  Icons.report_outlined,
-                  color: Colors.grey[800],
-                  size: 24,
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.block_outlined,
+                    color: Colors.orange,
+                    size: 22,
+                  ),
                 ),
                 title: Text(
-                  'Report',
-                  style: appStyle(16, Colors.black, FontWeight.w500),
+                  'Block User',
+                  style: appStyle(16, Colors.black, FontWeight.w600),
                 ),
                 onTap: () {
                   Navigator.pop(context);
                   HapticFeedback.lightImpact();
+                  _confirmBlockUser();
+                },
+              ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 4,
+                ),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.report_outlined,
+                    color: Colors.red,
+                    size: 22,
+                  ),
+                ),
+                title: Text(
+                  'Report User',
+                  style: appStyle(16, Colors.red, FontWeight.w600),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  HapticFeedback.lightImpact();
+                  _showReportDialog();
                 },
               ),
               const SizedBox(height: 12),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmBlockUser() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Block User',
+          style: appStyle(18, Colors.black, FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to block this user? They won\'t be able to message you.',
+          style: appStyle(14, Colors.grey[700]!, FontWeight.w400),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: appStyle(15, Colors.grey[600]!, FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              HapticFeedback.mediumImpact();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'User blocked',
+                    style: appStyle(14, Colors.white, FontWeight.w600),
+                  ),
+                  backgroundColor: Colors.orange,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              'Block',
+              style: appStyle(15, Colors.white, FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReportDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Report User',
+          style: appStyle(18, Colors.black, FontWeight.w700),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Why are you reporting this user?',
+              style: appStyle(14, Colors.grey[700]!, FontWeight.w400),
+            ),
+            const SizedBox(height: 16),
+            _buildReportOption('Inappropriate messages'),
+            _buildReportOption('Spam or scam'),
+            _buildReportOption('Harassment'),
+            _buildReportOption('Fake profile'),
+            _buildReportOption('Other'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: appStyle(15, Colors.grey[600]!, FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportOption(String reason) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        HapticFeedback.lightImpact();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Report submitted. We\'ll review it shortly.',
+              style: appStyle(14, Colors.white, FontWeight.w600),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              Icons.report_problem_outlined,
+              size: 20,
+              color: Colors.grey[600],
+            ),
+            const SizedBox(width: 12),
+            Text(reason, style: appStyle(15, Colors.black, FontWeight.w500)),
+          ],
         ),
       ),
     );

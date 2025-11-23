@@ -9,6 +9,7 @@ import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
+import 'edit_profile_page.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -264,7 +265,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -283,8 +284,70 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ],
             ),
           ),
+          const SizedBox(height: 20),
+          _buildStatsRow(),
         ],
       ),
+    );
+  }
+
+  Widget _buildStatsRow() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(
+            'Profile Views',
+            '247',
+            Icons.visibility_outlined,
+            Colors.blue,
+          ),
+          Container(width: 1, height: 40, color: Colors.grey[300]),
+          _buildStatItem(
+            'Likes Received',
+            '89',
+            Icons.favorite_outline,
+            Colors.red,
+          ),
+          Container(width: 1, height: 40, color: Colors.grey[300]),
+          _buildStatItem('Matches', '34', Icons.people_outline, Colors.green),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(height: 8),
+        Text(value, style: appStyle(18, Colors.black, FontWeight.w800)),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: appStyle(11, Colors.grey[600]!, FontWeight.w500),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 
@@ -431,15 +494,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       children: [
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
+          child: ElevatedButton.icon(
             onPressed: () {
-              // TODO: Navigate to edit profile page
-              CustomSnackbar.show(
+              HapticFeedback.lightImpact();
+              Navigator.push(
                 context,
-                message: 'Edit profile coming soon!',
-                type: SnackbarType.info,
+                MaterialPageRoute(
+                  builder: (context) => const EditProfilePage(),
+                ),
               );
             },
+            icon: const Icon(Icons.edit_outlined, size: 20),
+            label: Text(
+              'Edit Profile',
+              style: appStyle(16, Colors.white, FontWeight.w700),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -447,27 +516,24 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 borderRadius: BorderRadius.circular(30),
               ),
             ),
-            child: Text(
-              'Edit Profile',
-              style: appStyle(16, Colors.white, FontWeight.w700),
-            ),
           ),
         ),
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton(
+          child: OutlinedButton.icon(
             onPressed: () => _showLogoutDialog(context, ref),
+            icon: const Icon(Icons.logout, size: 20),
+            label: Text(
+              'Logout',
+              style: appStyle(16, Colors.red, FontWeight.w700),
+            ),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               side: const BorderSide(color: Colors.red, width: 2),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
-            ),
-            child: Text(
-              'Logout',
-              style: appStyle(16, Colors.red, FontWeight.w700),
             ),
           ),
         ),
