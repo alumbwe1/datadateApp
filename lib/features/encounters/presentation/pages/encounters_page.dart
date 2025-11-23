@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,9 +27,6 @@ class EncountersPage extends ConsumerStatefulWidget {
 class _EncountersPageState extends ConsumerState<EncountersPage>
     with TickerProviderStateMixin {
   final CardSwiperController _controller = CardSwiperController();
-  int _swipeCount = 0;
-  final int _freeSwipeLimit = 3;
-  bool _hasShownUpgradePrompt = false;
 
   late AnimationController _swipeAnimationController;
   late AnimationController _breatheController;
@@ -63,10 +61,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     String profileName,
     String profilePhoto,
   ) {
-    setState(() {
-      _swipeCount++;
-    });
-
     // Instant API call based on direction
     if (direction == CardSwiperDirection.right) {
       ref.read(encountersProvider.notifier).likeProfile(profileId);
@@ -82,16 +76,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
       }
     } else if (direction == CardSwiperDirection.left) {
       ref.read(encountersProvider.notifier).skipProfile(profileId);
-    }
-
-    // Show upgrade prompt after limit
-    if (_swipeCount >= _freeSwipeLimit && !_hasShownUpgradePrompt) {
-      _hasShownUpgradePrompt = true;
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (mounted) {
-          _showUpgradePrompt();
-        }
-      });
     }
   }
 
@@ -138,7 +122,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                // HeartLink Logo with gradient
+                // HeartLink Logo with Gradient
                 ShaderMask(
                   shaderCallback: (bounds) =>
                       AppColors.heartGradient.createShader(
@@ -147,18 +131,79 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   child: Text(
                     'HeartLink',
                     style: appStyle(
-                      25,
-                      Colors.white, // Color will be replaced by gradient
+                      26,
+                      Colors.white,
                       FontWeight.w800,
-                    ).copyWith(letterSpacing: -0.3),
+                    ).copyWith(letterSpacing: -0.5, height: 1),
                   ),
                 ),
                 const Spacer(),
-                // Premium Upgrade Button
+
+                // Filter Icon Button - Modern Style
                 Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                   decoration: BoxDecoration(
-                    gradient: AppColors.premiumGradient,
-                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.primaryLight.withValues(alpha: 0.3),
+                      width: 1.w,
+                    ),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: IconButton(
+                    icon: Icon(IconlyLight.filter, size: 20.sp),
+                    color: AppColors.primaryLight,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              Icon(
+                                IconlyLight.filter,
+                                color: AppColors.primaryLight,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Filters coming soon!',
+                                style: appStyle(
+                                  14,
+                                  Colors.white,
+                                  FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.black87,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
+                          margin: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      );
+                    },
+                    splashRadius: 24,
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                // Boost Button - Premium Style with Gradient
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.accentLight,
+                        AppColors.accentLight.withValues(alpha: 0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20.sp),
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.accentLight.withValues(alpha: 0.3),
@@ -167,40 +212,77 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                       ),
                     ],
                   ),
-                  child: ElevatedButton(
-                    onPressed: () => _showPremiumBottomSheet(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.bolt_rounded,
+                      size: 20.sp,
+                      color: Colors.black,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Iconsax.diamonds,
-                          color: Colors.black,
-                          size: 18,
+                    color: Colors.white,
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.accentLight,
+                                      AppColors.accentLight.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.bolt_rounded,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Boost Feature',
+                                      style: appStyle(
+                                        14,
+                                        Colors.white,
+                                        FontWeight.w700,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Get 10x more views - Coming soon!',
+                                      style: appStyle(
+                                        12,
+                                        Colors.white70,
+                                        FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.black87,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 3),
+                          margin: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Upgrade',
-                          style: appStyle(
-                            13,
-                            Colors.black,
-                            FontWeight.w600,
-                          ).copyWith(letterSpacing: -0.3),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
+                    splashRadius: 24,
+                    padding: EdgeInsets.zero,
                   ),
                 ),
               ],
@@ -490,18 +572,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           return FadeTransition(opacity: animation, child: child);
         },
         transitionDuration: const Duration(milliseconds: 400),
-      ),
-    );
-  }
-
-  void _showUpgradePrompt() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isDismissible: true,
-      isScrollControlled: true,
-      builder: (context) => UpgradePromptBottomSheet(
-        onUpgrade: () => _showPremiumBottomSheet(context),
       ),
     );
   }

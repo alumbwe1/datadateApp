@@ -92,7 +92,7 @@ class _MainNavigationState extends State<MainNavigation>
                   index: 0,
                   activeColor: isDark
                       ? AppColors.navEncountersDark
-                      : AppColors.navEncountersLight,
+                      : AppColors.primaryLight,
                 ),
                 _buildNavItem(
                   icon: Icons.grid_view_rounded,

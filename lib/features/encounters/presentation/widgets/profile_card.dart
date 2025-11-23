@@ -259,20 +259,24 @@ class _ProfileCardState extends State<ProfileCard> {
                               ),
                             ),
                             SizedBox(width: 12.w),
-                            Container(
-                              padding: EdgeInsets.all(6.w),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
-                                  width: 1,
+                            GestureDetector(
+                              onTap: _navigateToDetails,
+                              behavior: HitTestBehavior.opaque,
+                              child: Container(
+                                padding: EdgeInsets.all(10.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 1,
+                                  ),
                                 ),
-                              ),
-                              child: Icon(
-                                Icons.arrow_upward,
-                                color: Colors.white,
-                                size: 14.sp,
+                                child: Icon(
+                                  Icons.arrow_upward,
+                                  color: Colors.white,
+                                  size: 16.sp,
+                                ),
                               ),
                             ),
                           ],
