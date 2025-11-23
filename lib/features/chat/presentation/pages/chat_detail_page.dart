@@ -416,58 +416,188 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
           else if (!isSent)
             const SizedBox(width: 36),
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              margin: const EdgeInsets.only(bottom: 2),
-              decoration: BoxDecoration(
-                color: isSent ? Colors.black : Colors.grey[100],
-                borderRadius: BorderRadius.circular(20),
-                border: isSent
-                    ? null
-                    : Border.all(color: Colors.grey[200]!, width: 0.5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.content,
-                    style: appStyle(
-                      15,
-                      isSent ? Colors.white : Colors.black,
-                      FontWeight.w400,
-                    ).copyWith(height: 1.35, letterSpacing: -0.1),
-                  ),
-                  const SizedBox(height: 3),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        timeago.format(
-                          DateTime.parse(message.createdAt),
-                          locale: 'en_short',
+            child: GestureDetector(
+              onLongPress: () {
+                HapticFeedback.mediumImpact();
+                _showMessageOptions(message, isSent);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                margin: const EdgeInsets.only(bottom: 2),
+                decoration: BoxDecoration(
+                  color: isSent ? Colors.black : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(20),
+                  border: isSent
+                      ? null
+                      : Border.all(color: Colors.grey[200]!, width: 0.5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message.content,
+                      style: appStyle(
+                        15,
+                        isSent ? Colors.white : Colors.black,
+                        FontWeight.w400,
+                      ).copyWith(height: 1.35, letterSpacing: -0.1),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          timeago.format(
+                            DateTime.parse(message.createdAt),
+                            locale: 'en_short',
+                          ),
+                          style: appStyle(
+                            11,
+                            isSent
+                                ? Colors.white.withValues(alpha: 0.6)
+                                : Colors.grey[600]!,
+                            FontWeight.w400,
+                          ),
                         ),
-                        style: appStyle(
-                          11,
-                          isSent
-                              ? Colors.white.withValues(alpha: 0.6)
-                              : Colors.grey[600]!,
-                          FontWeight.w400,
-                        ),
-                      ),
-                      if (isSent) ...[
-                        const SizedBox(width: 4),
-                        Icon(
-                          message.isRead ? Icons.done_all : Icons.check,
-                          size: 14,
-                          color: message.isRead
-                              ? Colors.blue[400]
-                              : Colors.white.withValues(alpha: 0.6),
-                        ),
+                        if (isSent) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            message.isRead ? Icons.done_all : Icons.check,
+                            size: 14,
+                            color: message.isRead
+                                ? Colors.blue[400]
+                                : Colors.white.withValues(alpha: 0.6),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMessageOptions(message, bool isSent) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy, color: Colors.black87),
+                title: Text(
+                  'Copy',
+                  style: appStyle(15, Colors.black, FontWeight.w500),
+                ),
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: message.content));
+                  Navigator.pop(context);
+                  HapticFeedback.lightImpact();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Message copied',
+                        style: appStyle(14, Colors.white, FontWeight.w600),
+                      ),
+                      backgroundColor: Colors.black,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              if (isSent) ...[
+                Divider(height: 1, color: Colors.grey[200]),
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: Colors.red),
+                  title: Text(
+                    'Delete',
+                    style: appStyle(15, Colors.red, FontWeight.w500),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmDeleteMessage(message);
+                  },
+                ),
+              ],
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteMessage(message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Delete Message',
+          style: appStyle(18, Colors.black, FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to delete this message?',
+          style: appStyle(14, Colors.grey[700]!, FontWeight.w400),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: appStyle(15, Colors.grey[600]!, FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // TODO: Implement delete message API call
+              Navigator.pop(context);
+              HapticFeedback.mediumImpact();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Message deleted',
+                    style: appStyle(14, Colors.white, FontWeight.w600),
+                  ),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            },
+            child: Text(
+              'Delete',
+              style: appStyle(15, Colors.red, FontWeight.w700),
             ),
           ),
         ],

@@ -104,6 +104,7 @@ class _MainNavigationState extends State<MainNavigation>
                 ),
                 _buildNavItem(
                   icon: Iconsax.heart,
+                  svgPath: 'assets/svgs/heartH.svg',
                   label: 'Likes',
                   index: 2,
                   activeColor: isDark

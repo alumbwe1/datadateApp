@@ -11,10 +11,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
-import '../widgets/premium_bottom_sheet.dart';
 import '../widgets/swipe_overlay.dart';
 import '../widgets/animated_action_button.dart';
-import '../widgets/upgrade_prompt_bottom_sheet.dart';
 import 'match_page.dart';
 
 class EncountersPage extends ConsumerStatefulWidget {
@@ -489,26 +487,16 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           AnimatedActionButton(
             icon: Icons.close_rounded,
             iconColor: AppColors.nope,
-            size: screenWidth * 0.15,
-            iconSize: screenWidth * 0.08,
+            size: screenWidth * 0.18,
+            iconSize: screenWidth * 0.10,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.left);
             },
           ),
           SizedBox(width: buttonSpacing),
           AnimatedActionButton(
-            icon: Iconsax.heart,
-            iconColor: Colors.redAccent,
-            size: screenWidth * 0.18,
-            iconSize: screenWidth * 0.10,
-            onPressed: () {
-              _controller.swipe(CardSwiperDirection.right);
-            },
-          ),
-          SizedBox(width: buttonSpacing),
-          AnimatedActionButton(
             icon: Icons.star_rounded,
-            iconColor: AppColors.superLike,
+            iconColor: Colors.blue,
             size: screenWidth * 0.13,
             iconSize: screenWidth * 0.06,
             onPressed: () {
@@ -541,25 +529,27 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           ),
           SizedBox(width: buttonSpacing),
           AnimatedActionButton(
+            icon: Iconsax.heart,
+            iconColor: Colors.redAccent,
+            size: screenWidth * 0.18,
+            iconSize: screenWidth * 0.10,
+            onPressed: () {
+              _controller.swipe(CardSwiperDirection.right);
+            },
+          ),
+
+          SizedBox(width: buttonSpacing),
+          AnimatedActionButton(
             icon: IconlyBold.send,
-            iconColor: AppColors.like,
-            size: screenWidth * 0.15,
-            iconSize: screenWidth * 0.08,
+            iconColor: Colors.blue,
+            size: screenWidth * 0.13,
+            iconSize: screenWidth * 0.06,
             onPressed: () {
               _controller.swipe(CardSwiperDirection.left);
             },
           ),
         ],
       ),
-    );
-  }
-
-  void _showPremiumBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => const PremiumBottomSheet(),
     );
   }
 
