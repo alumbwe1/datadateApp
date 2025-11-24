@@ -13,6 +13,7 @@ import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/swipe_overlay.dart';
 import '../widgets/animated_action_button.dart';
+import '../widgets/filter_bottom_sheet.dart';
 import 'match_page.dart';
 
 class EncountersPage extends ConsumerStatefulWidget {
@@ -31,6 +32,10 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   bool _showLikeOverlay = false;
   bool _showNopeOverlay = false;
   double _overlayOpacity = 0.0;
+
+  // Filter state
+  double _minAge = 18;
+  double _maxAge = 35;
 
   @override
   void initState() {
@@ -152,35 +157,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                     color: AppColors.primaryLight,
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              Icon(
-                                IconlyLight.filter,
-                                color: AppColors.primaryLight,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Filters coming soon!',
-                                style: appStyle(
-                                  14,
-                                  Colors.white,
-                                  FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: Colors.black87,
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
-                          margin: const EdgeInsets.all(16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      );
+                      _showFilterBottomSheet();
                     },
                     splashRadius: 24,
                     padding: EdgeInsets.zero,
@@ -549,6 +526,57 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             },
           ),
         ],
+      ),
+    );
+  }
+
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => FilterBottomSheet(
+        initialMinAge: _minAge,
+        initialMaxAge: _maxAge,
+        onApply: (minAge, maxAge) {
+          setState(() {
+            _minAge = minAge;
+            _maxAge = maxAge;
+          });
+
+          // Show confirmation
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.primaryLight,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Filters applied: ${minAge.round()}-${maxAge.round()} years',
+                    style: appStyle(14, Colors.white, FontWeight.w600),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.black87,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          );
+
+          // TODO: Reload profiles with new age filter
+          // ref.read(encountersProvider.notifier).loadProfilesWithFilter(
+          //   minAge: minAge.round(),
+          //   maxAge: maxAge.round(),
+          // );
+        },
       ),
     );
   }

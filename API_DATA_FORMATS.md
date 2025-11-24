@@ -641,7 +641,7 @@ order: 1
 
 ## Interactions
 
-### GET `/api/matches/` - List Matches
+### GET `/api/v1.0/interactions/matches/` - List Matches
 
 **Response (200 OK):**
 
@@ -674,13 +674,9 @@ order: 1
 ]
 ```
 
-### GET `/api/likes/` - List Likes (Sent/Received)
+### GET `/api/v1.0/interactions/likes/` - List Likes (Sent)
 
-**Query Parameters:**
-
-```
-?type=sent  or  ?type=received
-```
+Get all likes given by the current user with detailed profile information.
 
 **Response (200 OK):**
 
@@ -688,23 +684,117 @@ order: 1
 [
   {
     "id": 23,
-    "liker": 1,
-    "liked": 7,
-    "like_type": "profile",
-    "profile_info": {
+    "liker": {
+      "id": 1,
+      "username": "john_doe",
+      "display_name": "John Doe",
+      "profile": {
+        "id": 1,
+        "bio": "Love coding and coffee!",
+        "age": 21,
+        "gender": "male",
+        "course": "Computer Science",
+        "graduation_year": 2026,
+        "interests": ["coding", "coffee", "hiking"],
+        "imageUrls": ["https://res.cloudinary.com/.../john_photo.jpg"],
+        "university": {
+          "id": 1,
+          "name": "Stanford University",
+          "slug": "stanford"
+        },
+        "last_active": "2025-11-20T10:00:00Z"
+      }
+    },
+    "liked": {
       "id": 7,
       "username": "emily_wilson",
-      "display_name": "Emily W.",
-      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/emily_photo.jpg"]
+      "display_name": "Emily Wilson",
+      "profile": {
+        "id": 7,
+        "bio": "Nature lover and bookworm",
+        "age": 22,
+        "gender": "female",
+        "course": "Biology",
+        "graduation_year": 2025,
+        "interests": ["reading", "nature", "photography"],
+        "imageUrls": ["https://res.cloudinary.com/.../emily_photo.jpg"],
+        "university": {
+          "id": 1,
+          "name": "Stanford University",
+          "slug": "stanford"
+        },
+        "last_active": "2025-11-20T09:45:00Z"
+      }
     },
+    "like_type": "profile",
+    "gallery_image": null,
     "created_at": "2025-11-15T10:20:00Z"
   }
 ]
 ```
 
-### POST `/api/likes/` - Create Like
+### GET `/api/v1.0/interactions/likes/received/` - List Likes Received
 
-**Request:**
+Get all likes received by the current user with detailed profile information of who liked you.
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 25,
+    "liker": {
+      "id": 9,
+      "username": "alex_brown",
+      "display_name": "Alex Brown",
+      "profile": {
+        "id": 9,
+        "bio": "Adventure seeker and coffee enthusiast",
+        "age": 23,
+        "gender": "male",
+        "course": "Engineering",
+        "graduation_year": 2026,
+        "interests": ["adventure", "coffee", "travel"],
+        "imageUrls": ["https://res.cloudinary.com/.../alex_photo.jpg"],
+        "university": {
+          "id": 1,
+          "name": "Stanford University",
+          "slug": "stanford"
+        },
+        "last_active": "2025-11-20T11:00:00Z"
+      }
+    },
+    "liked": {
+      "id": 1,
+      "username": "john_doe",
+      "display_name": "John Doe",
+      "profile": {
+        "id": 1,
+        "bio": "Love coding and coffee!",
+        "age": 21,
+        "gender": "male",
+        "course": "Computer Science",
+        "graduation_year": 2026,
+        "interests": ["coding", "coffee", "hiking"],
+        "imageUrls": ["https://res.cloudinary.com/.../john_photo.jpg"],
+        "university": {
+          "id": 1,
+          "name": "Stanford University",
+          "slug": "stanford"
+        },
+        "last_active": "2025-11-20T10:00:00Z"
+      }
+    },
+    "like_type": "profile",
+    "gallery_image": null,
+    "created_at": "2025-11-15T11:00:00Z"
+  }
+]
+```
+
+### POST `/api/v1.0/interactions/likes/` - Create Like
+
+**Request (Profile Like):**
 
 ```json
 {
@@ -713,19 +803,169 @@ order: 1
 }
 ```
 
-**Response (201 Created):**
+**Response (201 Created - No Match):**
 
 ```json
 {
   "id": 23,
-  "liker": 1,
-  "liked": 7,
+  "liker": {
+    "id": 1,
+    "username": "john_doe",
+    "display_name": "John Doe",
+    "profile": {
+      "id": 1,
+      "bio": "Love coding and coffee!",
+      "age": 21,
+      "gender": "male",
+      "course": "Computer Science",
+      "graduation_year": 2026,
+      "interests": ["coding", "coffee", "hiking"],
+      "imageUrls": ["https://res.cloudinary.com/.../john_photo.jpg"],
+      "university": {
+        "id": 1,
+        "name": "Stanford University",
+        "slug": "stanford"
+      },
+      "last_active": "2025-11-20T10:00:00Z"
+    }
+  },
+  "liked": {
+    "id": 7,
+    "username": "emily_wilson",
+    "display_name": "Emily Wilson",
+    "profile": {
+      "id": 7,
+      "bio": "Nature lover and bookworm",
+      "age": 22,
+      "gender": "female",
+      "course": "Biology",
+      "graduation_year": 2025,
+      "interests": ["reading", "nature", "photography"],
+      "imageUrls": ["https://res.cloudinary.com/.../emily_photo.jpg"],
+      "university": {
+        "id": 1,
+        "name": "Stanford University",
+        "slug": "stanford"
+      },
+      "last_active": "2025-11-20T09:45:00Z"
+    }
+  },
   "like_type": "profile",
-  "created_at": "2025-11-15T10:20:00Z"
+  "gallery_image": null,
+  "created_at": "2025-11-15T10:20:00Z",
+  "matched": false
 }
 ```
 
-### GET `/api/profile-views/` - List Profile Views
+**Response (201 Created - Match!):**
+
+```json
+{
+  "id": 23,
+  "liker": {
+    "id": 1,
+    "username": "john_doe",
+    "display_name": "John Doe",
+    "profile": {
+      "id": 1,
+      "bio": "Love coding and coffee!",
+      "age": 21,
+      "gender": "male",
+      "course": "Computer Science",
+      "graduation_year": 2026,
+      "interests": ["coding", "coffee", "hiking"],
+      "imageUrls": ["https://res.cloudinary.com/.../john_photo.jpg"],
+      "university": {
+        "id": 1,
+        "name": "Stanford University",
+        "slug": "stanford"
+      },
+      "last_active": "2025-11-20T10:00:00Z"
+    }
+  },
+  "liked": {
+    "id": 7,
+    "username": "emily_wilson",
+    "display_name": "Emily Wilson",
+    "profile": {
+      "id": 7,
+      "bio": "Nature lover and bookworm",
+      "age": 22,
+      "gender": "female",
+      "course": "Biology",
+      "graduation_year": 2025,
+      "interests": ["reading", "nature", "photography"],
+      "imageUrls": ["https://res.cloudinary.com/.../emily_photo.jpg"],
+      "university": {
+        "id": 1,
+        "name": "Stanford University",
+        "slug": "stanford"
+      },
+      "last_active": "2025-11-20T09:45:00Z"
+    }
+  },
+  "like_type": "profile",
+  "gallery_image": null,
+  "created_at": "2025-11-15T10:20:00Z",
+  "matched": true,
+  "match_id": 12,
+  "message": "It's a match!"
+}
+```
+
+**Request (Gallery Like):**
+
+```json
+{
+  "liked": 7,
+  "like_type": "gallery",
+  "gallery_image": 5
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "id": 24,
+  "liker": 1,
+  "liked": 7,
+  "like_type": "gallery",
+  "gallery_image": 5,
+  "created_at": "2025-11-15T10:25:00Z",
+  "matched": false
+}
+```
+
+**Error (400 Bad Request - Already Liked):**
+
+```json
+{
+  "detail": "You have already liked this profile."
+}
+```
+
+**Error (400 Bad Request - Self Like):**
+
+```json
+{
+  "detail": "You cannot like yourself."
+}
+```
+
+### DELETE `/api/v1.0/interactions/likes/{id}/` - Unlike
+
+**Response (200 OK):**
+
+```json
+{
+  "detail": "Like removed successfully."
+}
+```
+
+### GET `/api/v1.0/interactions/profile-views/` - List Profile Views
+
+Get all profile views made by the current user.
 
 **Response (200 OK):**
 
@@ -735,37 +975,29 @@ order: 1
     "id": 45,
     "viewer": 1,
     "viewed": 9,
-    "viewed_profile": {
-      "id": 9,
-      "username": "alex_brown",
-      "display_name": "Alex B.",
-      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/alex_photo.jpg"]
-    },
     "viewed_at": "2025-11-15T09:30:00Z"
   }
 ]
 ```
 
-### POST `/api/profile-views/` - Record Profile View
+### GET `/api/v1.0/interactions/profile-views/received/` - List Profile Views Received
 
-**Request:**
+Get all profile views received by the current user.
 
-```json
-{
-  "viewed": 9
-}
-```
-
-**Response (201 Created):**
+**Response (200 OK):**
 
 ```json
-{
-  "id": 45,
-  "viewer": 1,
-  "viewed": 9,
-  "viewed_at": "2025-11-15T09:30:00Z"
-}
+[
+  {
+    "id": 46,
+    "viewer": 10,
+    "viewed": 1,
+    "viewed_at": "2025-11-15T10:00:00Z"
+  }
+]
 ```
+
+**Note:** Profile views are automatically recorded when viewing a profile via GET `/api/v1.0/profiles/{id}/`
 
 ---
 
@@ -1298,3 +1530,1047 @@ or
     - Cascades to profile, likes, matches, messages, etc.
     - Requires authentication
     - Cannot be undone
+
+
+---
+
+## 
+
+---
+
+
+## Profile Boost System
+
+### GET `/api/v1.0/profiles/boosts/pricing/` - Get Boost Pricing (No Auth Required)
+
+**Response (200 OK):**
+
+```json
+{
+  "min_amount": 5.0,
+  "default_duration_hours": 2,
+  "currency": "ZMW",
+  "enabled": true
+}
+```
+
+### POST `/api/v1.0/profiles/boosts/` - Create Profile Boost
+
+**Request:**
+
+```json
+{
+  "amount_paid": 10.00,
+  "target_views": 100,
+  "duration_hours": 2
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "message": "Boost created successfully. Complete payment to activate.",
+  "boost": {
+    "id": 1,
+    "username": "john_doe",
+    "amount_paid": "10.00",
+    "target_views": 100,
+    "duration_hours": 2,
+    "current_views": 0,
+    "status": "pending",
+    "progress_percentage": 0,
+    "time_remaining": 0,
+    "started_at": null,
+    "expires_at": null,
+    "completed_at": null,
+    "created_at": "2025-11-23T10:00:00Z"
+  }
+}
+```
+
+**Error (403 Forbidden - Features Disabled):**
+
+```json
+{
+  "error": "Paid features are currently disabled"
+}
+```
+
+**Error (400 Bad Request - Active Boost Exists):**
+
+```json
+{
+  "error": "You already have an active boost",
+  "active_boost": {
+    "id": 1,
+    "amount_paid": "10.00",
+    "status": "active",
+    "expires_at": "2025-11-23T12:00:00Z"
+  }
+}
+```
+
+### POST `/api/v1.0/profiles/boosts/{id}/activate/` - Activate Boost After Payment
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "Boost activated successfully",
+  "boost": {
+    "id": 1,
+    "username": "john_doe",
+    "amount_paid": "10.00",
+    "target_views": 100,
+    "duration_hours": 2,
+    "current_views": 0,
+    "status": "active",
+    "progress_percentage": 0,
+    "time_remaining": 7200,
+    "started_at": "2025-11-23T10:00:00Z",
+    "expires_at": "2025-11-23T12:00:00Z",
+    "completed_at": null,
+    "created_at": "2025-11-23T10:00:00Z"
+  }
+}
+```
+
+### GET `/api/v1.0/profiles/boosts/active/` - Get Active Boost
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "username": "john_doe",
+  "amount_paid": "10.00",
+  "target_views": 100,
+  "duration_hours": 2,
+  "current_views": 45,
+  "status": "active",
+  "progress_percentage": 45.0,
+  "time_remaining": 3600,
+  "started_at": "2025-11-23T10:00:00Z",
+  "expires_at": "2025-11-23T12:00:00Z",
+  "completed_at": null,
+  "created_at": "2025-11-23T10:00:00Z"
+}
+```
+
+**Response (404 Not Found):**
+
+```json
+{
+  "message": "No active boost"
+}
+```
+
+### GET `/api/v1.0/profiles/boosts/history/` - Get Boost History
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 2,
+    "username": "john_doe",
+    "amount_paid": "15.00",
+    "target_views": 150,
+    "duration_hours": 3,
+    "current_views": 150,
+    "status": "completed",
+    "progress_percentage": 100.0,
+    "time_remaining": 0,
+    "started_at": "2025-11-22T10:00:00Z",
+    "expires_at": "2025-11-22T13:00:00Z",
+    "completed_at": "2025-11-22T12:30:00Z",
+    "created_at": "2025-11-22T10:00:00Z"
+  },
+  {
+    "id": 1,
+    "username": "john_doe",
+    "amount_paid": "10.00",
+    "target_views": 100,
+    "duration_hours": 2,
+    "current_views": 85,
+    "status": "expired",
+    "progress_percentage": 85.0,
+    "time_remaining": 0,
+    "started_at": "2025-11-21T10:00:00Z",
+    "expires_at": "2025-11-21T12:00:00Z",
+    "completed_at": "2025-11-21T12:00:00Z",
+    "created_at": "2025-11-21T10:00:00Z"
+  }
+]
+```
+
+---
+
+## Advanced Profile Discovery & Filtering
+
+### GET `/api/v1.0/profiles/discover/` - Discover Profiles with Filters
+
+**Query Parameters:**
+
+```
+?gender=female
+&min_age=20
+&max_age=25
+&city=Lusaka
+&compound=Meanwood
+&university_id=1
+&course=Computer
+&graduation_year=2026
+&intent=dating
+&interests=hiking,coffee
+&online_only=true
+&has_photos=true
+&occupation_type=student
+```
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 5,
+    "display_name": "Jane Smith",
+    "user": {
+      "id": 5,
+      "username": "jane_smith",
+      "email": "jane@university.edu"
+    },
+    "university_data": {
+      "id": 1,
+      "name": "University of Zambia",
+      "slug": "unza"
+    },
+    "display_bio": "Love hiking and coffee ☕",
+    "gender": "female",
+    "intent": "dating",
+    "age": 21,
+    "course": "Computer Science",
+    "graduation_year": 2026,
+    "city": "Lusaka",
+    "compound": "Meanwood",
+    "occupation_type": "student",
+    "interests": ["hiking", "coffee", "reading"],
+    "imageUrls": ["https://res.cloudinary.com/.../photo.jpg"],
+    "last_active": "2025-11-23T10:00:00Z"
+  }
+]
+```
+
+### GET `/api/v1.0/profiles/discover/recommended/` - Get Recommended Profiles
+
+Returns profiles based on user preferences, same university, excludes already liked/matched.
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 7,
+    "display_name": "Emily Wilson",
+    "gender": "female",
+    "age": 22,
+    "course": "Biology",
+    "city": "Lusaka",
+    "interests": ["nature", "photography"],
+    "imageUrls": ["https://res.cloudinary.com/.../photo.jpg"],
+    "last_active": "2025-11-23T09:45:00Z"
+  }
+]
+```
+
+### GET `/api/v1.0/profiles/discover/nearby/` - Get Nearby Profiles
+
+**Query Parameters:**
+
+```
+?same_compound=true
+```
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 8,
+    "display_name": "Sarah Jones",
+    "city": "Lusaka",
+    "compound": "Meanwood",
+    "age": 23,
+    "imageUrls": ["https://res.cloudinary.com/.../photo.jpg"]
+  }
+]
+```
+
+### GET `/api/v1.0/profiles/discover/students/` - Get Student Profiles
+
+**Query Parameters:**
+
+```
+?university_id=1&course=Computer
+```
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 9,
+    "display_name": "Alex Brown",
+    "occupation_type": "student",
+    "university_data": {
+      "id": 1,
+      "name": "University of Zambia"
+    },
+    "course": "Computer Science",
+    "graduation_year": 2026,
+    "imageUrls": ["https://res.cloudinary.com/.../photo.jpg"]
+  }
+]
+```
+
+### GET `/api/v1.0/profiles/discover/boosted/` - Get Boosted Profiles
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 10,
+    "display_name": "Mike Johnson",
+    "age": 24,
+    "course": "Engineering",
+    "imageUrls": ["https://res.cloudinary.com/.../photo.jpg"],
+    "last_active": "2025-11-23T10:30:00Z"
+  }
+]
+```
+
+---
+
+## Blocking & Reporting
+
+### POST `/api/v1.0/profiles/blocked-users/` - Block a User
+
+**Request:**
+
+```json
+{
+  "blocked_user_id": 123,
+  "reason": "Inappropriate behavior"
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "message": "User blocked successfully",
+  "block": {
+    "id": 1,
+    "blocker_username": "john_doe",
+    "blocked_username": "spam_user",
+    "blocked_user_id": 123,
+    "reason": "Inappropriate behavior",
+    "created_at": "2025-11-23T10:00:00Z"
+  }
+}
+```
+
+**Error (400 Bad Request - Self Block):**
+
+```json
+{
+  "error": "Cannot block yourself"
+}
+```
+
+**Error (400 Bad Request - Already Blocked):**
+
+```json
+{
+  "error": "User is already blocked"
+}
+```
+
+### GET `/api/v1.0/profiles/blocked-users/` - List Blocked Users
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 1,
+    "blocker_username": "john_doe",
+    "blocked_username": "spam_user",
+    "blocked_user_id": 123,
+    "reason": "Inappropriate behavior",
+    "created_at": "2025-11-23T10:00:00Z"
+  }
+]
+```
+
+### DELETE `/api/v1.0/profiles/blocked-users/{id}/` - Unblock User
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "User spam_user unblocked successfully"
+}
+```
+
+### POST `/api/v1.0/profiles/blocked-users/check/` - Check Block Status
+
+**Request:**
+
+```json
+{
+  "user_id": 123
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "is_blocked": false,
+  "is_blocked_by": false,
+  "can_interact": true
+}
+```
+
+### POST `/api/v1.0/profiles/reports/` - Create Report
+
+**Request:**
+
+```json
+{
+  "reported_user_id": 123,
+  "report_type": "user",
+  "reason": "harassment",
+  "description": "User sent inappropriate messages repeatedly",
+  "message_id": "msg_456"
+}
+```
+
+**Report Types:** `user`, `message`, `profile`
+
+**Reasons:** `spam`, `harassment`, `inappropriate_content`, `fake_profile`, `scam`, `other`
+
+**Response (201 Created):**
+
+```json
+{
+  "message": "Report submitted successfully",
+  "report": {
+    "id": 1,
+    "reporter_username": "john_doe",
+    "reported_username": "bad_user",
+    "report_type": "user",
+    "reason": "harassment",
+    "description": "User sent inappropriate messages repeatedly",
+    "message_id": "msg_456",
+    "status": "pending",
+    "admin_notes": "",
+    "resolved_at": null,
+    "resolved_by_username": null,
+    "created_at": "2025-11-23T10:00:00Z",
+    "updated_at": "2025-11-23T10:00:00Z"
+  }
+}
+```
+
+**Error (400 Bad Request - Self Report):**
+
+```json
+{
+  "error": "Cannot report yourself"
+}
+```
+
+### GET `/api/v1.0/profiles/reports/my_reports/` - Get My Reports
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 1,
+    "reporter_username": "john_doe",
+    "reported_username": "bad_user",
+    "report_type": "user",
+    "reason": "harassment",
+    "status": "pending",
+    "created_at": "2025-11-23T10:00:00Z"
+  }
+]
+```
+
+### GET `/api/v1.0/profiles/reports/pending/` - Get Pending Reports (Admin Only)
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 1,
+    "reporter_username": "john_doe",
+    "reported_username": "bad_user",
+    "report_type": "user",
+    "reason": "harassment",
+    "description": "User sent inappropriate messages repeatedly",
+    "status": "pending",
+    "created_at": "2025-11-23T10:00:00Z"
+  }
+]
+```
+
+### POST `/api/v1.0/profiles/reports/{id}/resolve/` - Resolve Report (Admin Only)
+
+**Request:**
+
+```json
+{
+  "notes": "User warned and content removed"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "Report resolved successfully",
+  "report": {
+    "id": 1,
+    "status": "resolved",
+    "admin_notes": "User warned and content removed",
+    "resolved_at": "2025-11-23T11:00:00Z",
+    "resolved_by_username": "admin_user"
+  }
+}
+```
+
+### POST `/api/v1.0/profiles/reports/{id}/dismiss/` - Dismiss Report (Admin Only)
+
+**Request:**
+
+```json
+{
+  "notes": "No violation found"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "Report dismissed successfully",
+  "report": {
+    "id": 1,
+    "status": "dismissed",
+    "admin_notes": "No violation found",
+    "resolved_at": "2025-11-23T11:00:00Z",
+    "resolved_by_username": "admin_user"
+  }
+}
+```
+
+---
+
+## Crush Messages
+
+### POST `/api/v1.0/interactions/crush-messages/` - Send Crush Message
+
+**Request:**
+
+```json
+{
+  "receiver_id": 123,
+  "message": "Hey! I'd love to get to know you better 😊"
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "message": "Crush message sent successfully",
+  "crush_message": {
+    "id": 1,
+    "sender_id": 1,
+    "sender_username": "john_doe",
+    "receiver_id": 123,
+    "receiver_username": "jane_smith",
+    "message": "Hey! I'd love to get to know you better 😊",
+    "status": "pending",
+    "read_at": null,
+    "responded_at": null,
+    "created_at": "2025-11-23T10:00:00Z"
+  }
+}
+```
+
+**Error (403 Forbidden - Features Disabled):**
+
+```json
+{
+  "error": "Matching features are currently disabled"
+}
+```
+
+**Error (400 Bad Request - Already Matched):**
+
+```json
+{
+  "receiver_id": ["You are already matched with this user"]
+}
+```
+
+**Error (400 Bad Request - Pending Message Exists):**
+
+```json
+{
+  "receiver_id": ["You already have a pending crush message to this user"]
+}
+```
+
+### GET `/api/v1.0/interactions/crush-messages/sent/` - Get Sent Crush Messages
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 1,
+    "sender_id": 1,
+    "sender_username": "john_doe",
+    "receiver_id": 123,
+    "receiver_username": "jane_smith",
+    "message": "Hey! I'd love to get to know you better 😊",
+    "status": "pending",
+    "read_at": null,
+    "responded_at": null,
+    "created_at": "2025-11-23T10:00:00Z"
+  }
+]
+```
+
+### GET `/api/v1.0/interactions/crush-messages/received/` - Get Received Crush Messages
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 2,
+    "sender_id": 456,
+    "sender_username": "alex_brown",
+    "receiver_id": 1,
+    "receiver_username": "john_doe",
+    "message": "Hi! You seem really interesting!",
+    "status": "pending",
+    "read_at": null,
+    "responded_at": null,
+    "created_at": "2025-11-23T09:30:00Z"
+  }
+]
+```
+
+### GET `/api/v1.0/interactions/crush-messages/pending/` - Get Pending Received Messages
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 2,
+    "sender_id": 456,
+    "sender_username": "alex_brown",
+    "receiver_id": 1,
+    "receiver_username": "john_doe",
+    "message": "Hi! You seem really interesting!",
+    "status": "pending",
+    "read_at": null,
+    "responded_at": null,
+    "created_at": "2025-11-23T09:30:00Z"
+  }
+]
+```
+
+### POST `/api/v1.0/interactions/crush-messages/{id}/mark_read/` - Mark as Read
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "Crush message marked as read",
+  "crush_message": {
+    "id": 2,
+    "status": "read",
+    "read_at": "2025-11-23T10:15:00Z"
+  }
+}
+```
+
+### POST `/api/v1.0/interactions/crush-messages/{id}/respond/` - Respond to Crush Message
+
+**Request (Accept):**
+
+```json
+{
+  "action": "accept"
+}
+```
+
+**Response (200 OK - Accept):**
+
+```json
+{
+  "message": "Crush message accepted. You are now matched!",
+  "crush_message": {
+    "id": 2,
+    "status": "accepted",
+    "responded_at": "2025-11-23T10:20:00Z"
+  },
+  "match_created": true
+}
+```
+
+**Request (Decline):**
+
+```json
+{
+  "action": "decline"
+}
+```
+
+**Response (200 OK - Decline):**
+
+```json
+{
+  "message": "Crush message declined",
+  "crush_message": {
+    "id": 2,
+    "status": "declined",
+    "responded_at": "2025-11-23T10:20:00Z"
+  }
+}
+```
+
+---
+
+## System Configuration
+
+### GET `/api/v1.0/profiles/system/status/` - Get System Status (Public, No Auth)
+
+**Response (200 OK):**
+
+```json
+{
+  "mode": "active",
+  "is_maintenance": false,
+  "maintenance_message": "",
+  "features_enabled": {
+    "matching": true,
+    "chat": true,
+    "boost": true,
+    "premium": true
+  }
+}
+```
+
+**Response (Maintenance Mode):**
+
+```json
+{
+  "mode": "maintenance",
+  "is_maintenance": true,
+  "maintenance_message": "System under maintenance. Back soon!",
+  "features_enabled": {
+    "matching": false,
+    "chat": false,
+    "boost": false,
+    "premium": false
+  }
+}
+```
+
+### GET `/api/v1.0/profiles/system-config/` - Get System Configuration (Admin Only)
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "mode": "active",
+  "paid_features_enabled": true,
+  "boost_enabled": true,
+  "premium_enabled": true,
+  "matching_enabled": true,
+  "chat_enabled": true,
+  "min_boost_amount": "5.00",
+  "boost_default_duration": 2,
+  "premium_weekly_price": "20.00",
+  "premium_monthly_price": "50.00",
+  "premium_yearly_price": "500.00",
+  "maintenance_message": "",
+  "trial_expires_at": null,
+  "updated_at": "2025-11-23T10:00:00Z",
+  "updated_by_username": "admin_user"
+}
+```
+
+### PATCH `/api/v1.0/profiles/system-config/1/` - Update System Configuration (Admin Only)
+
+**Request:**
+
+```json
+{
+  "mode": "active",
+  "paid_features_enabled": true,
+  "boost_enabled": true,
+  "min_boost_amount": "10.00"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "System configuration updated successfully",
+  "config": {
+    "id": 1,
+    "mode": "active",
+    "paid_features_enabled": true,
+    "boost_enabled": true,
+    "min_boost_amount": "10.00",
+    "updated_at": "2025-11-23T11:00:00Z",
+    "updated_by_username": "admin_user"
+  }
+}
+```
+
+### POST `/api/v1.0/profiles/system-config/set_trial_mode/` - Set Trial Mode (Admin Only)
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "System set to trial mode. All paid features disabled.",
+  "config": {
+    "mode": "trial",
+    "paid_features_enabled": false
+  }
+}
+```
+
+### POST `/api/v1.0/profiles/system-config/set_active_mode/` - Set Active Mode (Admin Only)
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "System set to active mode.",
+  "config": {
+    "mode": "active",
+    "paid_features_enabled": true
+  }
+}
+```
+
+### POST `/api/v1.0/profiles/system-config/set_maintenance_mode/` - Set Maintenance Mode (Admin Only)
+
+**Request:**
+
+```json
+{
+  "message": "System under maintenance. Back at 3 PM."
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "System set to maintenance mode.",
+  "config": {
+    "mode": "maintenance",
+    "maintenance_message": "System under maintenance. Back at 3 PM."
+  }
+}
+```
+
+### POST `/api/v1.0/profiles/system-config/toggle_feature/` - Toggle Feature (Admin Only)
+
+**Request:**
+
+```json
+{
+  "feature": "boost_enabled",
+  "enabled": false
+}
+```
+
+**Valid Features:** `paid_features_enabled`, `boost_enabled`, `premium_enabled`, `matching_enabled`, `chat_enabled`
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "boost_enabled disabled successfully",
+  "config": {
+    "boost_enabled": false
+  }
+}
+```
+
+---
+
+## Updated Profile Fields
+
+### PATCH `/api/v1.0/profiles/me/` - Update Profile with New Fields
+
+**Request:**
+
+```json
+{
+  "occupation_type": "student",
+  "university": 1,
+  "course": "Computer Science",
+  "graduation_year": 2026,
+  "city": "Lusaka",
+  "compound": "Meanwood",
+  "work_place": "",
+  "profile_tier": "standard"
+}
+```
+
+**Or for working professionals:**
+
+```json
+{
+  "occupation_type": "working",
+  "work_place": "Tech Company Ltd",
+  "city": "Lusaka",
+  "compound": "Kabulonga",
+  "university": null,
+  "course": "",
+  "graduation_year": null
+}
+```
+
+**Occupation Types:** `student`, `working`
+
+**Profile Tiers:** `standard`, `premium`
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "occupation_type": "student",
+  "university_data": {
+    "id": 1,
+    "name": "University of Zambia"
+  },
+  "course": "Computer Science",
+  "graduation_year": 2026,
+  "city": "Lusaka",
+  "compound": "Meanwood",
+  "work_place": "",
+  "profile_tier": "standard",
+  "premium_until": null
+}
+```
+
+---
+
+## Premium Features
+
+### Profile Tier Isolation
+
+- **Standard users** only see other standard profiles in discovery
+- **Premium users** only see other premium profiles in discovery
+- Premium status is automatically managed through subscriptions
+
+### Premium Subscription Response
+
+When a subscription is activated, the profile is automatically upgraded:
+
+```json
+{
+  "profile_tier": "premium",
+  "premium_until": "2025-12-23T10:00:00Z"
+}
+```
+
+---
+
+## Notes - Production Features
+
+17. **Profile Boost System**:
+    - Minimum K5 payment required
+    - User specifies target views and duration (default 2 hours)
+    - Real-time progress tracking
+    - Boosted profiles appear first in discovery
+    - System can disable boosts via configuration
+
+18. **Advanced Filtering**:
+    - Filter by age range, gender, location, university
+    - Filter by occupation type (student/working)
+    - Filter by city and compound
+    - Online status filtering
+    - Interest-based filtering
+    - Recommended profiles based on preferences
+
+19. **Blocking & Reporting**:
+    - Block users to prevent all interactions
+    - Report users, messages, or profiles
+    - Admin dashboard for report management
+    - Multiple report reasons (spam, harassment, etc.)
+    - Blocked users cannot see each other's profiles
+
+20. **Crush Messages**:
+    - Send ONE message before matching
+    - Receiver can accept (creates match) or decline
+    - Cannot send if already matched or blocked
+    - Read receipts and response tracking
+
+21. **System Configuration**:
+    - Three modes: trial, active, maintenance
+    - Feature toggles for boost, premium, matching, chat
+    - Configurable pricing for boosts and premium
+    - Public status endpoint for app state checking
+    - Admin-only configuration management
+
+22. **Match-Required Chat**:
+    - Chat ONLY allowed after users match
+    - WebSocket connection validates match status
+    - Applies to all chat interactions
+    - Connection rejected if not matched
+
+23. **Student & Work Profiles**:
+    - `occupation_type`: student or working
+    - Students have university, course, graduation year
+    - Working professionals have work_place
+    - Both have city and compound fields
+    - Filterable by all occupation fields
+
+24. **Premium Tier System**:
+    - Standard users see only standard profiles
+    - Premium users see only premium profiles
+    - Automatic tier management via subscriptions
+    - Enhanced visibility for premium users
+
+25. **Production Ready**:
+    - All features have proper error handling
+    - Admin controls for system management
+    - Feature flags for gradual rollout
+    - Trial mode for testing without payments
+    - Maintenance mode for system updates
