@@ -74,7 +74,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   Future<void> _checkAuthStatus() async {
-    await Future.delayed(const Duration(milliseconds: 2500));
+    await Future.delayed(const Duration(minutes: 2));
 
     if (!mounted) return;
 
@@ -220,7 +220,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                       ),
                                       child: Icon(
                                         Icons.favorite_rounded,
-                                        size: 60,
+                                        size: 60.0,
                                         color: Colors.white,
                                       ),
                                     ),
