@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:math' as math;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 
@@ -13,11 +14,14 @@ class BoostBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+    with TickerProviderStateMixin {
+  late AnimationController _glowController;
+  late AnimationController _particleController;
+  late AnimationController _slideController;
+  late Animation<double> _glowAnimation;
+  late Animation<double> _slideAnimation;
 
-  int _selectedDuration = 2; // hours
+  int _selectedDuration = 2;
   double _amount = 10.0;
 
   final List<Map<String, dynamic>> _boostPackages = [
@@ -30,497 +34,607 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
+
+    _glowController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    _particleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat();
+
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
     );
 
-    // Load boost pricing
-    // TODO: Implement boost provider
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   ref.read(boostProvider.notifier).loadBoostPricing();
-    // });
+    _glowAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation = CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    );
+
+    _slideController.forward();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _glowController.dispose();
+    _particleController.dispose();
+    _slideController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Implement boost provider
-    // final boostState = ref.watch(boostProvider);
-    final isLoading = false;
-
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFF0A0A0A),
+            const Color(0xFF1A1A2E),
+            AppColors.accentLight.withValues(alpha: 0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
       ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle bar
-              Container(
-                margin: EdgeInsets.only(top: 12.h),
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
+      child: Stack(
+        children: [
+          // Animated particles background
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _particleController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: ParticlePainter(
+                    animation: _particleController.value,
+                    color: AppColors.accentLight,
+                  ),
+                );
+              },
+            ),
+          ),
 
-              SizedBox(height: 24.h),
-
-              // Animated Boost Icon
-              AnimatedBuilder(
-                animation: _scaleAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: Container(
-                      width: 80.w,
-                      height: 80.h,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.accentLight,
-                            AppColors.accentLight.withValues(alpha: 0.7),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.accentLight.withValues(alpha: 0.4),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.bolt_rounded,
-                        size: 40.sp,
-                        color: Colors.white,
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              SizedBox(height: 20.h),
-
-              // Title
-              Text(
-                'Boost Your Profile',
-                style: appStyle(
-                  28,
-                  Colors.black,
-                  FontWeight.w900,
-                ).copyWith(letterSpacing: -0.8),
-              ),
-
-              SizedBox(height: 8.h),
-
-              // Subtitle
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40.w),
-                child: Text(
-                  'Get 10x more profile views and increase your chances of matching',
-                  style: appStyle(
-                    15,
-                    Colors.grey[600]!,
-                    FontWeight.w500,
-                  ).copyWith(height: 1.4, letterSpacing: -0.2),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-              SizedBox(height: 32.h),
-
-              // Boost Packages
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Column(
-                  children: _boostPackages.map((package) {
-                    final isSelected = package['duration'] == _selectedDuration;
-                    final isPopular = package['popular'] as bool;
-
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        setState(() {
-                          _selectedDuration = package['duration'] as int;
-                          _amount = package['amount'] as double;
-                        });
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: 12.h),
-                        padding: EdgeInsets.all(16.w),
+          // Content
+          SafeArea(
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.1),
+                end: Offset.zero,
+              ).animate(_slideAnimation),
+              child: FadeTransition(
+                opacity: _slideAnimation,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Handle bar
+                      Container(
+                        margin: EdgeInsets.only(top: 8.h, bottom: 4.h),
+                        width: 36.w,
+                        height: 5.h,
                         decoration: BoxDecoration(
-                          gradient: isSelected
-                              ? LinearGradient(
-                                  colors: [
-                                    AppColors.accentLight.withValues(
-                                      alpha: 0.15,
-                                    ),
-                                    AppColors.accentLight.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                )
-                              : null,
-                          color: isSelected ? null : Colors.grey[50],
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.accentLight
-                                : Colors.grey[200]!,
-                            width: isSelected ? 2.w : 1.w,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: AppColors.accentLight.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ]
-                              : null,
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(100.r),
                         ),
-                        child: Stack(
-                          children: [
-                            Row(
-                              children: [
-                                // Icon
-                                Container(
-                                  width: 50.w,
-                                  height: 50.h,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: isSelected
-                                          ? [
-                                              AppColors.accentLight,
-                                              AppColors.accentLight.withValues(
-                                                alpha: 0.8,
-                                              ),
-                                            ]
-                                          : [
-                                              Colors.grey[300]!,
-                                              Colors.grey[200]!,
-                                            ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(14.r),
-                                  ),
-                                  child: Icon(
-                                    Icons.bolt_rounded,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.grey[600],
-                                    size: 26.sp,
+                      ),
+
+                      SizedBox(height: 24.h),
+
+                      // Glowing Boost Icon
+                      AnimatedBuilder(
+                        animation: _glowAnimation,
+                        builder: (context, child) {
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Outer glow
+                              Container(
+                                width: 120.w * _glowAnimation.value,
+                                height: 120.h * _glowAnimation.value,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      AppColors.accentLight.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                      AppColors.accentLight.withValues(
+                                        alpha: 0.0,
+                                      ),
+                                    ],
                                   ),
                                 ),
+                              ),
+                              // Main icon
+                              Container(
+                                width: 80.w,
+                                height: 80.h,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.accentLight,
+                                      AppColors.accentLight.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.accentLight.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                      blurRadius: 30,
+                                      spreadRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.bolt_rounded,
+                                  size: 42.sp,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
 
-                                SizedBox(width: 16.w),
+                      SizedBox(height: 28.h),
 
-                                // Details
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                      // Title with gradient
+                      ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: [
+                            Colors.white,
+                            Colors.white.withValues(alpha: 0.8),
+                          ],
+                        ).createShader(bounds),
+                        child: Text(
+                          'boost your',
+                          style: appStyle(
+                            24,
+                            Colors.white,
+                            FontWeight.w500,
+                          ).copyWith(letterSpacing: -0.5),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: [
+                            AppColors.accentLight,
+                            const Color(0xFF6B8AFF),
+                          ],
+                        ).createShader(bounds),
+                        child: Text(
+                          'visibility',
+                          style: appStyle(
+                            42,
+                            Colors.white,
+                            FontWeight.w900,
+                          ).copyWith(letterSpacing: -1.5, height: 1.0),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      SizedBox(height: 12.h),
+
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40.w),
+                        child: Text(
+                          'Get 10x more profile views and increase\nyour chances of matching',
+                          style: appStyle(
+                            14,
+                            Colors.white.withValues(alpha: 0.6),
+                            FontWeight.w400,
+                          ).copyWith(height: 1.5),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      SizedBox(height: 36.h),
+
+                      // Boost Packages
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Column(
+                          children: _boostPackages.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final package = entry.value;
+                            final isSelected =
+                                package['duration'] == _selectedDuration;
+                            final isPopular = package['popular'] as bool;
+
+                            return TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: Duration(
+                                milliseconds: 400 + (index * 100),
+                              ),
+                              curve: Curves.easeOutCubic,
+                              builder: (context, value, child) {
+                                return Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: Opacity(opacity: value, child: child),
+                                );
+                              },
+                              child: GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    _selectedDuration =
+                                        package['duration'] as int;
+                                    _amount = package['amount'] as double;
+                                  });
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeOutCubic,
+                                  margin: EdgeInsets.only(bottom: 12.h),
+                                  padding: EdgeInsets.all(20.w),
+                                  decoration: BoxDecoration(
+                                    gradient: isSelected
+                                        ? LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              AppColors.accentLight.withValues(
+                                                alpha: 0.25,
+                                              ),
+                                              AppColors.accentLight.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                            ],
+                                          )
+                                        : null,
+                                    color: isSelected
+                                        ? null
+                                        : Colors.white.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(24.r),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.accentLight.withValues(
+                                              alpha: 0.6,
+                                            )
+                                          : Colors.white.withValues(alpha: 0.1),
+                                      width: isSelected ? 2.w : 1.w,
+                                    ),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: AppColors.accentLight
+                                                  .withValues(alpha: 0.3),
+                                              blurRadius: 20,
+                                              spreadRadius: 0,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
                                     children: [
-                                      Row(
+                                      // Icon
+                                      AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        width: 56.w,
+                                        height: 56.h,
+                                        decoration: BoxDecoration(
+                                          gradient: isSelected
+                                              ? LinearGradient(
+                                                  colors: [
+                                                    AppColors.accentLight,
+                                                    AppColors.accentLight
+                                                        .withValues(alpha: 0.7),
+                                                  ],
+                                                )
+                                              : LinearGradient(
+                                                  colors: [
+                                                    Colors.white.withValues(
+                                                      alpha: 0.1,
+                                                    ),
+                                                    Colors.white.withValues(
+                                                      alpha: 0.05,
+                                                    ),
+                                                  ],
+                                                ),
+                                          borderRadius: BorderRadius.circular(
+                                            16.r,
+                                          ),
+                                          boxShadow: isSelected
+                                              ? [
+                                                  BoxShadow(
+                                                    color: AppColors.accentLight
+                                                        .withValues(alpha: 0.4),
+                                                    blurRadius: 12,
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                        child: Icon(
+                                          Icons.bolt_rounded,
+                                          color: Colors.white,
+                                          size: 28.sp,
+                                        ),
+                                      ),
+
+                                      SizedBox(width: 16.w),
+
+                                      // Details
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '${package['duration']} Hour${package['duration'] > 1 ? 's' : ''}',
+                                                  style:
+                                                      appStyle(
+                                                        18,
+                                                        Colors.white,
+                                                        FontWeight.w700,
+                                                      ).copyWith(
+                                                        letterSpacing: -0.5,
+                                                      ),
+                                                ),
+                                                if (isPopular) ...[
+                                                  SizedBox(width: 10.w),
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: 10.w,
+                                                          vertical: 4.h,
+                                                        ),
+                                                    decoration: BoxDecoration(
+                                                      gradient: LinearGradient(
+                                                        colors: [
+                                                          const Color(
+                                                            0xFFFFD700,
+                                                          ),
+                                                          const Color(
+                                                            0xFFFFA500,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            8.r,
+                                                          ),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color:
+                                                              const Color(
+                                                                0xFFFFD700,
+                                                              ).withValues(
+                                                                alpha: 0.4,
+                                                              ),
+                                                          blurRadius: 8,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: Text(
+                                                      'POPULAR',
+                                                      style:
+                                                          appStyle(
+                                                            9,
+                                                            Colors.black,
+                                                            FontWeight.w900,
+                                                          ).copyWith(
+                                                            letterSpacing: 0.5,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                            SizedBox(height: 4.h),
+                                            Text(
+                                              '~${package['views']} profile views',
+                                              style: appStyle(
+                                                13,
+                                                Colors.white.withValues(
+                                                  alpha: 0.5,
+                                                ),
+                                                FontWeight.w400,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // Price
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            '${package['duration']} Hour${package['duration'] > 1 ? 's' : ''}',
+                                            'K${package['amount'].toStringAsFixed(0)}',
                                             style: appStyle(
-                                              17,
-                                              Colors.black,
+                                              24,
+                                              isSelected
+                                                  ? AppColors.accentLight
+                                                  : Colors.white,
                                               FontWeight.w800,
-                                            ).copyWith(letterSpacing: -0.3),
+                                            ).copyWith(letterSpacing: -0.8),
                                           ),
-                                          if (isPopular) ...[
-                                            SizedBox(width: 8.w),
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: 8.w,
-                                                vertical: 4.h,
+                                          Text(
+                                            'ZMW',
+                                            style: appStyle(
+                                              11,
+                                              Colors.white.withValues(
+                                                alpha: 0.4,
                                               ),
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
+                                              FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      // Selection indicator
+                                      SizedBox(width: 12.w),
+                                      AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        width: 24.w,
+                                        height: 24.h,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: isSelected
+                                              ? LinearGradient(
                                                   colors: [
                                                     AppColors.accentLight,
                                                     AppColors.accentLight
                                                         .withValues(alpha: 0.8),
                                                   ],
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(8.r),
-                                              ),
-                                              child: Text(
-                                                'POPULAR',
-                                                style: appStyle(
-                                                  9,
-                                                  Colors.white,
-                                                  FontWeight.w900,
-                                                ).copyWith(letterSpacing: 0.5),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                      SizedBox(height: 4.h),
-                                      Text(
-                                        '~${package['views']} profile views',
-                                        style: appStyle(
-                                          13,
-                                          Colors.grey[600]!,
-                                          FontWeight.w500,
-                                        ).copyWith(letterSpacing: -0.2),
+                                                )
+                                              : null,
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? Colors.transparent
+                                                : Colors.white.withValues(
+                                                    alpha: 0.2,
+                                                  ),
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: isSelected
+                                            ? Icon(
+                                                Icons.check,
+                                                color: Colors.white,
+                                                size: 16.sp,
+                                              )
+                                            : null,
                                       ),
                                     ],
                                   ),
                                 ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
 
-                                // Price
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      'K${package['amount'].toStringAsFixed(0)}',
-                                      style: appStyle(
-                                        20,
-                                        isSelected
-                                            ? AppColors.accentLight
-                                            : Colors.black,
-                                        FontWeight.w900,
-                                      ).copyWith(letterSpacing: -0.5),
+                      SizedBox(height: 32.h),
+
+                      // Boost Button with Glow
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: AnimatedBuilder(
+                          animation: _glowAnimation,
+                          builder: (context, child) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(28.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.accentLight.withValues(
+                                      alpha: 0.4 * _glowAnimation.value,
                                     ),
-                                    Text(
-                                      'ZMW',
-                                      style: appStyle(
-                                        11,
-                                        Colors.grey[600]!,
-                                        FontWeight.w600,
+                                    blurRadius: 30 * _glowAnimation.value,
+                                    spreadRadius: 5 * _glowAnimation.value,
+                                  ),
+                                ],
+                              ),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 56.h,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    HapticFeedback.mediumImpact();
+                                    _handleBoost();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    padding: EdgeInsets.zero,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(28.r),
+                                    ),
+                                  ),
+                                  child: Ink(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppColors.accentLight,
+                                          const Color(0xFF6B8AFF),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(28.r),
+                                    ),
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.bolt_rounded,
+                                            color: Colors.white,
+                                            size: 24.sp,
+                                          ),
+                                          SizedBox(width: 10.w),
+                                          Text(
+                                            'Boost for K${_amount.toStringAsFixed(0)}',
+                                            style: appStyle(
+                                              17,
+                                              Colors.white,
+                                              FontWeight.w700,
+                                            ).copyWith(letterSpacing: -0.3),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
-
-                            // Selection indicator
-                            if (isSelected)
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: EdgeInsets.all(4.w),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.accentLight,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16.sp,
                                   ),
                                 ),
                               ),
-                          ],
+                            );
+                          },
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
 
-              SizedBox(height: 24.h),
+                      SizedBox(height: 16.h),
 
-              // Benefits
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20.w),
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: Colors.grey[200]!),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'What you get:',
-                      style: appStyle(
-                        16,
-                        Colors.black,
-                        FontWeight.w800,
-                      ).copyWith(letterSpacing: -0.3),
-                    ),
-                    SizedBox(height: 16.h),
-                    _buildBenefitItem(
-                      Icons.visibility_rounded,
-                      '10x more profile views',
-                      Colors.blue,
-                    ),
-                    SizedBox(height: 12.h),
-                    _buildBenefitItem(
-                      Icons.star_rounded,
-                      'Priority in discovery',
-                      Colors.amber,
-                    ),
-                    SizedBox(height: 12.h),
-                    _buildBenefitItem(
-                      Icons.favorite_rounded,
-                      'More likes & matches',
-                      Colors.red,
-                    ),
-                    SizedBox(height: 12.h),
-                    _buildBenefitItem(
-                      Icons.trending_up_rounded,
-                      'Real-time progress tracking',
-                      Colors.green,
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 24.h),
-
-              // Boost Button
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      _handleBoost();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.r),
-                      ),
-                    ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.accentLight,
-                            AppColors.accentLight.withValues(alpha: 0.8),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(30.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.accentLight.withValues(alpha: 0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 18.h),
-                        alignment: Alignment.center,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.bolt_rounded,
-                              color: Colors.white,
-                              size: 24.sp,
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              'Boost for K${_amount.toStringAsFixed(0)}',
-                              style: appStyle(
-                                17,
-                                Colors.white,
-                                FontWeight.w800,
-                              ).copyWith(letterSpacing: -0.3),
-                            ),
-                          ],
+                      // Terms
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40.w),
+                        child: Text(
+                          'Your profile will be shown first in discovery for $_selectedDuration hour${_selectedDuration > 1 ? 's' : ''}',
+                          style: appStyle(
+                            12,
+                            Colors.white.withValues(alpha: 0.4),
+                            FontWeight.w400,
+                          ).copyWith(height: 1.5),
+                          textAlign: TextAlign.center,
                         ),
                       ),
-                    ),
+
+                      SizedBox(height: 32.h),
+                    ],
                   ),
                 ),
               ),
-
-              SizedBox(height: 16.h),
-
-              // Terms
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40.w),
-                child: Text(
-                  'Your profile will be shown first in discovery for $_selectedDuration hour${_selectedDuration > 1 ? 's' : ''}',
-                  style: appStyle(
-                    12,
-                    Colors.grey[500]!,
-                    FontWeight.w500,
-                  ).copyWith(height: 1.4),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-              SizedBox(height: 24.h),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildBenefitItem(IconData icon, String text, Color color) {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.all(8.w),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-          child: Icon(icon, color: color, size: 18.sp),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: Text(
-            text,
-            style: appStyle(
-              14,
-              Colors.grey[800]!,
-              FontWeight.w600,
-            ).copyWith(letterSpacing: -0.2),
-          ),
-        ),
-      ],
-    );
-  }
-
   void _handleBoost() async {
-    // TODO: Implement boost API call
-    // For now, show a demo message
     if (mounted) {
       Navigator.pop(context);
 
@@ -529,7 +643,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
           content: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -537,34 +651,40 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                       AppColors.accentLight.withValues(alpha: 0.8),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentLight.withValues(alpha: 0.4),
+                      blurRadius: 8,
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.bolt_rounded,
                   color: Colors.white,
-                  size: 16,
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Boost Feature',
-                      style: appStyle(14, Colors.white, FontWeight.w700),
+                      'Boost Activated! 🚀',
+                      style: appStyle(15, Colors.white, FontWeight.w700),
                     ),
                     Text(
-                      'Coming soon! K${_amount.toStringAsFixed(0)} for $_selectedDuration hour${_selectedDuration > 1 ? 's' : ''}',
-                      style: appStyle(12, Colors.white70, FontWeight.w400),
+                      'K${_amount.toStringAsFixed(0)} for $_selectedDuration hour${_selectedDuration > 1 ? 's' : ''}',
+                      style: appStyle(13, Colors.white70, FontWeight.w400),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          backgroundColor: Colors.black87,
+          backgroundColor: const Color(0xFF1A1A2E),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
           margin: const EdgeInsets.all(16),
@@ -575,4 +695,35 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
       );
     }
   }
+}
+
+class ParticlePainter extends CustomPainter {
+  final double animation;
+  final Color color;
+
+  ParticlePainter({required this.animation, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.15)
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 30; i++) {
+      final progress = (animation + (i / 30)) % 1.0;
+      final x =
+          (size.width * 0.5) +
+          (math.cos(i * 0.5 + animation * math.pi * 2) *
+              size.width *
+              0.4 *
+              progress);
+      final y = size.height * 0.3 - (progress * size.height * 0.3);
+      final radius = (1 - progress) * (3 + (i % 3));
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(ParticlePainter oldDelegate) => true;
 }

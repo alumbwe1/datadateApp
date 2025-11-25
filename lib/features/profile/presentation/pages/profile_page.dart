@@ -306,7 +306,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    profile.universityData?.name ?? 'University',
+                    profile.universityData?['name'] as String? ?? 'University',
                     style: appStyle(
                       14,
                       Colors.grey[700]!,

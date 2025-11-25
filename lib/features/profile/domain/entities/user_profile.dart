@@ -62,6 +62,13 @@ class UserProfile extends Equatable {
   // Helper getter for backward compatibility
   String? get profilePhoto => imageUrls.isNotEmpty ? imageUrls.first : null;
 
+  // Helper getter for university data
+  Map<String, dynamic>? get universityData => {
+    'id': universityId,
+    'name': universityName,
+    'logo': universityLogo,
+  };
+
   @override
   List<Object?> get props => [
     id,
