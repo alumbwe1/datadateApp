@@ -7,7 +7,7 @@ part 'report_model.g.dart';
 class ReportModel with _$ReportModel {
   const factory ReportModel({
     required int id,
-    @JsonKey(name: 'reporter_username') required String reporterUsername,
+    required String reporterUsername,
     @JsonKey(name: 'reported_username') required String reportedUsername,
     @JsonKey(name: 'report_type') required String reportType,
     required String reason,

@@ -19,234 +19,315 @@ class FilterBottomSheet extends StatefulWidget {
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
 }
 
-class _FilterBottomSheetState extends State<FilterBottomSheet> {
+class _FilterBottomSheetState extends State<FilterBottomSheet>
+    with SingleTickerProviderStateMixin {
   late RangeValues _ageRange;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _ageRange = RangeValues(widget.initialMinAge, widget.initialMaxAge);
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _handleReset() {
+    setState(() {
+      _ageRange = const RangeValues(18, 35);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
-        ),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag Handle
-            Container(
-              margin: EdgeInsets.only(top: 12.h),
-              width: 40.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2.r),
-              ),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5F7),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(32.r),
+              topRight: Radius.circular(32.r),
             ),
-
-            SizedBox(height: 20.h),
-
-            // Header
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryLight.withOpacity(0.15),
-                          AppColors.primaryLight.withOpacity(0.1),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Icon(
-                      Icons.tune_rounded,
-                      color: AppColors.primaryLight,
-                      size: 24.sp,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Text(
-                    'Filter Preferences',
-                    style: appStyle(
-                      22,
-                      Colors.black,
-                      FontWeight.w800,
-                    ).copyWith(letterSpacing: -0.5),
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _ageRange = const RangeValues(18, 35);
-                      });
-                    },
-                    child: Text(
-                      'Reset',
-                      style: appStyle(
-                        14,
-                        AppColors.primaryLight,
-                        FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 32.h),
-
-            // Age Range Section
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Age Range',
-                        style: appStyle(16, Colors.black87, FontWeight.w600),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 8.h,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.primaryLight.withOpacity(0.1),
-                              AppColors.secondaryLight.withOpacity(0.1),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: AppColors.primaryLight.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          '${_ageRange.start.round()} - ${_ageRange.end.round()} years',
-                          style: appStyle(
-                            14,
-                            AppColors.primaryLight,
-                            FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 24.h),
-
-                  // Range Slider
-                  SliderTheme(
-                    data: SliderThemeData(
-                      trackHeight: 4.h,
-                      activeTrackColor: AppColors.primaryLight,
-                      inactiveTrackColor: Colors.grey[200],
-                      thumbColor: Colors.white,
-                      overlayColor: AppColors.primaryLight.withOpacity(0.2),
-                      thumbShape: RoundSliderThumbShape(
-                        enabledThumbRadius: 12.r,
-                        elevation: 4,
-                      ),
-                      overlayShape: RoundSliderOverlayShape(
-                        overlayRadius: 24.r,
-                      ),
-                      rangeThumbShape: RoundRangeSliderThumbShape(
-                        enabledThumbRadius: 12.r,
-                        elevation: 4,
-                      ),
-                      rangeTrackShape: const RoundedRectRangeSliderTrackShape(),
-                      valueIndicatorColor: AppColors.primaryLight,
-                      valueIndicatorTextStyle: appStyle(
-                        12,
-                        Colors.white,
-                        FontWeight.w600,
-                      ),
-                    ),
-                    child: RangeSlider(
-                      values: _ageRange,
-                      min: 18,
-                      max: 60,
-                      divisions: 42,
-                      labels: RangeLabels(
-                        _ageRange.start.round().toString(),
-                        _ageRange.end.round().toString(),
-                      ),
-                      onChanged: (RangeValues values) {
-                        setState(() {
-                          _ageRange = values;
-                        });
-                      },
-                    ),
-                  ),
-
-                  SizedBox(height: 8.h),
-
-                  // Min and Max Labels
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '18',
-                        style: appStyle(12, Colors.grey[600]!, FontWeight.w500),
-                      ),
-                      Text(
-                        '60',
-                        style: appStyle(12, Colors.grey[600]!, FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 32.h),
-
-            // Apply Button
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56.h,
-                child: ElevatedButton(
-                  onPressed: () {
-                    widget.onApply(_ageRange.start, _ageRange.end);
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Apply Filters',
-                    style: appStyle(16, Colors.white, FontWeight.w700),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Minimal Drag Handle
+                Container(
+                  margin: EdgeInsets.only(top: 8.h, bottom: 4.h),
+                  width: 36.w,
+                  height: 5.h,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(100.r),
                   ),
                 ),
-              ),
-            ),
 
-            SizedBox(height: 24.h),
-          ],
+                SizedBox(height: 20.h),
+
+                // Clean Header
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filters',
+                        style: appStyle(
+                          28.sp,
+                          Colors.black,
+                          FontWeight.w700,
+                        ).copyWith(letterSpacing: -0.3),
+                      ),
+                      GestureDetector(
+                        onTap: _handleReset,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Text(
+                            'Reset',
+                            style: appStyle(
+                              15,
+                              AppColors.primaryLight,
+                              FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 40.h),
+
+                // Age Range Card
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Container(
+                    padding: EdgeInsets.all(24.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24.r),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Section Label
+                        Text(
+                          'Age Range',
+                          style: appStyle(
+                            17,
+                            Colors.black.withOpacity(0.6),
+                            FontWeight.w500,
+                          ),
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        // Large Age Display
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: Row(
+                            key: ValueKey(
+                              '${_ageRange.start}-${_ageRange.end}',
+                            ),
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                '${_ageRange.start.round()}',
+                                style: appStyle(
+                                  48,
+                                  Colors.black,
+                                  FontWeight.w700,
+                                ).copyWith(letterSpacing: -0.3.sp, height: 1.0),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                child: Text(
+                                  '—',
+                                  style: appStyle(
+                                    32.sp,
+                                    Colors.black.withOpacity(0.3),
+                                    FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '${_ageRange.end.round()}',
+                                style: appStyle(
+                                  48.sp,
+                                  Colors.black,
+                                  FontWeight.w700,
+                                ).copyWith(letterSpacing: -0.3.sp, height: 1.0),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'years',
+                                style: appStyle(
+                                  17,
+                                  Colors.black.withOpacity(0.4),
+                                  FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 32.h),
+
+                        // Minimalist Range Slider
+                        SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 4.h,
+                            activeTrackColor: Colors.black,
+                            inactiveTrackColor: Colors.black.withOpacity(0.08),
+                            thumbColor: Colors.black,
+                            overlayColor: Colors.black.withOpacity(0.08),
+                            thumbShape: RoundSliderThumbShape(
+                              enabledThumbRadius: 10.r,
+                              elevation: 0,
+                            ),
+                            overlayShape: RoundSliderOverlayShape(
+                              overlayRadius: 20.r,
+                            ),
+                            rangeThumbShape: RoundRangeSliderThumbShape(
+                              enabledThumbRadius: 10.r,
+                              elevation: 0,
+                            ),
+                            rangeTrackShape:
+                                const RoundedRectRangeSliderTrackShape(),
+                            valueIndicatorShape:
+                                const PaddleSliderValueIndicatorShape(),
+                            valueIndicatorColor: Colors.black,
+                            valueIndicatorTextStyle: appStyle(
+                              14,
+                              Colors.white,
+                              FontWeight.w600,
+                            ),
+                            showValueIndicator:
+                                ShowValueIndicator.onlyForDiscrete,
+                          ),
+                          child: RangeSlider(
+                            values: _ageRange,
+                            min: 18,
+                            max: 60,
+                            divisions: 42,
+                            labels: RangeLabels(
+                              '${_ageRange.start.round()}',
+                              '${_ageRange.end.round()}',
+                            ),
+                            onChanged: (RangeValues values) {
+                              setState(() {
+                                _ageRange = values;
+                              });
+                            },
+                          ),
+                        ),
+
+                        SizedBox(height: 8.h),
+
+                        // Subtle Range Labels
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '18',
+                              style: appStyle(
+                                13,
+                                Colors.black.withOpacity(0.4),
+                                FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              '60',
+                              style: appStyle(
+                                13,
+                                Colors.black.withOpacity(0.4),
+                                FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 24.h),
+
+                // Clean Apply Button
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 56.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        widget.onApply(_ageRange.start, _ageRange.end);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40.r),
+                        ),
+                        elevation: 0,
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Text(
+                        'Apply',
+                        style: appStyle(
+                          17,
+                          Colors.white,
+                          FontWeight.w600,
+                        ).copyWith(letterSpacing: -0.3),
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 32.h),
+              ],
+            ),
+          ),
         ),
       ),
     );

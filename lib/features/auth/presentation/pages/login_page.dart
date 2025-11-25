@@ -88,7 +88,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 style: GoogleFonts.poppins(
                   fontSize: 32.sp,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFF341F97),
+                  color: Colors.black,
                   letterSpacing: -0.3,
                 ),
                 textAlign: TextAlign.center,
@@ -235,7 +235,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             'Sign Up',
                             style: GoogleFonts.poppins(
                               fontSize: 15.sp,
-                              color: const Color(0xFF6C5CE7),
+                              color: Colors.black,
                               fontWeight: FontWeight.w700,
                             ),
                           ),

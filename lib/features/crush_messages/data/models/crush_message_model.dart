@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_annotation_target
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'crush_message_model.freezed.dart';
@@ -7,7 +9,7 @@ part 'crush_message_model.g.dart';
 class CrushMessageModel with _$CrushMessageModel {
   const factory CrushMessageModel({
     required int id,
-    @JsonKey(name: 'sender_id') required int senderId,
+    required int senderId,
     @JsonKey(name: 'sender_username') required String senderUsername,
     @JsonKey(name: 'receiver_id') required int receiverId,
     @JsonKey(name: 'receiver_username') required String receiverUsername,

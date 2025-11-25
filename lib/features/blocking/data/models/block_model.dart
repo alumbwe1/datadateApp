@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_annotation_target
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'block_model.freezed.dart';
@@ -7,7 +9,7 @@ part 'block_model.g.dart';
 class BlockModel with _$BlockModel {
   const factory BlockModel({
     required int id,
-    @JsonKey(name: 'blocker_username') required String blockerUsername,
+    required String blockerUsername,
     @JsonKey(name: 'blocked_username') required String blockedUsername,
     @JsonKey(name: 'blocked_user_id') required int blockedUserId,
     String? reason,

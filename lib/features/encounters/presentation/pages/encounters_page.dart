@@ -14,6 +14,7 @@ import '../widgets/profile_card.dart';
 import '../widgets/swipe_overlay.dart';
 import '../widgets/animated_action_button.dart';
 import '../widgets/filter_bottom_sheet.dart';
+import '../widgets/boost_bottom_sheet.dart';
 import 'match_page.dart';
 
 class EncountersPage extends ConsumerStatefulWidget {
@@ -196,65 +197,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                     color: Colors.white,
                     onPressed: () {
                       HapticFeedback.mediumImpact();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      AppColors.accentLight,
-                                      AppColors.accentLight.withValues(
-                                        alpha: 0.8,
-                                      ),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.bolt_rounded,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Boost Feature',
-                                      style: appStyle(
-                                        14,
-                                        Colors.white,
-                                        FontWeight.w700,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Get 10x more views - Coming soon!',
-                                      style: appStyle(
-                                        12,
-                                        Colors.white70,
-                                        FontWeight.w400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: Colors.black87,
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 3),
-                          margin: const EdgeInsets.all(16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      );
+                      _showBoostBottomSheet();
                     },
                     splashRadius: 24,
                     padding: EdgeInsets.zero,
@@ -578,6 +521,15 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           // );
         },
       ),
+    );
+  }
+
+  void _showBoostBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => const BoostBottomSheet(),
     );
   }
 
