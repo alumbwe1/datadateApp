@@ -1,3 +1,4 @@
+import 'package:datadate/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -166,15 +167,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 // Logo
                 Center(
                   child: Image.asset(
-                    'assets/images/dataDate.png',
-                    height: 50.h,
-                    width: 50.w,
-                    color: Colors.black,
+                    'assets/images/HeartLink1.png',
+                    height: 80.h,
+                    width: 80.w,
+                    color: AppColors.primaryLight,
                     fit: BoxFit.cover,
                   ),
                 ),
 
-                SizedBox(height: 24.h),
+                SizedBox(height: 10.h),
 
                 Text(
                   'Create Account',

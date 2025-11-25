@@ -1,3 +1,4 @@
+import 'package:datadate/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -73,14 +74,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               Center(
                 child: Image.asset(
                   'assets/images/HeartLink1.png',
-                  height: 70.h,
-                  width: 70.w,
-                  color: const Color(0xFF6C5CE7), // Premium purple
+                  height: 80.h,
+                  width: 80.w,
+                  color: AppColors.primaryLight, // Premium purple
                   fit: BoxFit.cover,
                 ),
               ),
 
-              SizedBox(height: 24.h),
+              SizedBox(height: 10.h),
 
               // Welcome text
               Text(

@@ -315,7 +315,7 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
                         // Enhanced Get Started Button
                         _buildEnhancedButton(
                           text: 'Get Started',
-                          onPressed: () => context.push('/login'),
+                          onPressed: () => context.push('/register'),
                           isPrimary: true,
                         ),
 

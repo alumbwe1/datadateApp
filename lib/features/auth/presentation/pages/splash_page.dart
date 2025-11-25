@@ -1,3 +1,4 @@
+import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -169,75 +170,15 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                   alignment: Alignment.center,
                                   children: [
                                     // Outer glow
-                                    Container(
-                                      width: 100 * pulseValue,
-                                      height: 100 * pulseValue,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: RadialGradient(
-                                          colors: [
-                                            const Color(
-                                              0xFFE91E63,
-                                            ).withValues(alpha: 0.4),
-                                            const Color(
-                                              0xFFE91E63,
-                                            ).withValues(alpha: 0.0),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    // Middle glow
-                                    Container(
-                                      width: 70,
-                                      height: 70,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: RadialGradient(
-                                          colors: [
-                                            const Color(
-                                              0xFFFF4081,
-                                            ).withValues(alpha: 0.3),
-                                            const Color(
-                                              0xFFFF4081,
-                                            ).withValues(alpha: 0.0),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    // Logo container
-                                    Container(
-                                      width: 80,
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: const LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            AppColors.accentLight,
-                                            const Color(0xFFFF6B9D),
-                                          ],
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: const Color(
-                                              0xFFE91E63,
-                                            ).withValues(alpha: 0.5),
-                                            blurRadius: 40,
-                                            spreadRadius: 10,
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadiusGeometry.circular(30.r),
-                                        child: Image.asset(
-                                          'assets/images/HeartLink1.png',
-                                          width: 10,
-                                          height: 10,
-                                          color: Colors.white,
-                                          fit: BoxFit.cover,
-                                        ),
+                                    ClipRRect(
+                                      borderRadius:
+                                          BorderRadiusGeometry.circular(30.r),
+                                      child: Image.asset(
+                                        'assets/images/HeartLink1.png',
+                                        width: 90.w,
+                                        height: 90.h,
+                                        color: Colors.white,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   ],
@@ -308,18 +249,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                     // Modern loading indicator
                     FadeTransition(
                       opacity: _textOpacity,
-                      child: AnimatedBuilder(
-                        animation: _particleController,
-                        builder: (context, child) {
-                          return CustomPaint(
-                            size: const Size(60, 60),
-                            painter: ModernLoadingPainter(
-                              progress: _particleController.value,
-                              color: const Color(0xFFE91E63),
-                            ),
-                          );
-                        },
-                      ),
+                      child: LottieLoadingIndicator(height: 40.h, width: 40.w),
                     ),
 
                     const SizedBox(height: 60),
@@ -470,54 +400,4 @@ class SplashParticlePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(SplashParticlePainter oldDelegate) => true;
-}
-
-class ModernLoadingPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-
-  ModernLoadingPainter({required this.progress, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
-
-    // Rotating arc
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
-      ..strokeCap = StrokeCap.round;
-
-    final startAngle = progress * math.pi * 2;
-    const sweepAngle = math.pi * 1.5;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - 4),
-      startAngle,
-      sweepAngle,
-      false,
-      paint,
-    );
-
-    // Animated dots
-    for (int i = 0; i < 3; i++) {
-      final dotProgress = (progress + (i * 0.15)) % 1.0;
-      final angle = dotProgress * math.pi * 2;
-      final dotRadius = radius - 4;
-
-      final x = center.dx + dotRadius * math.cos(angle);
-      final y = center.dy + dotRadius * math.sin(angle);
-
-      final dotPaint = Paint()
-        ..color = color.withValues(alpha: 1.0 - (i * 0.2))
-        ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(Offset(x, y), 3.0 - (i * 0.5), dotPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(ModernLoadingPainter oldDelegate) => true;
 }
