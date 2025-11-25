@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 
 class OnboardingWelcomePage extends ConsumerStatefulWidget {
@@ -17,41 +18,64 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
     with TickerProviderStateMixin {
   late AnimationController _particleController;
   late AnimationController _fadeController;
-  late AnimationController _matchController;
+  late AnimationController _gridController;
+  late AnimationController _glowController;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _slideAnimation;
+  late AnimationController _matchAnimationController;
+  late Animation<double> _matchScaleAnimation;
+  late Animation<double> _matchProgressAnimation;
 
   @override
   void initState() {
     super.initState();
+    _matchAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _matchScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _matchAnimationController,
+        curve: const Interval(0.0, 0.5, curve: Curves.elasticOut),
+      ),
+    );
+
+    _matchProgressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _matchAnimationController,
+        curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    // Start animation after a short delay
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        _matchAnimationController.forward();
+      }
+    });
 
     _particleController = AnimationController(
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 4000),
       vsync: this,
     )..repeat();
 
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
-    _matchController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+    _gridController = AnimationController(
+      duration: const Duration(milliseconds: 3000),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _glowController = AnimationController(
+      duration: const Duration(milliseconds: 2500),
       vsync: this,
     )..repeat(reverse: true);
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
-
-    _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
-      ),
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
     );
 
     _fadeController.forward();
@@ -61,8 +85,15 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
   void dispose() {
     _particleController.dispose();
     _fadeController.dispose();
-    _matchController.dispose();
+    _gridController.dispose();
+    _glowController.dispose();
+    _matchAnimationController.dispose();
     super.dispose();
+  }
+
+  int _calculateMatchPercentage() {
+    // Calculate match percentage based on profile data
+    return 100;
   }
 
   @override
@@ -71,465 +102,661 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF1A1A2E), Color(0xFF0F0F1E), Color(0xFF16213E)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF0A0A14),
+              Color(0xFF1A1A2E),
+              Color(0xFF16213E),
+              Color(0xFF0F0F1E),
+            ],
+            stops: [0.0, 0.3, 0.7, 1.0],
           ),
         ),
         child: Stack(
           children: [
-            // Animated particles background
+            // Enhanced particles background
             Positioned.fill(
               child: AnimatedBuilder(
-                animation: _particleController,
+                animation: Listenable.merge([
+                  _particleController,
+                  _glowController,
+                ]),
                 builder: (context, child) {
                   return CustomPaint(
-                    painter: WelcomeParticlePainter(
+                    painter: EnhancedParticlePainter(
                       animation: _particleController.value,
+                      glowAnimation: _glowController.value,
                     ),
                   );
                 },
               ),
             ),
 
-            // Main content
-            SafeArea(
-              child: AnimatedBuilder(
-                animation: _fadeAnimation,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _fadeAnimation.value,
-                    child: Transform.translate(
-                      offset: Offset(0, _slideAnimation.value),
-                      child: child,
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: EdgeInsets.all(24.w),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 20.h),
-
-                      // Skip button
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: TextButton(
-                          onPressed: () => context.go('/encounters'),
-                          child: Text(
-                            'Skip',
-                            style: appStyle(
-                              16,
-                              Colors.white.withValues(alpha: 0.7),
-                              FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const Spacer(flex: 1),
-
-                      // Profile matching visualization
-                      _buildMatchingVisualization(),
-
-                      SizedBox(height: 48.h),
-
-                      // Title
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Colors.white, Color(0xFFE91E63)],
-                        ).createShader(bounds),
-                        child: Text(
-                          'find your',
-                          style: appStyle(
-                            32,
-                            Colors.white,
-                            FontWeight.w600,
-                          ).copyWith(letterSpacing: -0.5, height: 1.2),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFFE91E63), Color(0xFFFF4081)],
-                        ).createShader(bounds),
-                        child: Text(
-                          'perfect match',
-                          style: appStyle(
-                            48,
-                            Colors.white,
-                            FontWeight.w900,
-                          ).copyWith(letterSpacing: -2.0, height: 0.9),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-
-                      SizedBox(height: 20.h),
-
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        child: Text(
-                          'Connect with people who share your\ninterests and make meaningful connections',
-                          style: appStyle(
-                            15,
-                            Colors.white.withValues(alpha: 0.6),
-                            FontWeight.w400,
-                          ).copyWith(height: 1.6),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-
-                      SizedBox(height: 32.h),
-
-                      // Feature chips
-                      _buildFeatureRow(),
-
-                      const Spacer(flex: 2),
-
-                      // Get Started Button
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 800),
-                        curve: Curves.easeOut,
-                        builder: (context, value, child) {
-                          return Transform.scale(scale: value, child: child);
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          height: 56.h,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(
-                                  0xFFE91E63,
-                                ).withValues(alpha: 0.4),
-                                blurRadius: 20,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () => context.push('/login'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28.r),
-                              ),
-                            ),
-                            child: Ink(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFE91E63),
-                                    Color(0xFFFF4081),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(28.r),
-                              ),
-                              child: Container(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  'Get Started',
-                                  style: appStyle(
-                                    17,
-                                    Colors.white,
-                                    FontWeight.w700,
-                                  ).copyWith(letterSpacing: -0.3),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: 40.h),
+            // Gradient overlay for depth
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.2,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.3),
                     ],
                   ),
                 ),
               ),
             ),
+
+            // Main content
+            SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 16.h),
+
+                        // Enhanced Logo with animation
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: AnimatedBuilder(
+                            animation: _glowController,
+                            builder: (context, child) {
+                              return Container(
+                                width: 60.w,
+                                height: 60.h,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.accentLight,
+                                      const Color(0xFFFF6B9D),
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.accentLight.withValues(
+                                        alpha:
+                                            0.6 *
+                                            (0.7 + _glowController.value * 0.3),
+                                      ),
+                                      blurRadius:
+                                          30 + (_glowController.value * 10),
+                                      spreadRadius:
+                                          5 + (_glowController.value * 5),
+                                    ),
+                                    BoxShadow(
+                                      color: const Color(0xFFFF6B9D).withValues(
+                                        alpha:
+                                            0.4 *
+                                            (0.6 + _glowController.value * 0.4),
+                                      ),
+                                      blurRadius: 20,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Container(
+                                  margin: EdgeInsets.all(3.w),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white,
+                                  ),
+                                  child: ClipOval(
+                                    child: Image.asset(
+                                      'assets/images/heartlink.png',
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Icon(
+                                              Icons.favorite_rounded,
+                                              size: 35.sp,
+                                              color: AppColors.accentLight,
+                                            );
+                                          },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+
+                        // Enhanced Profile Grid
+                        _buildEnhancedProfileGrid(),
+
+                        SizedBox(height: 30.h),
+
+                        // App Logo with animated gradient
+                        AnimatedBuilder(
+                          animation: _glowController,
+                          builder: (context, child) {
+                            return ShaderMask(
+                              shaderCallback: (bounds) => LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppColors.accentLight,
+                                  const Color(0xFFFF6B9D),
+                                  AppColors.accentLight.withValues(alpha: 0.9),
+                                ],
+                                stops: [
+                                  0.0,
+                                  0.5 + _glowController.value * 0.3,
+                                  1.0,
+                                ],
+                              ).createShader(bounds),
+                              child: Text(
+                                'HeartLink',
+                                style: appStyle(
+                                  52,
+                                  Colors.white,
+                                  FontWeight.w900,
+                                ).copyWith(letterSpacing: -2.5, height: 1.0),
+                                textAlign: TextAlign.center,
+                              ),
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: 10.h),
+
+                        // Tagline with subtle animation
+                        TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          duration: const Duration(milliseconds: 1500),
+                          curve: Curves.easeOut,
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Transform.translate(
+                                offset: Offset(0, 20 * (1 - value)),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: Column(
+                            children: [
+                              Text(
+                                'Find Your Perfect Match',
+                                style: appStyle(
+                                  24,
+                                  Colors.white,
+                                  FontWeight.w700,
+                                ).copyWith(letterSpacing: -0.5),
+                                textAlign: TextAlign.center,
+                              ),
+                              SizedBox(height: 12.h),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                                child: Text(
+                                  'Join thousands discovering meaningful\nconnections every day',
+                                  style: appStyle(
+                                    13.sp,
+                                    Colors.white.withValues(alpha: 0.65),
+                                    FontWeight.w400,
+                                  ).copyWith(height: 1.6),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 20.h),
+
+                        // Enhanced Get Started Button
+                        _buildEnhancedButton(
+                          text: 'Get Started',
+                          onPressed: () => context.push('/login'),
+                          isPrimary: true,
+                        ),
+
+                        SizedBox(height: 10.h),
+
+                        // Sign up prompt with better styling
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Already have an account? ',
+                              style: appStyle(
+                                14,
+                                Colors.white.withValues(alpha: 0.6),
+                                FontWeight.w500,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => context.push('/login'),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8.w,
+                                  vertical: 4.h,
+                                ),
+                                child: Text(
+                                  'Sign In',
+                                  style: appStyle(
+                                    14,
+                                    AppColors.accentLight,
+                                    FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 30.h),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMatchingVisualization() {
-    return SizedBox(
-      height: 280.h,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Connection line with glow
-          AnimatedBuilder(
-            animation: _matchController,
-            builder: (context, child) {
-              return CustomPaint(
-                size: Size(300.w, 280.h),
-                painter: ConnectionLinePainter(
-                  progress: _matchController.value,
-                ),
-              );
-            },
-          ),
-
-          // Left profile
-          Positioned(
-            left: 20.w,
-            top: 60.h,
-            child: _buildProfileCard(
-              'assets/images/guy.jpg',
-              'You',
-              Colors.purple.shade300,
-            ),
-          ),
-
-          // Right profile
-          Positioned(
-            right: 20.w,
-            top: 60.h,
-            child: _buildProfileCard(
-              'assets/images/profile2.jpeg',
-              'Match',
-              Colors.pink.shade300,
-            ),
-          ),
-
-          // Center match indicator
-          Center(
-            child: AnimatedBuilder(
-              animation: _matchController,
-              builder: (context, child) {
-                final scale = 0.9 + (_matchController.value * 0.1);
-                return Transform.scale(
-                  scale: scale,
-                  child: Container(
-                    width: 90.w,
-                    height: 90.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          const Color(0xFFE91E63).withValues(alpha: 0.3),
-                          const Color(0xFFE91E63).withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
-                    child: Container(
-                      margin: EdgeInsets.all(8.w),
+  Widget _buildEnhancedProfileGrid() {
+    return AnimatedBuilder(
+      animation: _gridController,
+      builder: (context, child) {
+        return SizedBox(
+          height: 360.h,
+          child: Stack(
+            children: [
+              // Multi-layer animated glow
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: _glowController,
+                  builder: (context, child) {
+                    return Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFE91E63), Color(0xFFFF4081)],
+                        gradient: RadialGradient(
+                          colors: [
+                            AppColors.accentLight.withValues(
+                              alpha: 0.2 * (0.4 + _glowController.value * 0.6),
+                            ),
+                            const Color(0xFFFF6B9D).withValues(
+                              alpha: 0.15 * (0.3 + _glowController.value * 0.7),
+                            ),
+                            Colors.transparent,
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(
-                              0xFFE91E63,
-                            ).withValues(alpha: 0.6),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                          ),
-                        ],
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '100%',
-                            style: appStyle(
-                              20,
-                              Colors.white,
-                              FontWeight.w900,
-                            ).copyWith(letterSpacing: -0.5, height: 1.0),
-                          ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            'Match',
-                            style: appStyle(
-                              10,
-                              Colors.white.withValues(alpha: 0.9),
-                              FontWeight.w600,
-                            ).copyWith(letterSpacing: 0.5),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileCard(String imagePath, String label, Color accentColor) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 1000),
-      curve: Curves.elasticOut,
-      builder: (context, value, child) {
-        return Transform.scale(scale: value, child: child);
-      },
-      child: Column(
-        children: [
-          Container(
-            width: 100.w,
-            height: 100.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  accentColor.withValues(alpha: 0.3),
-                  accentColor.withValues(alpha: 0.1),
-                ],
+                    );
+                  },
+                ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: accentColor.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(4.w),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.1),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    width: 2,
-                  ),
-                ),
-                child: ClipOval(
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 50.sp,
-                    color: Colors.white.withValues(alpha: 0.6),
+
+              Center(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: ScreenUtil().screenHeight * 0.4,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Main big image (center)
+                      Positioned(
+                        left: 10.w,
+                        top: 110.h,
+                        child: _gridImage('assets/images/guy.jpeg'),
+                      ),
+                      Positioned(
+                        top: 260.h,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: AnimatedBuilder(
+                            animation: _matchScaleAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _matchScaleAnimation.value,
+                                child: child,
+                              );
+                            },
+                            child: _buildCircularMatchIndicator(),
+                          ),
+                        ),
+                      ),
+
+                      // Top-right small image
+                      Positioned(
+                        right: 5.w,
+                        top: 10.h,
+                        child: _gridImage(
+                          'assets/images/profile2.jpeg',
+
+                          small: true,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            child: Text(
-              label,
-              style: appStyle(12, Colors.white, FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildFeatureChip(Icons.verified_rounded, 'Verified'),
-        SizedBox(width: 12.w),
-        _buildFeatureChip(Icons.favorite_rounded, 'Safe'),
-        SizedBox(width: 12.w),
-        _buildFeatureChip(Icons.bolt_rounded, 'Fast'),
-      ],
-    );
-  }
-
-  Widget _buildFeatureChip(IconData icon, String label) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeOut,
-      builder: (context, value, child) {
-        return Transform.scale(scale: value, child: child);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              const Color(0xFFE91E63).withValues(alpha: 0.2),
-              const Color(0xFFFF4081).withValues(alpha: 0.2),
             ],
           ),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: const Color(0xFFE91E63).withValues(alpha: 0.3),
+        );
+      },
+    );
+  }
+
+  Widget _buildCircularMatchIndicator() {
+    final matchPercentage = _calculateMatchPercentage();
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 180),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(50),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16.sp, color: const Color(0xFFFF4081)),
-            SizedBox(width: 6.w),
-            Text(
-              label,
-              style: appStyle(
-                13,
-                Colors.white.withValues(alpha: 0.9),
-                FontWeight.w600,
+          BoxShadow(
+            color: Colors.deepPurpleAccent.withValues(alpha: 0.1),
+            blurRadius: 30,
+            spreadRadius: 5,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // Animated circular progress indicator
+              AnimatedBuilder(
+                animation: _matchProgressAnimation,
+                builder: (context, child) {
+                  return SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: CustomPaint(
+                      painter: CircularProgressPainter(
+                        progress:
+                            (matchPercentage / 100) *
+                            _matchProgressAnimation.value,
+                        strokeWidth: 5,
+                        color: Colors.deepPurpleAccent,
+                        backgroundColor: Colors.grey.shade200,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              // Animated percentage text
+              AnimatedBuilder(
+                animation: _matchProgressAnimation,
+                builder: (context, child) {
+                  final displayPercentage =
+                      (matchPercentage * _matchProgressAnimation.value).toInt();
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.8, end: 1.0),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.elasticOut,
+                    builder: (context, scale, child) {
+                      return Transform.scale(
+                        scale: scale,
+                        child: Text(
+                          '$displayPercentage%',
+                          style: appStyle(
+                            15.sp,
+                            Colors.black,
+                            FontWeight.w900,
+                          ).copyWith(letterSpacing: -0.5),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Match',
+                style: appStyle(
+                  17,
+                  Colors.black,
+                  FontWeight.w800,
+                ).copyWith(letterSpacing: -0.4, height: 1),
+              ),
+              const SizedBox(height: 2),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.deepPurpleAccent.withValues(alpha: 0.2),
+                      Colors.pinkAccent.withValues(alpha: 0.2),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Great!',
+                  style: appStyle(
+                    10,
+                    Colors.deepPurple,
+                    FontWeight.w700,
+                  ).copyWith(letterSpacing: 0.5),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _gridImage(String asset, {bool small = false}) {
+    return ClipRRect(
+      borderRadius: BorderRadiusGeometry.circular(25.r),
+      child: Image.asset(
+        asset,
+        width: ScreenUtil().screenWidth * 0.45,
+        height: ScreenUtil().screenHeight * 0.3,
+        fit: BoxFit.cover,
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded) {
+            return child;
+          }
+          return AnimatedOpacity(
+            opacity: frame == null ? 0 : 1,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOut,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEnhancedButton({
+    required String text,
+    required VoidCallback onPressed,
+    bool isPrimary = true,
+  }) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 30 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: AnimatedBuilder(
+        animation: _glowController,
+        builder: (context, child) {
+          return Container(
+            width: double.infinity,
+            height: 58.h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(29.r),
+              boxShadow: isPrimary
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accentLight.withValues(
+                          alpha: 0.5 * (0.6 + _glowController.value * 0.4),
+                        ),
+                        blurRadius: 28,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 8),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFFFF6B9D).withValues(
+                          alpha: 0.3 * (0.5 + _glowController.value * 0.5),
+                        ),
+                        blurRadius: 20,
+                        spreadRadius: -5,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(29.r),
+                ),
+              ),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: isPrimary
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.accentLight,
+                            const Color(0xFFFF6B9D),
+                            AppColors.accentLight.withValues(alpha: 0.9),
+                          ],
+                        )
+                      : LinearGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.15),
+                            Colors.white.withValues(alpha: 0.08),
+                          ],
+                        ),
+                  borderRadius: BorderRadius.circular(29.r),
+                  border: Border.all(
+                    color: isPrimary
+                        ? Colors.white.withValues(alpha: 0.2)
+                        : Colors.white.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    text,
+                    style: appStyle(
+                      17,
+                      Colors.white,
+                      FontWeight.w700,
+                    ).copyWith(letterSpacing: 0.5),
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 }
 
-class WelcomeParticlePainter extends CustomPainter {
+class EnhancedParticlePainter extends CustomPainter {
   final double animation;
+  final double glowAnimation;
 
-  WelcomeParticlePainter({required this.animation});
+  EnhancedParticlePainter({
+    required this.animation,
+    required this.glowAnimation,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
 
-    // Floating hearts
+    // Floating hearts with varied motion
     for (int i = 0; i < 15; i++) {
       final progress = (animation + (i / 15)) % 1.0;
-      final x = (size.width * (i % 3) / 3) + (size.width * 0.2);
-      final y = size.height - (progress * size.height * 1.2);
-      final heartSize = 8.0 + (i % 3) * 3.0;
-      final opacity = (1 - progress) * 0.3;
+      final drift = math.sin(progress * math.pi * 2) * 30;
+      final x = (size.width * (i % 5) / 5) + (size.width * 0.1) + drift;
+      final y = size.height - (progress * size.height * 1.3);
+      final heartSize = 5.0 + (i % 4) * 2.5;
+      final opacity = math.sin(progress * math.pi) * 0.3;
 
       paint.color = Color.lerp(
         const Color(0xFFE91E63),
-        const Color(0xFFFF4081),
-        (i % 10) / 10,
+        const Color(0xFFFF6B9D),
+        (i % 12) / 12,
       )!.withValues(alpha: opacity);
 
       _drawHeart(canvas, Offset(x, y), heartSize, paint);
     }
 
-    // Circular particles
+    // Spiral particles
     for (int i = 0; i < 30; i++) {
-      final progress = (animation * 0.5 + (i / 30)) % 1.0;
-      final angle = (i / 30) * math.pi * 2;
+      final progress = (animation * 0.4 + (i / 30)) % 1.0;
+      final angle = (i / 30) * math.pi * 4 + (progress * math.pi * 2);
       final radius = progress * size.width * 0.5;
       final x = (size.width / 2) + (math.cos(angle) * radius);
       final y = (size.height / 2) + (math.sin(angle) * radius);
-      final particleSize = (1 - progress) * (2 + (i % 2));
-      final opacity = (1 - progress) * 0.4;
+      final particleSize = (1 - progress) * (2.0 + (i % 3) * 0.5);
+      final opacity = (1 - progress) * 0.35;
 
-      paint.color = const Color(0xFFFF4081).withValues(alpha: opacity);
+      paint.color = Color.lerp(
+        const Color(0xFFFF4081),
+        const Color(0xFFFF6B9D),
+        glowAnimation,
+      )!.withValues(alpha: opacity);
+
       canvas.drawCircle(Offset(x, y), particleSize, paint);
+    }
+
+    // Ambient glow particles
+    for (int i = 0; i < 20; i++) {
+      final progress = (animation * 0.6 + (i / 20)) % 1.0;
+      final x = (size.width * (i % 4) / 4) + (size.width * 0.15);
+      final y = (size.height * (i / 5) / 4) + (progress * 50);
+      final glowSize = 3.0 + math.sin(progress * math.pi) * 2.0;
+      final opacity = math.sin(progress * math.pi) * 0.2;
+
+      paint.color = Colors.white.withValues(alpha: opacity);
+      paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+      canvas.drawCircle(Offset(x, y), glowSize, paint);
+      paint.maskFilter = null;
     }
   }
 
@@ -556,44 +783,121 @@ class WelcomeParticlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(WelcomeParticlePainter oldDelegate) => true;
+  bool shouldRepaint(EnhancedParticlePainter oldDelegate) => true;
 }
 
-class ConnectionLinePainter extends CustomPainter {
+class EnhancedGridLinesPainter extends CustomPainter {
   final double progress;
+  final Color color;
 
-  ConnectionLinePainter({required this.progress});
+  EnhancedGridLinesPainter({required this.progress, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 1.5;
 
-    // Glowing connection line
-    final startX = size.width * 0.25;
-    final endX = size.width * 0.75;
-    final y = size.height * 0.5;
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
 
-    // Draw multiple lines for glow effect
-    for (int i = 0; i < 3; i++) {
-      paint
-        ..color = const Color(0xFFE91E63).withValues(alpha: 0.2 - (i * 0.05))
-        ..strokeWidth = 2.0 + (i * 2);
+    // Draw lines with gradient effect
+    final lines = [
+      [centerX, centerY, centerX, 36.0], // top
+      [centerX, centerY, size.width - 36, centerY], // right
+      [centerX, centerY, centerX, size.height - 36], // bottom
+      [centerX, centerY, 36.0, centerY], // left
+    ];
 
-      canvas.drawLine(Offset(startX, y), Offset(endX, y), paint);
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      final gradient = LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [
+          color.withValues(alpha: 0.05),
+          color.withValues(alpha: 0.2 * (0.6 + progress * 0.4)),
+          color.withValues(alpha: 0.05),
+        ],
+      );
+
+      paint.shader = gradient.createShader(
+        Rect.fromPoints(Offset(line[0], line[1]), Offset(line[2], line[3])),
+      );
+
+      canvas.drawLine(
+        Offset(line[0], line[1]),
+        Offset(line[2], line[3]),
+        paint,
+      );
     }
 
-    // Animated pulse along the line
-    final pulseX = startX + ((endX - startX) * progress);
-    final pulsePaint = Paint()
-      ..color = const Color(0xFFFF4081).withValues(alpha: 0.8)
-      ..style = PaintingStyle.fill;
+    // Add glowing dots at connection points
+    paint.shader = null;
+    paint.style = PaintingStyle.fill;
+    paint.color = color.withValues(alpha: 0.3 * (0.5 + progress * 0.5));
+    paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
-    canvas.drawCircle(Offset(pulseX, y), 4.0, pulsePaint);
+    for (var line in lines) {
+      canvas.drawCircle(Offset(line[2], line[3]), 3, paint);
+    }
   }
 
   @override
-  bool shouldRepaint(ConnectionLinePainter oldDelegate) => true;
+  bool shouldRepaint(EnhancedGridLinesPainter oldDelegate) => true;
+}
+
+// Custom painter for circular progress indicator
+class CircularProgressPainter extends CustomPainter {
+  final double progress;
+  final double strokeWidth;
+  final Color color;
+  final Color backgroundColor;
+
+  CircularProgressPainter({
+    required this.progress,
+    required this.strokeWidth,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    // Draw background circle
+    final backgroundPaint = Paint()
+      ..color = backgroundColor
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, backgroundPaint);
+
+    // Draw progress arc
+    final progressPaint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    const startAngle = -math.pi / 2; // Start from top
+    final sweepAngle = 2 * math.pi * progress;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CircularProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.backgroundColor != backgroundColor;
+  }
 }

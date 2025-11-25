@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../providers/auth_provider.dart';
 import 'dart:math' as math;
@@ -20,6 +22,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
   late Animation<double> _logoScale;
   late Animation<double> _logoOpacity;
   late Animation<double> _textOpacity;
+  late AnimationController _glowController;
 
   @override
   void initState() {
@@ -30,6 +33,11 @@ class _SplashPageState extends ConsumerState<SplashPage>
       duration: const Duration(milliseconds: 3000),
       vsync: this,
     )..repeat();
+
+    _glowController = AnimationController(
+      duration: Duration(milliseconds: 2500),
+      vsync: this,
+    )..repeat(reverse: true);
 
     // Logo entrance animation
     _logoController = AnimationController(
@@ -69,12 +77,14 @@ class _SplashPageState extends ConsumerState<SplashPage>
   void dispose() {
     _particleController.dispose();
     _logoController.dispose();
+    _glowController.dispose();
     _pulseController.dispose();
+
     super.dispose();
   }
 
   Future<void> _checkAuthStatus() async {
-    await Future.delayed(const Duration(minutes: 2));
+    await Future.delayed(const Duration(minutes: 1));
 
     if (!mounted) return;
 
@@ -160,8 +170,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                   children: [
                                     // Outer glow
                                     Container(
-                                      width: 200 * pulseValue,
-                                      height: 200 * pulseValue,
+                                      width: 100 * pulseValue,
+                                      height: 100 * pulseValue,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         gradient: RadialGradient(
@@ -178,8 +188,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                     ),
                                     // Middle glow
                                     Container(
-                                      width: 150,
-                                      height: 150,
+                                      width: 70,
+                                      height: 70,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         gradient: RadialGradient(
@@ -196,16 +206,16 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                     ),
                                     // Logo container
                                     Container(
-                                      width: 110,
-                                      height: 110,
+                                      width: 80,
+                                      height: 80,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         gradient: const LinearGradient(
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                           colors: [
-                                            Color(0xFFE91E63),
-                                            Color(0xFFFF4081),
+                                            AppColors.accentLight,
+                                            const Color(0xFFFF6B9D),
                                           ],
                                         ),
                                         boxShadow: [
@@ -218,10 +228,16 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                           ),
                                         ],
                                       ),
-                                      child: Icon(
-                                        Icons.favorite_rounded,
-                                        size: 60.0,
-                                        color: Colors.white,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadiusGeometry.circular(30.r),
+                                        child: Image.asset(
+                                          'assets/images/HeartLink1.png',
+                                          width: 10,
+                                          height: 10,
+                                          color: Colors.white,
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -240,20 +256,39 @@ class _SplashPageState extends ConsumerState<SplashPage>
                       opacity: _textOpacity,
                       child: Column(
                         children: [
-                          ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
-                              colors: [Colors.white, Color(0xFFE91E63)],
-                            ).createShader(bounds),
-                            child: Text(
-                              'HeartLink',
-                              style: appStyle(
-                                52,
-                                Colors.white,
-                                FontWeight.w900,
-                              ).copyWith(letterSpacing: -2.0, height: 1.0),
-                              textAlign: TextAlign.center,
-                            ),
+                          AnimatedBuilder(
+                            animation: _glowController,
+                            builder: (context, child) {
+                              return ShaderMask(
+                                shaderCallback: (bounds) => LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppColors.accentLight,
+                                    const Color(0xFFFF6B9D),
+                                    AppColors.accentLight.withValues(
+                                      alpha: 0.9,
+                                    ),
+                                  ],
+                                  stops: [
+                                    0.0,
+                                    0.5 + _glowController.value * 0.3,
+                                    1.0,
+                                  ],
+                                ).createShader(bounds),
+                                child: Text(
+                                  'HeartLink',
+                                  style: appStyle(
+                                    52,
+                                    Colors.white,
+                                    FontWeight.w900,
+                                  ).copyWith(letterSpacing: -2.5, height: 1.0),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            },
                           ),
+
                           const SizedBox(height: 12),
                           Text(
                             'Find Your Perfect Match',
@@ -311,12 +346,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      const Color(
-                                        0xFFE91E63,
-                                      ).withValues(alpha: 0.2),
-                                      const Color(
-                                        0xFFFF4081,
-                                      ).withValues(alpha: 0.2),
+                                      AppColors.accentLight,
+                                      const Color(0xFFFF6B9D),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(8),
@@ -332,8 +363,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                 shaderCallback: (bounds) =>
                                     const LinearGradient(
                                       colors: [
-                                        Color(0xFFE91E63),
-                                        Color(0xFFFF4081),
+                                        AppColors.accentLight,
+                                        const Color(0xFFFF6B9D),
                                       ],
                                     ).createShader(bounds),
                                 child: Text(

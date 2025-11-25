@@ -72,7 +72,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               // Logo
               Center(
                 child: Image.asset(
-                  'assets/images/dataDate.png',
+                  'assets/images/HeartLink1.png',
                   height: 70.h,
                   width: 70.w,
                   color: const Color(0xFF6C5CE7), // Premium purple
