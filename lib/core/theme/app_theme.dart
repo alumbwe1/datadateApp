@@ -60,35 +60,7 @@ class AppTheme {
           ),
         ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.surfaceLight,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 1),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        hintStyle: GoogleFonts.poppins(
-          color: AppColors.textSecondaryLight,
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
+
       dividerTheme: DividerThemeData(
         color: Colors.grey.shade200,
         thickness: 1,
@@ -174,7 +146,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryDark,
+          backgroundColor: AppColors.primaryLight,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
@@ -198,35 +170,7 @@ class AppTheme {
           ),
         ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.surfaceDark,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade800, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryDark, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 1),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        hintStyle: GoogleFonts.poppins(
-          color: AppColors.textSecondaryDark,
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
+
       dividerTheme: DividerThemeData(
         color: Colors.grey.shade800,
         thickness: 1,
