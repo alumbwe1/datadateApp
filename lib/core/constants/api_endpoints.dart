@@ -3,7 +3,7 @@ class ApiEndpoints {
   // Base URL - should be loaded from environment
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.240.145:7000',
+    defaultValue: 'http://10.0.2.2:7000',
   );
 
   // Authentication
@@ -47,6 +47,10 @@ class ApiEndpoints {
       '/api/v1.0/chat/messages/'; // POST only - send message
   static String markMessageRead(int messageId) =>
       '/api/v1.0/chat/messages/$messageId/mark_read/';
+  static String editMessage(int messageId) =>
+      '/api/v1.0/chat/messages/$messageId/';
+  static String deleteMessage(int messageId) =>
+      '/api/v1.0/chat/messages/$messageId/';
 
   // WebSocket
   static String chatWebSocket(int roomId) => '/ws/chat/$roomId/';

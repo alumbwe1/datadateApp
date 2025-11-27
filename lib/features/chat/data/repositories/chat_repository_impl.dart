@@ -47,4 +47,20 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<MessageModel> markMessageAsRead(int messageId) async {
     return await _remoteDataSource.markMessageAsRead(messageId);
   }
+
+  @override
+  Future<MessageModel> editMessage({
+    required int messageId,
+    required String content,
+  }) async {
+    return await _remoteDataSource.editMessage(
+      messageId: messageId,
+      content: content,
+    );
+  }
+
+  @override
+  Future<void> deleteMessage(int messageId) async {
+    return await _remoteDataSource.deleteMessage(messageId);
+  }
 }

@@ -268,6 +268,56 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
     }
   }
 
+  Future<void> editMessage(int messageId, String content) async {
+    if (content.trim().isEmpty) return;
+
+    print('📝 Editing message $messageId with new content: "$content"');
+
+    try {
+      final updatedMessage = await _repository.editMessage(
+        messageId: messageId,
+        content: content,
+      );
+
+      // Update the message in the local state
+      final updatedMessages = state.messages.map((msg) {
+        if (msg.id == messageId) {
+          return updatedMessage;
+        }
+        return msg;
+      }).toList();
+
+      state = state.copyWith(messages: updatedMessages);
+      print('✅ Message updated successfully in UI');
+    } catch (e) {
+      print('❌ Error editing message: $e');
+      state = state.copyWith(error: 'Failed to edit message: ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteMessage(int messageId) async {
+    print('🗑️ Deleting message $messageId');
+
+    try {
+      await _repository.deleteMessage(messageId);
+
+      // Remove the message from the local state
+      final updatedMessages = state.messages
+          .where((msg) => msg.id != messageId)
+          .toList();
+
+      state = state.copyWith(messages: updatedMessages);
+      print('✅ Message deleted successfully from UI');
+    } catch (e) {
+      print('❌ Error deleting message: $e');
+      state = state.copyWith(
+        error: 'Failed to delete message: ${e.toString()}',
+      );
+      rethrow;
+    }
+  }
+
   @override
   void dispose() {
     _wsSubscription?.cancel();

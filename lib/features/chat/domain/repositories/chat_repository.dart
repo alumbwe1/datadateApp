@@ -14,4 +14,9 @@ abstract class ChatRepository {
     required String content,
   });
   Future<MessageModel> markMessageAsRead(int messageId);
+  Future<MessageModel> editMessage({
+    required int messageId,
+    required String content,
+  });
+  Future<void> deleteMessage(int messageId);
 }

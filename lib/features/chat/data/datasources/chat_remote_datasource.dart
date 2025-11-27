@@ -126,4 +126,29 @@ class ChatRemoteDataSource {
       );
     }
   }
+
+  /// Edit a message
+  Future<MessageModel> editMessage({
+    required int messageId,
+    required String content,
+  }) async {
+    try {
+      final data = await _apiClient.patch<Map<String, dynamic>>(
+        ApiEndpoints.editMessage(messageId),
+        data: {'content': content},
+      );
+      return MessageModel.fromJson(data);
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['detail'] ?? 'Failed to edit message');
+    }
+  }
+
+  /// Delete a message
+  Future<void> deleteMessage(int messageId) async {
+    try {
+      await _apiClient.delete(ApiEndpoints.deleteMessage(messageId));
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['detail'] ?? 'Failed to delete message');
+    }
+  }
 }

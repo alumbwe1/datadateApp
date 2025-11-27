@@ -66,7 +66,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
     // Pulse animation
     _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     )..repeat(reverse: true);
 
@@ -85,7 +85,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   Future<void> _checkAuthStatus() async {
-    await Future.delayed(const Duration(minutes: 1));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
 
