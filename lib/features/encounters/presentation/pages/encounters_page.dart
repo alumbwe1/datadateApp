@@ -13,7 +13,7 @@ import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/swipe_overlay.dart';
 import '../widgets/animated_action_button.dart';
-import '../widgets/filter_bottom_sheet.dart';
+import '../widgets/enhanced_filter_bottom_sheet.dart';
 import '../widgets/boost_bottom_sheet.dart';
 import 'match_page.dart';
 
@@ -34,9 +34,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   bool _showNopeOverlay = false;
   double _overlayOpacity = 0.0;
 
-  // Filter state
-  double _minAge = 18;
-  double _maxAge = 35;
+  // No need for local filter state anymore - managed by provider
 
   @override
   void initState() {
@@ -143,26 +141,68 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 ),
                 const Spacer(),
 
-                // Filter Icon Button - Modern Style
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.primaryLight.withValues(alpha: 0.3),
-                      width: 1.w,
+                // Filter Icon Button - Modern Style with Badge
+                Stack(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 8.h,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: AppColors.primaryLight.withValues(alpha: 0.3),
+                          width: 1.w,
+                        ),
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: IconButton(
+                        icon: Icon(IconlyLight.filter, size: 20.sp),
+                        color: AppColors.primaryLight,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          _showFilterBottomSheet();
+                        },
+                        splashRadius: 24,
+                        padding: EdgeInsets.zero,
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: IconButton(
-                    icon: Icon(IconlyLight.filter, size: 20.sp),
-                    color: AppColors.primaryLight,
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      _showFilterBottomSheet();
-                    },
-                    splashRadius: 24,
-                    padding: EdgeInsets.zero,
-                  ),
+                    if (encountersState.activeFilterCount > 0)
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Container(
+                          padding: EdgeInsets.all(4.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryLight.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 4,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 18.w,
+                            minHeight: 18.h,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${encountersState.activeFilterCount}',
+                              style: appStyle(
+                                10,
+                                Colors.white,
+                                FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
 
                 const SizedBox(width: 8),
@@ -474,51 +514,88 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   }
 
   void _showFilterBottomSheet() {
+    final encountersState = ref.read(encountersProvider);
+    final user = ref.read(authProvider).user;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => FilterBottomSheet(
-        initialMinAge: _minAge,
-        initialMaxAge: _maxAge,
-        onApply: (minAge, maxAge) {
-          setState(() {
-            _minAge = minAge;
-            _maxAge = maxAge;
-          });
+      builder: (context) => EnhancedFilterBottomSheet(
+        initialFilters: encountersState.activeFilters,
+        onApply: (filters) {
+          if (user != null) {
+            ref
+                .read(encountersProvider.notifier)
+                .applyFilters(filters, user.gender);
 
-          // Show confirmation
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: AppColors.primaryLight,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Filters applied: ${minAge.round()}-${maxAge.round()} years',
-                    style: appStyle(14, Colors.white, FontWeight.w600),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.black87,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          );
+            // Show confirmation
+            final filterCount = filters.values
+                .where(
+                  (v) =>
+                      v != null &&
+                      (v is! bool || v == true) &&
+                      (v is! String || v.isNotEmpty),
+                )
+                .length;
 
-          // TODO: Reload profiles with new age filter
-          // ref.read(encountersProvider.notifier).loadProfilesWithFilter(
-          //   minAge: minAge.round(),
-          //   maxAge: maxAge.round(),
-          // );
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: AppColors.primaryLight,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '$filterCount filter${filterCount != 1 ? 's' : ''} applied',
+                      style: appStyle(14, Colors.white, FontWeight.w600),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.black87,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 2),
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            );
+          }
+        },
+        onClear: () {
+          if (user != null) {
+            ref.read(encountersProvider.notifier).clearFilters(user.gender);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    Icon(
+                      Icons.refresh_rounded,
+                      color: AppColors.primaryLight,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Filters cleared',
+                      style: appStyle(14, Colors.white, FontWeight.w600),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.black87,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 2),
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            );
+          }
         },
       ),
     );

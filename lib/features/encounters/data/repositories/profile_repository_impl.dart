@@ -67,6 +67,29 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<Either<Failure, List<Profile>>> getProfilesWithFilters({
+    required String userGender,
+    required Map<String, dynamic> filters,
+    int count = 20,
+  }) async {
+    try {
+      // Get opposite gender if not specified in filters
+      if (filters['gender'] == null) {
+        filters['gender'] = _getOppositeGender(userGender);
+      }
+
+      final profiles = await remoteDataSource.getProfilesWithFilters(filters);
+      return Right(profiles);
+    } on NetworkFailure catch (e) {
+      return Left(e);
+    } on ServerFailure catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(ServerFailure('Failed to load profiles: ${e.toString()}'));
+    }
+  }
+
+  @override
   Future<Either<Failure, Map<String, dynamic>>> likeProfile(
     String profileId,
   ) async {
@@ -77,12 +100,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
       }
 
       final result = await remoteDataSource.likeProfile(id);
-
-      // Check if it's a match
-      if (result['matched'] == true) {
-        print('🎉 It\'s a match! Match ID: ${result['match_id']}');
-      }
-
       return Right(result);
     } on NetworkFailure catch (e) {
       return Left(e);

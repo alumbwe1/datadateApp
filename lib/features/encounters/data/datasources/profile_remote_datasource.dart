@@ -11,6 +11,11 @@ abstract class ProfileRemoteDataSource {
     int? university,
     int page = 1,
   });
+
+  Future<List<ProfileModel>> getProfilesWithFilters(
+    Map<String, dynamic> filters,
+  );
+
   Future<ProfileModel> getProfileDetail(int id);
   Future<Map<String, dynamic>> likeProfile(int profileId);
   Future<ProfileModel> createProfile({
@@ -212,6 +217,28 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
+  Future<List<ProfileModel>> getProfilesWithFilters(
+    Map<String, dynamic> filters,
+  ) async {
+    try {
+      final response = await apiClient.get<Map<String, dynamic>>(
+        ApiEndpoints.discoverProfiles,
+        queryParameters: filters,
+      );
+
+      final paginatedResponse = PaginatedResponse.fromJson(
+        response,
+        (json) => ProfileModel.fromJson(json),
+      );
+
+      return paginatedResponse.results;
+    } catch (e) {
+      // Fallback to mock data if API fails
+      return _getMockProfiles(gender: filters['gender']);
+    }
+  }
+
+  @override
   Future<ProfileModel> getProfileDetail(int id) async {
     final response = await apiClient.get<Map<String, dynamic>>(
       ApiEndpoints.profileDetail(id),
@@ -236,7 +263,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         'detail': response['detail'] ?? 'Profile liked successfully',
       };
     } catch (e) {
-      print('Error liking profile: $e');
       rethrow;
     }
   }

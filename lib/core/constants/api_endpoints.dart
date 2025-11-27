@@ -25,6 +25,7 @@ class ApiEndpoints {
   static const String profiles = '/api/v1.0/profiles/profiles/';
   static String profileDetail(int id) => '/api/v1.0/profiles/profiles/$id/';
   static const String myProfile = '/api/v1.0/profiles/profiles/me/';
+  static const String discoverProfiles = '/api/v1.0/profiles/discover/';
 
   static const String uploadProfilePhotos =
       '/api/v1.0/profiles/profiles/upload_photos/';
