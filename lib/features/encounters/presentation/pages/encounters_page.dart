@@ -529,6 +529,8 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      isDismissible: true,
+      useSafeArea: true,
       builder: (context) => const BoostBottomSheet(),
     );
   }

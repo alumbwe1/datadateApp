@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'dart:math' as math;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
@@ -21,14 +22,37 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
   late Animation<double> _glowAnimation;
   late Animation<double> _slideAnimation;
 
-  int _selectedDuration = 2;
+  String _selectedPlan = 'Go';
   double _amount = 10.0;
 
   final List<Map<String, dynamic>> _boostPackages = [
-    {'duration': 1, 'views': 50, 'amount': 5.0, 'popular': false},
-    {'duration': 2, 'views': 100, 'amount': 10.0, 'popular': true},
-    {'duration': 4, 'views': 200, 'amount': 18.0, 'popular': false},
-    {'duration': 8, 'views': 500, 'amount': 35.0, 'popular': false},
+    {
+      'name': 'Go',
+      'duration': 1,
+      'views': '50+',
+      'amount': 5.0,
+      'popular': false,
+      'color': Color(0xFF00D4FF),
+      'description': 'Perfect starter',
+    },
+    {
+      'name': 'Pro',
+      'duration': 3,
+      'views': '150+',
+      'amount': 10.0,
+      'popular': true,
+      'color': Color(0xFFFF6B9D),
+      'description': 'Most popular',
+    },
+    {
+      'name': 'Plus',
+      'duration': 7,
+      'views': '500+',
+      'amount': 25.0,
+      'popular': false,
+      'color': Color(0xFFFFD700),
+      'description': 'Maximum visibility',
+    },
   ];
 
   @override
@@ -73,6 +97,9 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.92,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -83,7 +110,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
             AppColors.accentLight.withValues(alpha: 0.1),
           ],
         ),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(17.r)),
       ),
       child: Stack(
         children: [
@@ -112,6 +139,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
               child: FadeTransition(
                 opacity: _slideAnimation,
                 child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -179,10 +207,13 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                     ),
                                   ],
                                 ),
-                                child: Icon(
-                                  Icons.bolt_rounded,
-                                  size: 42.sp,
-                                  color: Colors.white,
+                                child: SvgPicture.asset(
+                                  'assets/svgs/star2.svg',
+                                  fit: BoxFit.none,
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.black,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                             ],
@@ -190,41 +221,23 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                         },
                       ),
 
-                      SizedBox(height: 28.h),
+                      SizedBox(height: 20.h),
 
-                      // Title with gradient
-                      ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          colors: [
-                            Colors.white,
-                            Colors.white.withValues(alpha: 0.8),
-                          ],
-                        ).createShader(bounds),
-                        child: Text(
-                          'boost your',
-                          style: appStyle(
-                            24,
-                            Colors.white,
-                            FontWeight.w500,
-                          ).copyWith(letterSpacing: -0.5),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-
+                      // Title
                       ShaderMask(
                         shaderCallback: (bounds) => LinearGradient(
                           colors: [
                             AppColors.accentLight,
-                            const Color(0xFF6B8AFF),
+                            AppColors.accentLight.withValues(alpha: 0.8),
                           ],
                         ).createShader(bounds),
                         child: Text(
-                          'visibility',
+                          'Get More Matches',
                           style: appStyle(
-                            42,
+                            32,
                             Colors.white,
                             FontWeight.w900,
-                          ).copyWith(letterSpacing: -1.5, height: 1.0),
+                          ).copyWith(letterSpacing: -1.0, height: 1.0),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -232,9 +245,9 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                       SizedBox(height: 12.h),
 
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 40.w),
+                        padding: EdgeInsets.symmetric(horizontal: 32.w),
                         child: Text(
-                          'Get 10x more profile views and increase\nyour chances of matching',
+                          'Boost your profile to the top and get\n10x more visibility',
                           style: appStyle(
                             14,
                             Colors.white.withValues(alpha: 0.6),
@@ -244,7 +257,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                         ),
                       ),
 
-                      SizedBox(height: 36.h),
+                      SizedBox(height: 32.h),
 
                       // Boost Packages
                       Padding(
@@ -253,9 +266,9 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                           children: _boostPackages.asMap().entries.map((entry) {
                             final index = entry.key;
                             final package = entry.value;
-                            final isSelected =
-                                package['duration'] == _selectedDuration;
+                            final isSelected = package['name'] == _selectedPlan;
                             final isPopular = package['popular'] as bool;
+                            final planColor = package['color'] as Color;
 
                             return TweenAnimationBuilder<double>(
                               tween: Tween(begin: 0.0, end: 1.0),
@@ -273,8 +286,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                 onTap: () {
                                   HapticFeedback.lightImpact();
                                   setState(() {
-                                    _selectedDuration =
-                                        package['duration'] as int;
+                                    _selectedPlan = package['name'] as String;
                                     _amount = package['amount'] as double;
                                   });
                                 },
@@ -282,39 +294,34 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                   duration: const Duration(milliseconds: 300),
                                   curve: Curves.easeOutCubic,
                                   margin: EdgeInsets.only(bottom: 12.h),
-                                  padding: EdgeInsets.all(20.w),
+                                  padding: EdgeInsets.all(18.w),
                                   decoration: BoxDecoration(
                                     gradient: isSelected
                                         ? LinearGradient(
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                             colors: [
-                                              AppColors.accentLight.withValues(
-                                                alpha: 0.25,
-                                              ),
-                                              AppColors.accentLight.withValues(
-                                                alpha: 0.1,
-                                              ),
+                                              planColor.withValues(alpha: 0.2),
+                                              planColor.withValues(alpha: 0.05),
                                             ],
                                           )
                                         : null,
                                     color: isSelected
                                         ? null
                                         : Colors.white.withValues(alpha: 0.05),
-                                    borderRadius: BorderRadius.circular(24.r),
+                                    borderRadius: BorderRadius.circular(20.r),
                                     border: Border.all(
                                       color: isSelected
-                                          ? AppColors.accentLight.withValues(
-                                              alpha: 0.6,
-                                            )
+                                          ? planColor.withValues(alpha: 0.6)
                                           : Colors.white.withValues(alpha: 0.1),
                                       width: isSelected ? 2.w : 1.w,
                                     ),
                                     boxShadow: isSelected
                                         ? [
                                             BoxShadow(
-                                              color: AppColors.accentLight
-                                                  .withValues(alpha: 0.3),
+                                              color: planColor.withValues(
+                                                alpha: 0.3,
+                                              ),
                                               blurRadius: 20,
                                               spreadRadius: 0,
                                             ),
@@ -323,53 +330,44 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                   ),
                                   child: Row(
                                     children: [
-                                      // Icon
-                                      AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        width: 56.w,
-                                        height: 56.h,
+                                      // Plan Badge
+                                      Container(
+                                        width: 60.w,
+                                        height: 60.h,
                                         decoration: BoxDecoration(
-                                          gradient: isSelected
-                                              ? LinearGradient(
-                                                  colors: [
-                                                    AppColors.accentLight,
-                                                    AppColors.accentLight
-                                                        .withValues(alpha: 0.7),
-                                                  ],
-                                                )
-                                              : LinearGradient(
-                                                  colors: [
-                                                    Colors.white.withValues(
-                                                      alpha: 0.1,
-                                                    ),
-                                                    Colors.white.withValues(
-                                                      alpha: 0.05,
-                                                    ),
-                                                  ],
-                                                ),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              planColor,
+                                              planColor.withValues(alpha: 0.7),
+                                            ],
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             16.r,
                                           ),
-                                          boxShadow: isSelected
-                                              ? [
-                                                  BoxShadow(
-                                                    color: AppColors.accentLight
-                                                        .withValues(alpha: 0.4),
-                                                    blurRadius: 12,
-                                                  ),
-                                                ]
-                                              : null,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: planColor.withValues(
+                                                alpha: 0.4,
+                                              ),
+                                              blurRadius: 12,
+                                            ),
+                                          ],
                                         ),
-                                        child: Icon(
-                                          Icons.bolt_rounded,
-                                          color: Colors.white,
-                                          size: 28.sp,
+                                        child: Center(
+                                          child: Text(
+                                            package['name'],
+                                            style: appStyle(
+                                              16,
+                                              Colors.white,
+                                              FontWeight.w900,
+                                            ).copyWith(letterSpacing: 0.5),
+                                          ),
                                         ),
                                       ),
 
-                                      SizedBox(width: 16.w),
+                                      SizedBox(width: 14.w),
 
                                       // Details
                                       Expanded(
@@ -379,62 +377,49 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                           children: [
                                             Row(
                                               children: [
-                                                Text(
-                                                  '${package['duration']} Hour${package['duration'] > 1 ? 's' : ''}',
-                                                  style:
-                                                      appStyle(
-                                                        18,
-                                                        Colors.white,
-                                                        FontWeight.w700,
-                                                      ).copyWith(
-                                                        letterSpacing: -0.5,
-                                                      ),
+                                                Flexible(
+                                                  child: Text(
+                                                    '${package['duration']} Days Boost',
+                                                    style:
+                                                        appStyle(
+                                                          16,
+                                                          Colors.white,
+                                                          FontWeight.w700,
+                                                        ).copyWith(
+                                                          letterSpacing: -0.3,
+                                                        ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
                                                 ),
                                                 if (isPopular) ...[
-                                                  SizedBox(width: 10.w),
+                                                  SizedBox(width: 6.w),
                                                   Container(
                                                     padding:
                                                         EdgeInsets.symmetric(
-                                                          horizontal: 10.w,
-                                                          vertical: 4.h,
+                                                          horizontal: 8.w,
+                                                          vertical: 3.h,
                                                         ),
                                                     decoration: BoxDecoration(
-                                                      gradient: LinearGradient(
-                                                        colors: [
-                                                          const Color(
-                                                            0xFFFFD700,
+                                                      gradient:
+                                                          const LinearGradient(
+                                                            colors: [
+                                                              Color(0xFFFFD700),
+                                                              Color(0xFFFFA500),
+                                                            ],
                                                           ),
-                                                          const Color(
-                                                            0xFFFFA500,
-                                                          ),
-                                                        ],
-                                                      ),
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                            8.r,
+                                                            6.r,
                                                           ),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color:
-                                                              const Color(
-                                                                0xFFFFD700,
-                                                              ).withValues(
-                                                                alpha: 0.4,
-                                                              ),
-                                                          blurRadius: 8,
-                                                        ),
-                                                      ],
                                                     ),
                                                     child: Text(
-                                                      'POPULAR',
-                                                      style:
-                                                          appStyle(
-                                                            9,
-                                                            Colors.black,
-                                                            FontWeight.w900,
-                                                          ).copyWith(
-                                                            letterSpacing: 0.5,
-                                                          ),
+                                                      '🔥',
+                                                      style: appStyle(
+                                                        10,
+                                                        Colors.black,
+                                                        FontWeight.w900,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
@@ -442,63 +427,78 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                             ),
                                             SizedBox(height: 4.h),
                                             Text(
-                                              '~${package['views']} profile views',
+                                              '${package['views']} views • ${package['description']}',
                                               style: appStyle(
-                                                13,
+                                                12,
                                                 Colors.white.withValues(
                                                   alpha: 0.5,
                                                 ),
                                                 FontWeight.w400,
                                               ),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
                                             ),
                                           ],
                                         ),
                                       ),
 
+                                      SizedBox(width: 8.w),
+
                                       // Price
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.end,
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text(
-                                            'K${package['amount'].toStringAsFixed(0)}',
-                                            style: appStyle(
-                                              24,
-                                              isSelected
-                                                  ? AppColors.accentLight
-                                                  : Colors.white,
-                                              FontWeight.w800,
-                                            ).copyWith(letterSpacing: -0.8),
-                                          ),
-                                          Text(
-                                            'ZMW',
-                                            style: appStyle(
-                                              11,
-                                              Colors.white.withValues(
-                                                alpha: 0.4,
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'K',
+                                                style: appStyle(
+                                                  14,
+                                                  isSelected
+                                                      ? planColor
+                                                      : Colors.white,
+                                                  FontWeight.w700,
+                                                ),
                                               ),
-                                              FontWeight.w500,
-                                            ),
+                                              Text(
+                                                package['amount']
+                                                    .toStringAsFixed(0),
+                                                style: appStyle(
+                                                  22,
+                                                  isSelected
+                                                      ? planColor
+                                                      : Colors.white,
+                                                  FontWeight.w900,
+                                                ).copyWith(letterSpacing: -0.5),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
 
+                                      SizedBox(width: 8.w),
+
                                       // Selection indicator
-                                      SizedBox(width: 12.w),
                                       AnimatedContainer(
                                         duration: const Duration(
                                           milliseconds: 300,
                                         ),
-                                        width: 24.w,
-                                        height: 24.h,
+                                        width: 22.w,
+                                        height: 22.h,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           gradient: isSelected
                                               ? LinearGradient(
                                                   colors: [
-                                                    AppColors.accentLight,
-                                                    AppColors.accentLight
-                                                        .withValues(alpha: 0.8),
+                                                    planColor,
+                                                    planColor.withValues(
+                                                      alpha: 0.8,
+                                                    ),
                                                   ],
                                                 )
                                               : null,
@@ -515,7 +515,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                             ? Icon(
                                                 Icons.check,
                                                 color: Colors.white,
-                                                size: 16.sp,
+                                                size: 14.sp,
                                               )
                                             : null,
                                       ),
@@ -528,9 +528,9 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                         ),
                       ),
 
-                      SizedBox(height: 32.h),
+                      SizedBox(height: 28.h),
 
-                      // Boost Button with Glow
+                      // Boost Button
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: AnimatedBuilder(
@@ -570,7 +570,9 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                       gradient: LinearGradient(
                                         colors: [
                                           AppColors.accentLight,
-                                          const Color(0xFF6B8AFF),
+                                          AppColors.accentLight.withValues(
+                                            alpha: 0.8,
+                                          ),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(28.r),
@@ -580,13 +582,14 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Icon(
                                             Icons.bolt_rounded,
                                             color: Colors.white,
                                             size: 24.sp,
                                           ),
-                                          SizedBox(width: 10.w),
+                                          SizedBox(width: 8.w),
                                           Text(
                                             'Boost for K${_amount.toStringAsFixed(0)}',
                                             style: appStyle(
@@ -594,6 +597,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                               Colors.white,
                                               FontWeight.w700,
                                             ).copyWith(letterSpacing: -0.3),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ],
                                       ),
@@ -610,19 +614,20 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
 
                       // Terms
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 40.w),
+                        padding: EdgeInsets.symmetric(horizontal: 32.w),
                         child: Text(
-                          'Your profile will be shown first in discovery for $_selectedDuration hour${_selectedDuration > 1 ? 's' : ''}',
+                          'Your profile will appear first in discovery',
                           style: appStyle(
                             12,
                             Colors.white.withValues(alpha: 0.4),
                             FontWeight.w400,
                           ).copyWith(height: 1.5),
                           textAlign: TextAlign.center,
+                          overflow: TextOverflow.visible,
                         ),
                       ),
 
-                      SizedBox(height: 32.h),
+                      SizedBox(height: 24.h),
                     ],
                   ),
                 ),
@@ -672,11 +677,11 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Boost Activated! 🚀',
+                      '$_selectedPlan Boost Activated! 🚀',
                       style: appStyle(15, Colors.white, FontWeight.w700),
                     ),
                     Text(
-                      'K${_amount.toStringAsFixed(0)} for $_selectedDuration hour${_selectedDuration > 1 ? 's' : ''}',
+                      'K${_amount.toStringAsFixed(0)} plan activated',
                       style: appStyle(13, Colors.white70, FontWeight.w400),
                     ),
                   ],

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_style.dart';
@@ -21,7 +22,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    // Load profile data on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(profileProvider.notifier).loadProfile();
     });
@@ -41,9 +41,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         title: Text(
           'Profile',
           style: appStyle(
-            28,
+            24,
             Colors.black,
-            FontWeight.bold,
+            FontWeight.w700,
           ).copyWith(letterSpacing: -0.5),
         ),
         actions: [
@@ -51,7 +51,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             icon: const Icon(
               Icons.settings_outlined,
               color: Colors.black,
-              size: 28,
+              size: 24,
             ),
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -88,6 +88,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildProfileHeader(context, profile),
+                      const SizedBox(height: 32),
+                      _buildStatsRow(),
                       const SizedBox(height: 32),
                       _buildInfoSection('About', profile),
                       const SizedBox(height: 24),
@@ -132,10 +134,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Stack(
             alignment: Alignment.center,
             children: [
-              // Circular progress indicator with gradient
+              // Minimal circular progress
               SizedBox(
-                width: 160,
-                height: 160,
+                width: 140,
+                height: 140,
                 child: TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: completionPercentage / 100),
                   duration: const Duration(milliseconds: 1500),
@@ -143,31 +145,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   builder: (context, value, child) {
                     return CircularProgressIndicator(
                       value: value,
-                      strokeWidth: 7,
-                      backgroundColor: Colors.grey[200],
+                      strokeWidth: 4,
+                      backgroundColor: Colors.grey[100],
                       valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                       strokeCap: StrokeCap.round,
                     );
                   },
                 ),
               ),
-              // Profile photo with enhanced shadow
+              // Profile photo
               Container(
-                width: 140,
-                height: 140,
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 5),
+                  border: Border.all(color: Colors.white, width: 4),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      blurRadius: 25,
-                      offset: const Offset(0, 10),
-                    ),
-                    BoxShadow(
-                      color: progressColor.withValues(alpha: 0.2),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -178,286 +175,122 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           imageUrl: profile.imageUrls[0],
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
-                            color: Colors.grey[200],
+                            color: Colors.grey[100],
                             child: const Center(
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                           ),
                           errorWidget: (context, url, error) => Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Colors.grey[300]!, Colors.grey[200]!],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
+                            color: Colors.grey[100],
                             child: Icon(
                               Icons.person,
-                              size: 70,
-                              color: Colors.grey[400],
+                              size: 60,
+                              color: Colors.grey[300],
                             ),
                           ),
                         )
                       : Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.grey[300]!, Colors.grey[200]!],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
+                          color: Colors.grey[100],
                           child: Icon(
                             Icons.person,
-                            size: 70,
-                            color: Colors.grey[400],
+                            size: 60,
+                            color: Colors.grey[300],
                           ),
                         ),
                 ),
               ),
-              // Completion percentage badge with animation
+              // Completion badge
               Positioned(
                 bottom: 0,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0.0, end: 1.0),
-                    duration: const Duration(milliseconds: 800),
-                    curve: Curves.elasticOut,
-                    builder: (context, value, child) {
-                      return Transform.scale(
-                        scale: value,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                progressColor,
-                                progressColor.withValues(alpha: 0.8),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: progressColor.withValues(alpha: 0.4),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                completionPercentage >= 80
-                                    ? Icons.check_circle
-                                    : Icons.info_outline,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '$completionPercentage%',
-                                style: appStyle(
-                                  14,
-                                  Colors.white,
-                                  FontWeight.w900,
-                                ).copyWith(letterSpacing: -0.3),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: progressColor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: progressColor.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '$completionPercentage%',
+                    style: appStyle(12, Colors.white, FontWeight.w700),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           Text(
             profile.age != null
                 ? '${profile.realName ?? profile.displayName}, ${profile.age}'
                 : profile.realName ?? profile.displayName,
             style: appStyle(
-              30,
+              28,
               Colors.black,
-              FontWeight.w900,
-            ).copyWith(letterSpacing: -0.8, height: 1.1),
+              FontWeight.w700,
+            ).copyWith(letterSpacing: -0.8),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Colors.grey[50],
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.grey[200]!),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.school_outlined, size: 18, color: Colors.grey[700]),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    profile.universityData?['name'] as String? ?? 'University',
-                    style: appStyle(
-                      14,
-                      Colors.grey[700]!,
-                      FontWeight.w600,
-                    ).copyWith(letterSpacing: -0.2),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.pink[50]!, Colors.red[50]!],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.pink[100]!),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Iconsax.heart, size: 16, color: Colors.red[400]),
-                const SizedBox(width: 8),
+                Icon(Icons.school_outlined, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 6),
                 Text(
-                  'Here for ${profile.intent ?? 'dating'}',
-                  style: appStyle(
-                    14,
-                    Colors.red[700]!,
-                    FontWeight.w700,
-                  ).copyWith(letterSpacing: -0.2),
+                  profile.universityData?['name'] as String? ?? 'University',
+                  style: appStyle(13, Colors.grey[700]!, FontWeight.w600),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          _buildStatsRow(),
         ],
       ),
     );
   }
 
   Widget _buildStatsRow() {
-    // TODO: Replace with real data from API
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.grey[50]!, Colors.grey[100]!],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItem('Views', '0', Icons.visibility_outlined, Colors.blue),
-          Container(
-            width: 1.5,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.grey[200]!,
-                  Colors.grey[300]!,
-                  Colors.grey[200]!,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          _buildStatItem('Likes', '0', Icons.favorite_outline, Colors.red),
-          Container(
-            width: 1.5,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.grey[200]!,
-                  Colors.grey[300]!,
-                  Colors.grey[200]!,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          _buildStatItem('Matches', '0', Icons.people_outline, Colors.green),
-        ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildStatItem('Views', '0', Icons.visibility_outlined),
+        Container(width: 1, height: 40, color: Colors.grey[200]),
+        _buildStatItem('Likes', '0', Iconsax.heart_copy),
+        Container(width: 1, height: 40, color: Colors.grey[200]),
+        _buildStatItem('Matches', '0', Iconsax.people_copy),
+      ],
     );
   }
 
-  Widget _buildStatItem(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildStatItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                color.withValues(alpha: 0.15),
-                color.withValues(alpha: 0.08),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
-          ),
-          child: Icon(icon, color: color, size: 22),
-        ),
-        const SizedBox(height: 10),
+        Icon(icon, color: Colors.grey[600], size: 24),
+        const SizedBox(height: 8),
         Text(
           value,
           style: appStyle(
             20,
             Colors.black,
-            FontWeight.w900,
+            FontWeight.w700,
           ).copyWith(letterSpacing: -0.5),
         ),
         const SizedBox(height: 2),
-        Text(
-          label,
-          style: appStyle(
-            11,
-            Colors.grey[600]!,
-            FontWeight.w600,
-          ).copyWith(letterSpacing: -0.2),
-          textAlign: TextAlign.center,
-        ),
+        Text(label, style: appStyle(11, Colors.grey[600]!, FontWeight.w500)),
       ],
     );
   }
@@ -468,77 +301,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue[50]!, Colors.blue[100]!],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.info_outline,
-                size: 20,
-                color: Colors.blue[700],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: appStyle(
-                22,
-                Colors.black,
-                FontWeight.w900,
-              ).copyWith(letterSpacing: -0.5),
-            ),
-          ],
+        Text(
+          title,
+          style: appStyle(
+            20,
+            Colors.black,
+            FontWeight.w700,
+          ).copyWith(letterSpacing: -0.5),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: hasBio
-                  ? [Colors.grey[50]!, Colors.grey[100]!]
-                  : [Colors.orange[50]!, Colors.orange[100]!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
+            color: hasBio ? Colors.grey[50] : Colors.orange[50],
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: hasBio ? Colors.grey[200]! : Colors.orange[200]!,
-              width: 1.5,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!hasBio)
-                Icon(Icons.edit_outlined, size: 20, color: Colors.orange[700]),
-              if (!hasBio) const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  profile.bio ?? 'No bio yet. Tap edit to add one!',
-                  style: appStyle(
-                    15,
-                    hasBio ? Colors.grey[800]! : Colors.orange[900]!,
-                    hasBio ? FontWeight.w500 : FontWeight.w600,
-                  ).copyWith(height: 1.6, letterSpacing: -0.2),
-                ),
-              ),
-            ],
+          child: Text(
+            profile.bio ?? 'No bio yet. Tap edit to add one!',
+            style: appStyle(
+              14,
+              hasBio ? Colors.grey[800]! : Colors.orange[900]!,
+              FontWeight.w500,
+            ).copyWith(height: 1.5),
           ),
         ),
       ],
@@ -546,81 +334,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildInterestsSection(dynamic profile) {
-    final colors = [
-      [Colors.purple[50]!, Colors.purple[100]!, Colors.purple[700]!],
-      [Colors.blue[50]!, Colors.blue[100]!, Colors.blue[700]!],
-      [Colors.green[50]!, Colors.green[100]!, Colors.green[700]!],
-      [Colors.orange[50]!, Colors.orange[100]!, Colors.orange[700]!],
-      [Colors.pink[50]!, Colors.pink[100]!, Colors.pink[700]!],
-      [Colors.teal[50]!, Colors.teal[100]!, Colors.teal[700]!],
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.purple[50]!, Colors.purple[100]!],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.favorite_outline,
-                size: 20,
-                color: Colors.purple[700],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Interests',
-              style: appStyle(
-                22,
-                Colors.black,
-                FontWeight.w900,
-              ).copyWith(letterSpacing: -0.5),
-            ),
-          ],
+        Text(
+          'Interests',
+          style: appStyle(
+            20,
+            Colors.black,
+            FontWeight.w700,
+          ).copyWith(letterSpacing: -0.5),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: profile.interests.asMap().entries.map<Widget>((entry) {
-            final index = entry.key;
-            final interest = entry.value;
-            final colorSet = colors[index % colors.length];
-
+          spacing: 8,
+          runSpacing: 8,
+          children: profile.interests.map<Widget>((interest) {
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [colorSet[0], colorSet[1]],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: colorSet[1], width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorSet[2].withValues(alpha: 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.grey[300]!),
               ),
               child: Text(
                 interest,
-                style: appStyle(
-                  14,
-                  colorSet[2],
-                  FontWeight.w700,
-                ).copyWith(letterSpacing: -0.2),
+                style: appStyle(14, Colors.grey[800]!, FontWeight.w600),
               ),
             );
           }).toList(),
@@ -633,52 +372,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.green[50]!, Colors.green[100]!],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(Icons.info, size: 20, color: Colors.green[700]),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Details',
-              style: appStyle(
-                22,
-                Colors.black,
-                FontWeight.w900,
-              ).copyWith(letterSpacing: -0.5),
-            ),
-          ],
+        Text(
+          'Details',
+          style: appStyle(
+            20,
+            Colors.black,
+            FontWeight.w700,
+          ).copyWith(letterSpacing: -0.5),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         if (profile.course != null && profile.course!.isNotEmpty)
           _buildDetailItem(
-            icon: Icons.school,
+            icon: Icons.school_outlined,
             label: 'Course',
             value: profile.course!,
-            color: Colors.blue,
           ),
         if (profile.graduationYear != null)
           _buildDetailItem(
-            icon: Icons.calendar_today,
+            icon: Iconsax.calendar_copy,
             label: 'Graduation Year',
             value: profile.graduationYear.toString(),
-            color: Colors.orange,
           ),
         if (profile.gender != null && profile.gender!.isNotEmpty)
           _buildDetailItem(
-            icon: Icons.person_outline,
+            icon: Iconsax.user_copy,
             label: 'Gender',
             value: profile.gender!.toUpperCase(),
-            color: Colors.purple,
           ),
       ],
     );
@@ -688,61 +407,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     required IconData icon,
     required String label,
     required String value,
-    required Color color,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withValues(alpha: 0.08),
-            color.withValues(alpha: 0.04),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  color.withValues(alpha: 0.15),
-                  color.withValues(alpha: 0.1),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey[200]!),
             ),
-            child: Icon(icon, size: 22, color: color),
+            child: Icon(icon, size: 20, color: Colors.grey[700]),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: appStyle(
-                    12,
-                    Colors.grey[600]!,
-                    FontWeight.w600,
-                  ).copyWith(letterSpacing: -0.1),
+                  style: appStyle(11, Colors.grey[600]!, FontWeight.w500),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: appStyle(
-                    16,
+                    15,
                     Colors.black,
-                    FontWeight.w700,
+                    FontWeight.w600,
                   ).copyWith(letterSpacing: -0.3),
                 ),
               ],
@@ -769,80 +469,48 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              padding: EdgeInsets.zero,
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(40.r),
               ),
+              elevation: 0,
             ),
-            child: Ink(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Colors.black, Color(0xFF2C2C2C)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.edit_outlined, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Edit Profile',
+                  style: appStyle(16, Colors.white, FontWeight.w600),
                 ),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.edit_outlined,
-                      size: 22,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Edit Profile',
-                      style: appStyle(
-                        17,
-                        Colors.white,
-                        FontWeight.w800,
-                      ).copyWith(letterSpacing: -0.3),
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () => _showLogoutDialog(context, ref),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              side: BorderSide(color: Colors.red[400]!, width: 2),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              side: const BorderSide(color: Colors.red, width: 1.5),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(40.r),
               ),
-              backgroundColor: Colors.red[50],
+              foregroundColor: Colors.red,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.logout, size: 22, color: Colors.red[700]),
-                const SizedBox(width: 10),
+                const Icon(Icons.logout, size: 20),
+                const SizedBox(width: 8),
                 Text(
                   'Logout',
-                  style: appStyle(
-                    17,
-                    Colors.red[700]!,
-                    FontWeight.w800,
-                  ).copyWith(letterSpacing: -0.3),
+                  style: appStyle(16, Colors.red, FontWeight.w600),
                 ),
               ],
             ),
@@ -859,9 +527,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (context) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -874,29 +542,25 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildBottomSheetOption(
                 'Account Settings',
                 Icons.person_outline,
-                Colors.blue,
                 () => Navigator.pop(context),
               ),
               _buildBottomSheetOption(
                 'Privacy',
                 Icons.lock_outline,
-                Colors.green,
                 () => Navigator.pop(context),
               ),
               _buildBottomSheetOption(
                 'Notifications',
                 Icons.notifications_outlined,
-                Colors.orange,
                 () => Navigator.pop(context),
               ),
               _buildBottomSheetOption(
                 'Help & Support',
                 Icons.help_outline,
-                Colors.purple,
                 () => Navigator.pop(context),
               ),
             ],
@@ -909,25 +573,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildBottomSheetOption(
     String label,
     IconData icon,
-    Color color,
     VoidCallback onTap,
   ) {
     return ListTile(
       leading: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: color, size: 22),
+        child: Icon(icon, color: Colors.grey[700], size: 20),
       ),
       title: Text(
         label,
-        style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.2,
-        ),
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
       trailing: Icon(Icons.chevron_right, color: Colors.grey[400]),
       onTap: () {
@@ -941,7 +600,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Logout',
           style: TextStyle(fontWeight: FontWeight.bold),
