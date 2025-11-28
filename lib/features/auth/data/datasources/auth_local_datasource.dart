@@ -10,6 +10,12 @@ abstract class AuthLocalDataSource {
   Future<void> saveUserId(String userId);
   Future<String?> getUserId();
   Future<void> clearAuthData();
+
+  // User data caching
+  Future<void> saveUserDataTimestamp(DateTime timestamp);
+  Future<DateTime?> getUserDataTimestamp();
+  Future<void> saveCachedUser(Map<String, dynamic> userData);
+  Future<dynamic> getCachedUser();
 }
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
@@ -56,5 +62,37 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     await secureStorage.delete(key: AppConstants.keyAuthToken);
     await secureStorage.delete(key: AppConstants.keyRefreshToken);
     await sharedPreferences.remove(AppConstants.keyUserId);
+    await sharedPreferences.remove('userDataTimestamp');
+    await sharedPreferences.remove('cachedUserData');
+  }
+
+  @override
+  Future<void> saveUserDataTimestamp(DateTime timestamp) async {
+    await sharedPreferences.setString(
+      'userDataTimestamp',
+      timestamp.toIso8601String(),
+    );
+  }
+
+  @override
+  Future<DateTime?> getUserDataTimestamp() async {
+    final timestampStr = sharedPreferences.getString('userDataTimestamp');
+    if (timestampStr == null) return null;
+    return DateTime.tryParse(timestampStr);
+  }
+
+  @override
+  Future<void> saveCachedUser(Map<String, dynamic> userData) async {
+    await sharedPreferences.setString(
+      'cachedUserData',
+      userData.toString(), // Simple string storage
+    );
+  }
+
+  @override
+  Future<dynamic> getCachedUser() async {
+    // For now, return null - full implementation would parse stored user data
+    // This is a simplified version
+    return null;
   }
 }

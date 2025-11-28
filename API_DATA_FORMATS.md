@@ -353,9 +353,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
   "imageUrls": [
     "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/new_photo.jpg"
   ],
-  "imagePublicIds": [
-    "profiles/user1/new_photo_xyz789"
-  ]
+  "imagePublicIds": ["profiles/user1/new_photo_xyz789"]
 }
 ```
 
@@ -369,9 +367,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
     "imageUrls": [
       "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/new_photo.jpg"
     ],
-    "imagePublicIds": [
-      "profiles/user1/new_photo_xyz789"
-    ]
+    "imagePublicIds": ["profiles/user1/new_photo_xyz789"]
   }
 }
 ```
@@ -394,9 +390,7 @@ This document shows the exact JSON format for all API endpoints based on the Dja
   "imageUrls": [
     "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/photo2.jpg"
   ],
-  "imagePublicIds": [
-    "profiles/user1/photo2_def456"
-  ]
+  "imagePublicIds": ["profiles/user1/photo2_def456"]
 }
 ```
 
@@ -655,7 +649,9 @@ order: 1
       "id": 5,
       "username": "jane_smith",
       "display_name": "Jane S.",
-      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"]
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
+      ]
     },
     "created_at": "2025-11-14T18:30:00Z"
   },
@@ -667,7 +663,9 @@ order: 1
       "id": 8,
       "username": "sarah_jones",
       "display_name": "Sarah J.",
-      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/sarah_photo.jpg"]
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/sarah_photo.jpg"
+      ]
     },
     "created_at": "2025-11-13T12:15:00Z"
   }
@@ -676,7 +674,7 @@ order: 1
 
 ### GET `/api/v1.0/interactions/likes/` - List Likes (Sent)
 
-Get all likes given by the current user with detailed profile information.
+Get all likes given by the current user. **Only shows who you liked, not your own profile.**
 
 **Response (200 OK):**
 
@@ -684,27 +682,6 @@ Get all likes given by the current user with detailed profile information.
 [
   {
     "id": 23,
-    "liker": {
-      "id": 1,
-      "username": "john_doe",
-      "display_name": "John Doe",
-      "profile": {
-        "id": 1,
-        "bio": "Love coding and coffee!",
-        "age": 21,
-        "gender": "male",
-        "course": "Computer Science",
-        "graduation_year": 2026,
-        "interests": ["coding", "coffee", "hiking"],
-        "imageUrls": ["https://res.cloudinary.com/.../john_photo.jpg"],
-        "university": {
-          "id": 1,
-          "name": "Stanford University",
-          "slug": "stanford"
-        },
-        "last_active": "2025-11-20T10:00:00Z"
-      }
-    },
     "liked": {
       "id": 7,
       "username": "emily_wilson",
@@ -729,13 +706,42 @@ Get all likes given by the current user with detailed profile information.
     "like_type": "profile",
     "gallery_image": null,
     "created_at": "2025-11-15T10:20:00Z"
+  },
+  {
+    "id": 24,
+    "liked": {
+      "id": 10,
+      "username": "mike_johnson",
+      "display_name": "Mike Johnson",
+      "profile": {
+        "id": 10,
+        "bio": "Sports enthusiast and tech geek",
+        "age": 23,
+        "gender": "male",
+        "course": "Engineering",
+        "graduation_year": 2026,
+        "interests": ["sports", "technology", "gaming"],
+        "imageUrls": ["https://res.cloudinary.com/.../mike_photo.jpg"],
+        "university": {
+          "id": 1,
+          "name": "Stanford University",
+          "slug": "stanford"
+        },
+        "last_active": "2025-11-20T11:00:00Z"
+      }
+    },
+    "like_type": "profile",
+    "gallery_image": null,
+    "created_at": "2025-11-15T11:30:00Z"
   }
 ]
 ```
 
+**Note:** Response only includes the `liked` field (who you liked), not the `liker` field (your own profile).
+
 ### GET `/api/v1.0/interactions/likes/received/` - List Likes Received
 
-Get all likes received by the current user with detailed profile information of who liked you.
+Get all likes received by the current user with detailed profile information of who liked you. **Only shows the liker's profile, not your own.**
 
 **Response (200 OK):**
 
@@ -764,33 +770,41 @@ Get all likes received by the current user with detailed profile information of 
         "last_active": "2025-11-20T11:00:00Z"
       }
     },
-    "liked": {
-      "id": 1,
-      "username": "john_doe",
-      "display_name": "John Doe",
+    "like_type": "profile",
+    "gallery_image": null,
+    "created_at": "2025-11-15T11:00:00Z"
+  },
+  {
+    "id": 26,
+    "liker": {
+      "id": 12,
+      "username": "sarah_wilson",
+      "display_name": "Sarah Wilson",
       "profile": {
-        "id": 1,
-        "bio": "Love coding and coffee!",
-        "age": 21,
-        "gender": "male",
-        "course": "Computer Science",
+        "id": 12,
+        "bio": "Coffee lover and bookworm",
+        "age": 22,
+        "gender": "female",
+        "course": "Literature",
         "graduation_year": 2026,
-        "interests": ["coding", "coffee", "hiking"],
-        "imageUrls": ["https://res.cloudinary.com/.../john_photo.jpg"],
+        "interests": ["reading", "coffee", "writing"],
+        "imageUrls": ["https://res.cloudinary.com/.../sarah_photo.jpg"],
         "university": {
           "id": 1,
           "name": "Stanford University",
           "slug": "stanford"
         },
-        "last_active": "2025-11-20T10:00:00Z"
+        "last_active": "2025-11-20T10:30:00Z"
       }
     },
     "like_type": "profile",
     "gallery_image": null,
-    "created_at": "2025-11-15T11:00:00Z"
+    "created_at": "2025-11-15T12:00:00Z"
   }
 ]
 ```
+
+**Note:** Response only includes the `liker` field (who liked you), not the `liked` field (your own profile). Perfect for "Who Liked Me" screens.
 
 ### POST `/api/v1.0/interactions/likes/` - Create Like
 
@@ -997,7 +1011,43 @@ Get all profile views received by the current user.
 ]
 ```
 
-**Note:** Profile views are automatically recorded when viewing a profile via GET `/api/v1.0/profiles/{id}/`
+### POST `/api/v1.0/interactions/profile-views/record_views/` - Record Multiple Profile Views
+
+Record multiple profile views at once. Perfect for swipe-based interfaces where users see multiple profiles.
+
+**Request:**
+
+```json
+{
+  "profile_ids": [5, 7, 9, 12, 15]
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "detail": "Recorded 5 profile views",
+  "recorded_count": 5,
+  "skipped_count": 0
+}
+```
+
+**Notes:**
+- Maximum 50 profiles per request
+- Automatically skips profiles viewed within the last hour (avoids duplicates)
+- Skips your own profile ID
+- Perfect for batch recording in swipe interfaces
+
+**Error (400 Bad Request):**
+
+```json
+{
+  "detail": "profile_ids must be a non-empty list"
+}
+```
+
+**Note:** Profile views are also automatically recorded when viewing a single profile via GET `/api/v1.0/profiles/{id}/`
 
 ---
 
@@ -1018,7 +1068,9 @@ Get all profile views received by the current user.
       "id": 5,
       "username": "jane_smith",
       "display_name": "Jane S.",
-      "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"]
+      "imageUrls": [
+        "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
+      ]
     },
     "last_message": {
       "id": 156,
@@ -1047,7 +1099,9 @@ Get all profile views received by the current user.
     "id": 5,
     "username": "jane_smith",
     "display_name": "Jane S.",
-    "imageUrls": ["https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"],
+    "imageUrls": [
+      "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo.jpg"
+    ],
     "is_online": true
   },
   "created_at": "2025-11-14T18:30:00Z"
@@ -1481,7 +1535,8 @@ or
 
 9. **Universities Endpoint**: `/api/v1.0/profiles/universities/` is publicly accessible without authentication
 
-10. **Registration Flow**: 
+10. **Registration Flow**:
+
     - **Traditional:**
       - Step 1: POST `/auth/users/` (create account)
       - Step 2: POST `/auth/jwt/create/` (login to get token)
@@ -1495,6 +1550,7 @@ or
       - POST `/auth/fcm-token/` (update FCM token for push notifications)
 
 11. **Profile Photos**:
+
     - Photos are stored as Cloudinary URLs in `imageUrls` array
     - `imagePublicIds` array stores Cloudinary public IDs for deletion
     - Maximum 6 photos per profile
@@ -1503,23 +1559,27 @@ or
     - DELETE `/api/v1.0/profiles/me/delete_photo/` removes specific photo by publicId
 
 12. **Profile Privacy**:
+
     - Private profiles show `anon_handle` as `display_name` and hide bio until matched
     - When matched and `show_real_name_on_match=true`, real name is revealed
     - Age is calculated automatically from `date_of_birth` (must be 18+)
 
 13. **Real-time Notifications**:
+
     - WebSocket endpoint: `ws://localhost:8000/ws/notifications/?token={jwt_token}`
     - Receives real-time notifications for matches, likes, and other events
     - Requires JWT token for authentication
     - See WEBSOCKET_SETUP_GUIDE.md for detailed implementation
 
 14. **Push Notifications**:
+
     - Firebase Cloud Messaging (FCM) for offline/background notifications
     - Update FCM token via POST `/auth/fcm-token/`
     - Automatically sent when user is offline or app is in background
     - Includes match notifications, like notifications, and message alerts
 
 15. **Google OAuth**:
+
     - Client ID: `87342870814-ophi6dp8lc2kt7njgle8jgfc1hq6vug7.apps.googleusercontent.com`
     - Authenticate via POST `/auth/google/` with Google ID token
     - Creates new user if doesn't exist
@@ -1531,13 +1591,11 @@ or
     - Requires authentication
     - Cannot be undone
 
-
 ---
 
-## 
+##
 
 ---
-
 
 ## Profile Boost System
 
@@ -1560,7 +1618,7 @@ or
 
 ```json
 {
-  "amount_paid": 10.00,
+  "amount_paid": 10.0,
   "target_views": 100,
   "duration_hours": 2
 }
@@ -1727,7 +1785,24 @@ or
 &online_only=true
 &has_photos=true
 &occupation_type=student
+&work_place=Tech Company
 ```
+
+**Available Filters:**
+
+- `gender`: male, female, other
+- `min_age`, `max_age`: Age range (e.g., 20-25)
+- `city`: City name (case-insensitive partial match)
+- `compound`: Residential compound/area (case-insensitive partial match)
+- `university_id`: University ID
+- `course`: Course name (case-insensitive partial match)
+- `graduation_year`: Graduation year (exact match)
+- `intent`: relationship, dating, friends
+- `interests`: Comma-separated list (e.g., hiking,coffee)
+- `online_only`: true/false (online = active in last 15 minutes)
+- `has_photos`: true/false (has at least one photo)
+- `occupation_type`: student, working
+- `work_place`: Company/workplace name (case-insensitive partial match)
 
 **Response (200 OK):**
 
@@ -1764,7 +1839,23 @@ or
 
 ### GET `/api/v1.0/profiles/discover/recommended/` - Get Recommended Profiles
 
-Returns profiles based on user preferences, same university, excludes already liked/matched.
+Returns personalized profile recommendations based on intelligent matching algorithm.
+
+**Matching Algorithm:**
+
+1. **Shared Interests**: Profiles with more common interests ranked higher (20 points per shared interest)
+2. **Age Proximity**: Profiles within ±5 years of user's age, closer ages ranked higher (up to 50 points)
+3. **Boost Status**: Active boosted profiles get priority (50 bonus points)
+4. **Recent Activity**: Recently active users ranked higher (up to 30 points)
+
+**Filters Applied:**
+
+- User's preferred genders
+- Same university (for students)
+- Age range: ±5 years from user's age
+- Excludes already viewed profiles
+- Excludes already liked profiles
+- Excludes already matched profiles
 
 **Response (200 OK):**
 
@@ -1777,12 +1868,35 @@ Returns profiles based on user preferences, same university, excludes already li
     "age": 22,
     "course": "Biology",
     "city": "Lusaka",
-    "interests": ["nature", "photography"],
+    "interests": ["nature", "photography", "hiking"],
     "imageUrls": ["https://res.cloudinary.com/.../photo.jpg"],
-    "last_active": "2025-11-23T09:45:00Z"
+    "last_active": "2025-11-23T09:45:00Z",
+    "university_data": {
+      "id": 1,
+      "name": "University of Zambia",
+      "slug": "unza"
+    }
+  },
+  {
+    "id": 9,
+    "display_name": "Sarah Martinez",
+    "gender": "female",
+    "age": 21,
+    "course": "Computer Science",
+    "city": "Lusaka",
+    "interests": ["coding", "coffee", "music"],
+    "imageUrls": ["https://res.cloudinary.com/.../photo2.jpg"],
+    "last_active": "2025-11-23T10:15:00Z",
+    "university_data": {
+      "id": 1,
+      "name": "University of Zambia",
+      "slug": "unza"
+    }
   }
 ]
 ```
+
+**Note:** Returns up to 20 profiles, sorted by match score (highest compatibility first)
 
 ### GET `/api/v1.0/profiles/discover/nearby/` - Get Nearby Profiles
 
@@ -2515,21 +2629,29 @@ When a subscription is activated, the profile is automatically upgraded:
 ## Notes - Production Features
 
 17. **Profile Boost System**:
+
     - Minimum K5 payment required
     - User specifies target views and duration (default 2 hours)
     - Real-time progress tracking
     - Boosted profiles appear first in discovery
     - System can disable boosts via configuration
 
-18. **Advanced Filtering**:
+18. **Advanced Filtering & Recommendations**:
+
     - Filter by age range, gender, location, university
     - Filter by occupation type (student/working)
     - Filter by city and compound
     - Online status filtering
     - Interest-based filtering
-    - Recommended profiles based on preferences
+    - **Smart Recommendations**: Intelligent matching algorithm using:
+      - Shared interests scoring
+      - Age proximity matching
+      - Boost status priority
+      - Recent activity weighting
+      - Excludes viewed/liked/matched profiles
 
 19. **Blocking & Reporting**:
+
     - Block users to prevent all interactions
     - Report users, messages, or profiles
     - Admin dashboard for report management
@@ -2537,12 +2659,14 @@ When a subscription is activated, the profile is automatically upgraded:
     - Blocked users cannot see each other's profiles
 
 20. **Crush Messages**:
+
     - Send ONE message before matching
     - Receiver can accept (creates match) or decline
     - Cannot send if already matched or blocked
     - Read receipts and response tracking
 
 21. **System Configuration**:
+
     - Three modes: trial, active, maintenance
     - Feature toggles for boost, premium, matching, chat
     - Configurable pricing for boosts and premium
@@ -2550,12 +2674,14 @@ When a subscription is activated, the profile is automatically upgraded:
     - Admin-only configuration management
 
 22. **Match-Required Chat**:
+
     - Chat ONLY allowed after users match
     - WebSocket connection validates match status
     - Applies to all chat interactions
     - Connection rejected if not matched
 
 23. **Student & Work Profiles**:
+
     - `occupation_type`: student or working
     - Students have university, course, graduation year
     - Working professionals have work_place
@@ -2563,6 +2689,7 @@ When a subscription is activated, the profile is automatically upgraded:
     - Filterable by all occupation fields
 
 24. **Premium Tier System**:
+
     - Standard users see only standard profiles
     - Premium users see only premium profiles
     - Automatic tier management via subscriptions

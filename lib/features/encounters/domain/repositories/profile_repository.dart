@@ -19,4 +19,5 @@ abstract class ProfileRepository {
 
   Future<Either<Failure, Map<String, dynamic>>> likeProfile(String profileId);
   Future<Either<Failure, void>> skipProfile(String profileId);
+  Future<Either<Failure, void>> recordProfileView(int profileId);
 }

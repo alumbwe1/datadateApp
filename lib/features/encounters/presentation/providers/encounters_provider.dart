@@ -179,6 +179,14 @@ class EncountersNotifier extends StateNotifier<EncountersState> {
       ),
     );
   }
+
+  Future<void> recordProfileView(int profileId) async {
+    try {
+      await _profileRepository.recordProfileView(profileId);
+    } catch (e) {
+      // Silently fail - view tracking shouldn't block user interaction
+    }
+  }
 }
 
 final encountersProvider =

@@ -74,26 +74,36 @@ class InteractionsRemoteDataSourceImpl implements InteractionsRemoteDataSource {
 
   @override
   Future<List<LikeModel>> getLikes({required String type}) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      ApiEndpoints.likes,
-      queryParameters: {'type': type},
-    );
+    // Use the correct endpoint based on type
+    final endpoint = type == 'received'
+        ? ApiEndpoints.receivedLikes
+        : ApiEndpoints.likes;
 
-    // Handle paginated response with 'results' key
-    if (response.containsKey('results')) {
-      final results = response['results'] as List<dynamic>;
-      return results
-          .map((json) => LikeModel.fromJson(json as Map<String, dynamic>))
-          .toList();
-    }
-    // Fallback for non-paginated response (direct list)
-    else if (response is List) {
-      return (response as List<dynamic>)
-          .map((json) => LikeModel.fromJson(json as Map<String, dynamic>))
-          .toList();
-    }
+    try {
+      // Try to get as dynamic first to handle both List and Map responses
+      final response = await apiClient.get<dynamic>(endpoint);
 
-    throw Exception('Unexpected response format for likes');
+      // Handle direct list response (non-paginated)
+      if (response is List) {
+        return response
+            .map((json) => LikeModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+
+      // Handle paginated response with 'results' key
+      if (response is Map<String, dynamic> && response.containsKey('results')) {
+        final results = response['results'] as List<dynamic>;
+        return results
+            .map((json) => LikeModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+
+      throw Exception(
+        'Unexpected response format for likes: ${response.runtimeType}',
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override

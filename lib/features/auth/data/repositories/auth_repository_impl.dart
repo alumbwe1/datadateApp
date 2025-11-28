@@ -116,4 +116,26 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<String?> getAuthToken() async {
     return await localDataSource.getAuthToken();
   }
+
+  @override
+  Future<bool> shouldRefreshUserData() async {
+    final lastFetch = await localDataSource.getUserDataTimestamp();
+    if (lastFetch == null) return true;
+
+    final now = DateTime.now();
+    final difference = now.difference(lastFetch);
+
+    // Refresh if more than 7 days old
+    return difference.inDays >= 7;
+  }
+
+  @override
+  Future<User?> getCachedUser() async {
+    return await localDataSource.getCachedUser();
+  }
+
+  @override
+  Future<void> saveUserDataTimestamp() async {
+    await localDataSource.saveUserDataTimestamp(DateTime.now());
+  }
 }

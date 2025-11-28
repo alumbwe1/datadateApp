@@ -136,4 +136,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
       );
     }
   }
+
+  @override
+  Future<Either<Failure, void>> recordProfileView(int profileId) async {
+    try {
+      await remoteDataSource.recordProfileView(profileId);
+      return const Right(null);
+    } on NetworkFailure catch (e) {
+      return Left(e);
+    } on ServerFailure catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(ServerFailure('Failed to record view: ${e.toString()}'));
+    }
+  }
 }

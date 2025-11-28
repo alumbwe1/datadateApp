@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../interactions/data/models/like_model.dart';
+import '../../../encounters/domain/entities/profile.dart';
+import '../../../encounters/presentation/pages/profile_details_page.dart';
 import '../providers/likes_provider.dart';
 import 'likes_empty_state.dart';
 import 'received_like_card.dart';
 import 'sent_like_card.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_style.dart';
 
 class LikesGridView extends ConsumerWidget {
   final List<LikeModel> likes;
@@ -89,18 +90,41 @@ class LikesGridView extends ConsumerWidget {
   }
 
   void _showProfileSnackbar(BuildContext context, UserInfo userInfo) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'View ${userInfo.displayName}\'s profile',
-          style: appStyle(14, Colors.white, FontWeight.w600),
+    // Convert UserInfo to Profile entity
+    final profile = _convertToProfile(userInfo);
+
+    if (profile != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfileDetailsPage(profile: profile),
         ),
-        backgroundColor: Colors.black87,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 2),
-      ),
+      );
+    }
+  }
+
+  Profile? _convertToProfile(UserInfo userInfo) {
+    final profileData = userInfo.profile;
+    if (profileData == null) return null;
+
+    return Profile(
+      id: userInfo.id,
+      displayName: userInfo.displayName,
+      username: userInfo.username,
+      email: '', // Not available in likes response
+      universityName: profileData.university?.name ?? 'Unknown University',
+      universityLogo: '', // Not available in likes response
+      age: profileData.age ?? 0,
+      gender: profileData.gender ?? '',
+      intent: 'dating', // Default value
+      bio: profileData.bio,
+      photos: profileData.imageUrls.isNotEmpty
+          ? profileData.imageUrls
+          : ['https://via.placeholder.com/400'],
+      interests: profileData.interests,
+      lastActive: profileData.lastActive != null
+          ? DateTime.tryParse(profileData.lastActive!)
+          : null,
     );
   }
 }

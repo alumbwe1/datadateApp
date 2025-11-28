@@ -28,6 +28,8 @@ class _ChatPageState extends ConsumerState<ChatPage>
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
 
+  bool _hasLoaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -36,20 +38,19 @@ class _ChatPageState extends ConsumerState<ChatPage>
       duration: const Duration(milliseconds: 300),
     );
     _animationController.forward();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(chatRoomsProvider.notifier).loadChatRooms();
-      ref.read(matchesProvider.notifier).loadMatches();
-    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Future.microtask(() {
-      ref.read(chatRoomsProvider.notifier).loadChatRooms();
-      ref.read(matchesProvider.notifier).loadMatches();
-    });
+    // Load only once when page becomes visible
+    if (!_hasLoaded) {
+      _hasLoaded = true;
+      Future.microtask(() {
+        ref.read(chatRoomsProvider.notifier).loadChatRooms();
+        ref.read(matchesProvider.notifier).loadMatches();
+      });
+    }
   }
 
   @override

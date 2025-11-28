@@ -103,14 +103,43 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> checkAuthStatus() async {
     final isLoggedIn = await _authRepository.isLoggedIn();
     if (isLoggedIn) {
-      final result = await _authRepository.getCurrentUser();
-      result.fold((failure) {
-        // If token validation fails, clear auth state
-        // This handles cases where tokens are invalid/expired
-        state = AuthState(user: null, error: null);
-      }, (user) => state = state.copyWith(user: user));
+      // Check if we need to refresh user data (7 days cache)
+      final shouldRefresh = await _authRepository.shouldRefreshUserData();
+
+      if (shouldRefresh) {
+        // Fetch fresh user data from API
+        final result = await _authRepository.getCurrentUser();
+        result.fold(
+          (failure) {
+            // If token validation fails, clear auth state
+            state = AuthState(user: null, error: null);
+          },
+          (user) {
+            state = state.copyWith(user: user);
+            // Save timestamp of last fetch
+            _authRepository.saveUserDataTimestamp();
+          },
+        );
+      } else {
+        // Use cached user data
+        final cachedUser = await _authRepository.getCachedUser();
+        if (cachedUser != null) {
+          state = state.copyWith(user: cachedUser);
+        } else {
+          // No cache, fetch from API
+          final result = await _authRepository.getCurrentUser();
+          result.fold(
+            (failure) {
+              state = AuthState(user: null, error: null);
+            },
+            (user) {
+              state = state.copyWith(user: user);
+              _authRepository.saveUserDataTimestamp();
+            },
+          );
+        }
+      }
     } else {
-      // Ensure state is cleared if not logged in
       state = AuthState(user: null, error: null);
     }
   }

@@ -13,4 +13,9 @@ abstract class AuthRepository {
   Future<Either<Failure, User>> getCurrentUser();
   Future<bool> isLoggedIn();
   Future<String?> getAuthToken();
+
+  // Caching methods
+  Future<bool> shouldRefreshUserData();
+  Future<User?> getCachedUser();
+  Future<void> saveUserDataTimestamp();
 }

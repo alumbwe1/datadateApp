@@ -14,13 +14,29 @@ class DiscoverPage extends ConsumerStatefulWidget {
   ConsumerState<DiscoverPage> createState() => _DiscoverPageState();
 }
 
-class _DiscoverPageState extends ConsumerState<DiscoverPage> {
+class _DiscoverPageState extends ConsumerState<DiscoverPage>
+    with AutomaticKeepAliveClientMixin {
+  bool _hasLoaded = false;
+
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadRecommendedProfiles();
-    });
+    // Don't load immediately - wait for first build
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Load only once when page becomes visible
+    if (!_hasLoaded) {
+      _hasLoaded = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadRecommendedProfiles();
+      });
+    }
   }
 
   Future<void> _loadRecommendedProfiles() async {
@@ -29,6 +45,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     final encountersState = ref.watch(encountersProvider);
     final profiles = encountersState.profiles;
 
@@ -147,13 +164,20 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
 
   Widget _buildProfileCard(BuildContext context, Profile profile) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProfileDetailsPage(profile: profile),
-          ),
-        );
+      onTap: () async {
+        // Record profile view
+        await ref
+            .read(encountersProvider.notifier)
+            .recordProfileView(profile.id);
+
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfileDetailsPage(profile: profile),
+            ),
+          );
+        }
       },
       child: Container(
         decoration: BoxDecoration(

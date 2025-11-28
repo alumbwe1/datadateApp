@@ -14,19 +14,35 @@ class LikesPage extends ConsumerStatefulWidget {
   ConsumerState<LikesPage> createState() => _LikesPageState();
 }
 
-class _LikesPageState extends ConsumerState<LikesPage> {
+class _LikesPageState extends ConsumerState<LikesPage>
+    with AutomaticKeepAliveClientMixin {
   int _selectedIndex = 0;
+  bool _hasLoaded = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(likesProvider.notifier).loadAllLikes();
-    });
+    // Don't load immediately - wait for first build
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Load only once when page becomes visible
+    if (!_hasLoaded) {
+      _hasLoaded = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(likesProvider.notifier).loadAllLikes();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     final likesState = ref.watch(likesProvider);
 
     return Scaffold(
@@ -90,7 +106,7 @@ class _LikesPageState extends ConsumerState<LikesPage> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                       spreadRadius: 0,

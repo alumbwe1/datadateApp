@@ -20,6 +20,7 @@ abstract class ProfileRemoteDataSource {
 
   Future<ProfileModel> getProfileDetail(int id);
   Future<Map<String, dynamic>> likeProfile(int profileId);
+  Future<void> recordProfileView(int profileId);
   Future<ProfileModel> createProfile({
     required String bio,
     required int age,
@@ -279,6 +280,46 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
+  Future<List<ProfileModel>> getRecommendedProfiles() async {
+    try {
+      final response = await apiClient.get<dynamic>(
+        ApiEndpoints.recommendedProfiles,
+      );
+
+      // The recommended endpoint returns a list directly
+      if (response is List) {
+        return response
+            .map((json) => ProfileModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else if (response is Map<String, dynamic>) {
+        // If it's paginated, handle it
+        final paginatedResponse = PaginatedResponse.fromJson(
+          response,
+          (json) => ProfileModel.fromJson(json),
+        );
+        return paginatedResponse.results;
+      }
+
+      return [];
+    } catch (e) {
+      // Fallback to mock data if API fails
+      return _getMockProfiles();
+    }
+  }
+
+  @override
+  Future<void> recordProfileView(int profileId) async {
+    try {
+      await apiClient.post(
+        ApiEndpoints.profileViews,
+        data: {'viewed': profileId},
+      );
+    } catch (e) {
+      // Silently fail - view tracking shouldn't block user interaction
+    }
+  }
+
+  @override
   Future<ProfileModel> createProfile({
     required String bio,
     required int age,
@@ -333,33 +374,5 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         lastActive: DateTime.now().second % 2 == 0 ? DateTime.now() : null,
       );
     }).toList();
-  }
-
-  @override
-  Future<List<ProfileModel>> getRecommendedProfiles() async {
-    try {
-      final response = await apiClient.get<dynamic>(
-        ApiEndpoints.recommendedProfiles,
-      );
-
-      // The recommended endpoint returns a list directly
-      if (response is List) {
-        return response
-            .map((json) => ProfileModel.fromJson(json as Map<String, dynamic>))
-            .toList();
-      } else if (response is Map<String, dynamic>) {
-        // If it's paginated, handle it
-        final paginatedResponse = PaginatedResponse.fromJson(
-          response,
-          (json) => ProfileModel.fromJson(json),
-        );
-        return paginatedResponse.results;
-      }
-
-      return [];
-    } catch (e) {
-      // Fallback to mock data if API fails
-      return _getMockProfiles();
-    }
   }
 }

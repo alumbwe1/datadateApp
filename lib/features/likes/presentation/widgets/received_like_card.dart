@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../interactions/data/models/like_model.dart';
 
-class ReceivedLikeCard extends StatelessWidget {
+class ReceivedLikeCard extends StatefulWidget {
   final UserInfo userInfo;
   final ProfileData? profile;
   final String? imageUrl;
@@ -25,6 +25,38 @@ class ReceivedLikeCard extends StatelessWidget {
   });
 
   @override
+  State<ReceivedLikeCard> createState() => _ReceivedLikeCardState();
+}
+
+class _ReceivedLikeCardState extends State<ReceivedLikeCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(_) => _controller.forward();
+  void _onTapUp(_) => _controller.reverse();
+  void _onTapCancel() => _controller.reverse();
+
+  @override
   Widget build(BuildContext context) {
     final colors = [
       AppColors.secondaryLight,
@@ -32,45 +64,51 @@ class ReceivedLikeCard extends StatelessWidget {
       AppColors.primaryLight,
       AppColors.accentLight,
     ];
-    final borderColor = colors[index % colors.length];
+    final borderColor = colors[widget.index % colors.length];
 
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.r),
-          gradient: LinearGradient(
-            colors: [
-              borderColor.withOpacity(0.3),
-              borderColor.withOpacity(0.1),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: borderColor.withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
+      onTap: widget.onTap,
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
         child: Container(
-          margin: const EdgeInsets.all(3),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: Colors.white, width: 2),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.r),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _buildImage(),
-                _buildGradientOverlay(),
-                _buildProfileInfo(),
-                _buildHeartBadge(borderColor),
+            borderRadius: BorderRadius.circular(16.r),
+            gradient: LinearGradient(
+              colors: [
+                borderColor.withValues(alpha: 0.2),
+                borderColor.withValues(alpha: 0.08),
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: borderColor.withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Container(
+            margin: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14.r),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _buildImage(),
+                  _buildGradientOverlay(),
+                  _buildProfileInfo(),
+                  _buildHeartBadge(borderColor),
+                ],
+              ),
             ),
           ),
         ),
@@ -79,9 +117,9 @@ class ReceivedLikeCard extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    if (imageUrl != null) {
+    if (widget.imageUrl != null) {
       return CachedNetworkImage(
-        imageUrl: imageUrl!,
+        imageUrl: widget.imageUrl!,
         fit: BoxFit.cover,
         placeholder: (context, url) => Container(
           color: Colors.grey[200],
@@ -90,6 +128,7 @@ class ReceivedLikeCard extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(
                 AppColors.secondaryLight,
               ),
+              strokeWidth: 2,
             ),
           ),
         ),
@@ -110,7 +149,7 @@ class ReceivedLikeCard extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          userInfo.displayName[0].toUpperCase(),
+          widget.userInfo.displayName[0].toUpperCase(),
           style: appStyle(48, Colors.grey[500]!, FontWeight.w800),
         ),
       ),
@@ -128,7 +167,7 @@ class ReceivedLikeCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Colors.black.withOpacity(0.85)],
+            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.85)],
           ),
         ),
       ),
@@ -148,11 +187,11 @@ class ReceivedLikeCard extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  '${userInfo.displayName}, ${profile?.age ?? '??'}',
+                  '${widget.userInfo.displayName}, ${widget.profile?.age ?? '??'}',
                   style: appStyle(18, Colors.white, FontWeight.w800).copyWith(
                     shadows: [
                       Shadow(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         blurRadius: 4,
                       ),
                     ],
@@ -169,20 +208,20 @@ class ReceivedLikeCard extends StatelessWidget {
               Icon(
                 Icons.access_time_rounded,
                 size: 12,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
               ),
               const SizedBox(width: 4),
               Text(
-                _getTimeAgo(createdAt),
+                _getTimeAgo(widget.createdAt),
                 style:
                     appStyle(
                       12,
-                      Colors.white.withOpacity(0.9),
+                      Colors.white.withValues(alpha: 0.9),
                       FontWeight.w600,
                     ).copyWith(
                       shadows: [
                         Shadow(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           blurRadius: 4,
                         ),
                       ],
@@ -206,13 +245,13 @@ class ReceivedLikeCard extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.5),
+              color: color.withValues(alpha: 0.5),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: const Icon(Iconsax.heart, color: Colors.blue, size: 20),
+        child: Icon(Iconsax.heart, color: color, size: 20),
       ),
     );
   }

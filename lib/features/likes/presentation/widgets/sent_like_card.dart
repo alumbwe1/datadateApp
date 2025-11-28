@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../interactions/data/models/like_model.dart';
@@ -67,29 +66,39 @@ class _SentLikeCardState extends State<SentLikeCard>
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16.r),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primaryLight.withValues(alpha: 0.15),
+                AppColors.primaryLight.withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: AppColors.primaryLight.withValues(alpha: 0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.r),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _buildImage(),
-                _buildGradientOverlay(),
-                _buildProfileInfo(),
-                _buildPendingBadge(),
-              ],
+          child: Container(
+            margin: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14.r),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _buildImage(),
+                  _buildGradientOverlay(),
+                  _buildProfileInfo(),
+                  _buildHeartBadge(),
+                ],
+              ),
             ),
           ),
         ),
@@ -106,9 +115,7 @@ class _SentLikeCardState extends State<SentLikeCard>
           color: Colors.grey[200],
           child: const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                AppColors.secondaryLight,
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryLight),
               strokeWidth: 2,
             ),
           ),
@@ -121,11 +128,17 @@ class _SentLikeCardState extends State<SentLikeCard>
 
   Widget _buildPlaceholder() {
     return Container(
-      color: Colors.grey[200],
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.grey[300]!, Colors.grey[200]!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
       child: Center(
         child: Text(
           widget.userInfo.displayName[0].toUpperCase(),
-          style: appStyle(48, Colors.grey[400]!, FontWeight.w700),
+          style: appStyle(48, Colors.grey[500]!, FontWeight.w800),
         ),
       ),
     );
@@ -137,17 +150,12 @@ class _SentLikeCardState extends State<SentLikeCard>
       left: 0,
       right: 0,
       child: Container(
-        height: 130,
+        height: 140,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.transparent,
-              Colors.black.withOpacity(0.3),
-              Colors.black.withOpacity(0.6),
-            ],
-            stops: const [0.0, 0.5, 1.0],
+            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.85)],
           ),
         ),
       ),
@@ -156,45 +164,53 @@ class _SentLikeCardState extends State<SentLikeCard>
 
   Widget _buildProfileInfo() {
     return Positioned(
-      bottom: 14,
-      left: 14,
-      right: 50,
+      bottom: 12,
+      left: 12,
+      right: 12,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '${widget.userInfo.displayName}, ${widget.profile?.age ?? '??'}',
-            style: appStyle(16, Colors.white, FontWeight.w700).copyWith(
-              shadows: [
-                Shadow(color: Colors.black.withOpacity(0.4), blurRadius: 3),
-              ],
-              letterSpacing: 0.3,
-            ),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  '${widget.userInfo.displayName}, ${widget.profile?.age ?? '??'}',
+                  style: appStyle(18, Colors.white, FontWeight.w800).copyWith(
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 6.h),
+          const SizedBox(height: 4),
           Row(
             children: [
               Icon(
-                Icons.schedule_rounded,
-                size: 13,
-                color: Colors.white.withOpacity(0.85),
+                Icons.access_time_rounded,
+                size: 12,
+                color: Colors.white.withValues(alpha: 0.9),
               ),
-              SizedBox(width: 5.w),
+              const SizedBox(width: 4),
               Text(
                 _getTimeAgo(widget.createdAt),
                 style:
                     appStyle(
-                      11,
-                      Colors.white.withOpacity(0.85),
-                      FontWeight.w500,
+                      12,
+                      Colors.white.withValues(alpha: 0.9),
+                      FontWeight.w600,
                     ).copyWith(
                       shadows: [
                         Shadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 3,
+                          color: Colors.black.withValues(alpha: 0.5),
+                          blurRadius: 4,
                         ),
                       ],
                     ),
@@ -206,50 +222,27 @@ class _SentLikeCardState extends State<SentLikeCard>
     );
   }
 
-  Widget _buildPendingBadge() {
+  Widget _buildHeartBadge() {
     return Positioned(
-      top: 12,
-      right: 12,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 7.h),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.25),
-                width: 1,
-              ),
+      top: 10,
+      right: 10,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryLight.withValues(alpha: 0.5),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.amber[400],
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.amber[400]!.withOpacity(0.6),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 6.w),
-                Text(
-                  'Pending',
-                  style: appStyle(10, Colors.white, FontWeight.w600),
-                ),
-              ],
-            ),
-          ),
+          ],
+        ),
+        child: const Icon(
+          Iconsax.heart,
+          color: AppColors.primaryLight,
+          size: 20,
         ),
       ),
     );
