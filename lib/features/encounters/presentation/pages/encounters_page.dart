@@ -7,6 +7,7 @@ import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../providers/encounters_provider.dart';
@@ -55,24 +56,49 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     });
   }
 
-  void _handleSwipe(
+  Future<void> _handleSwipe(
     CardSwiperDirection direction,
     String profileId,
     String profileName,
     String profilePhoto,
-  ) {
+  ) async {
     // Instant API call based on direction
     if (direction == CardSwiperDirection.right) {
-      ref.read(encountersProvider.notifier).likeProfile(profileId);
+      try {
+        final matchInfo = await ref
+            .read(encountersProvider.notifier)
+            .likeProfile(profileId);
 
-      // Check for match (simulate 30% chance for demo)
-      final isMatch = DateTime.now().millisecond % 10 < 3;
-      if (isMatch) {
-        Future.delayed(const Duration(milliseconds: 400), () {
-          if (mounted) {
-            _showMatchDialog(profileName, profilePhoto);
+        if (mounted) {
+          // Check if it's a match
+          if (matchInfo != null && matchInfo['matched'] == true) {
+            Future.delayed(const Duration(milliseconds: 400), () {
+              if (mounted) {
+                _showMatchDialog(profileName, profilePhoto);
+              }
+            });
           }
-        });
+        }
+      } catch (e) {
+        if (mounted) {
+          // Handle "already liked" error
+          final errorMessage = e.toString();
+          if (errorMessage.contains('already liked')) {
+            CustomSnackbar.show(
+              context,
+              message: 'You\'ve already liked this profile',
+              type: SnackbarType.warning,
+              duration: const Duration(seconds: 2),
+            );
+          } else {
+            CustomSnackbar.show(
+              context,
+              message: 'Failed to send like',
+              type: SnackbarType.error,
+              duration: const Duration(seconds: 2),
+            );
+          }
+        }
       }
     } else if (direction == CardSwiperDirection.left) {
       ref.read(encountersProvider.notifier).skipProfile(profileId);

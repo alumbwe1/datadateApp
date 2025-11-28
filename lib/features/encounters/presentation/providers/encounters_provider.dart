@@ -142,9 +142,15 @@ class EncountersNotifier extends StateNotifier<EncountersState> {
     final result = await _profileRepository.likeProfile(profileId);
 
     Map<String, dynamic>? matchInfo;
-    result.fold((failure) => null, (response) {
-      matchInfo = response;
-    });
+    result.fold(
+      (failure) {
+        // Throw the error so it can be caught in the UI
+        throw Exception(failure.message);
+      },
+      (response) {
+        matchInfo = response;
+      },
+    );
 
     _moveToNext();
     return matchInfo;

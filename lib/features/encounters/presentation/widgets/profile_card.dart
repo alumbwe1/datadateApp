@@ -2,24 +2,26 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../domain/entities/profile.dart';
 import '../pages/profile_details_page.dart';
+import '../providers/encounters_provider.dart';
 import 'crush_bottom_sheet.dart';
 
-class ProfileCard extends StatefulWidget {
+class ProfileCard extends ConsumerStatefulWidget {
   final Profile profile;
 
   const ProfileCard({super.key, required this.profile});
 
   @override
-  State<ProfileCard> createState() => _ProfileCardState();
+  ConsumerState<ProfileCard> createState() => _ProfileCardState();
 }
 
-class _ProfileCardState extends State<ProfileCard> {
+class _ProfileCardState extends ConsumerState<ProfileCard> {
   int _currentImageIndex = 0;
 
   void _nextImage() {
@@ -48,13 +50,20 @@ class _ProfileCardState extends State<ProfileCard> {
     );
   }
 
-  void _navigateToDetails() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfileDetailsPage(profile: widget.profile),
-      ),
-    );
+  Future<void> _navigateToDetails() async {
+    // Record profile view before navigating
+    await ref
+        .read(encountersProvider.notifier)
+        .recordProfileView(widget.profile.id);
+
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfileDetailsPage(profile: widget.profile),
+        ),
+      );
+    }
   }
 
   @override
