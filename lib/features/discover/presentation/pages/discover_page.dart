@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../encounters/domain/entities/profile.dart';
 import '../../../encounters/presentation/pages/profile_details_page.dart';
-import '../../../encounters/presentation/providers/encounters_provider.dart';
+import '../providers/discover_provider.dart';
 
 class DiscoverPage extends ConsumerStatefulWidget {
   const DiscoverPage({super.key});
@@ -40,43 +42,56 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
   }
 
   Future<void> _loadRecommendedProfiles() async {
-    await ref.read(encountersProvider.notifier).loadRecommendedProfiles();
+    await ref.read(discoverProvider.notifier).loadRecommendedProfiles();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
-    final encountersState = ref.watch(encountersProvider);
-    final profiles = encountersState.profiles;
+    final discoverState = ref.watch(discoverProvider);
+    final profiles = discoverState.profiles;
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
+        preferredSize: Size.fromHeight(55.h),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                Text(
-                  'Discover',
-                  style: appStyle(
-                    25,
-                    Colors.black,
-                    FontWeight.w800,
-                  ).copyWith(letterSpacing: -0.3),
+                // Discover Logo with Gradient (matching HeartLink style)
+                ShaderMask(
+                  shaderCallback: (bounds) =>
+                      AppColors.heartGradient.createShader(
+                        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                      ),
+                  child: Text(
+                    'Discover',
+                    style: appStyle(
+                      26.sp,
+                      Colors.white,
+                      FontWeight.w800,
+                    ).copyWith(letterSpacing: -0.5, height: 1),
+                  ),
                 ),
                 const Spacer(),
+                // Refresh Button - Modern Style
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.primaryLight.withValues(alpha: 0.3),
+                      width: 1.w,
+                    ),
+                    borderRadius: BorderRadius.circular(20.r),
                   ),
-                  child: const Icon(
-                    Icons.tune_rounded,
-                    size: 20,
-                    color: Colors.black87,
+                  child: IconButton(
+                    icon: Icon(Icons.refresh_rounded, size: 20.sp),
+                    color: AppColors.primaryLight,
+                    onPressed: _loadRecommendedProfiles,
+                    splashRadius: 24,
+                    padding: EdgeInsets.zero,
                   ),
                 ),
               ],
@@ -84,10 +99,10 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
           ),
         ),
       ),
-      body: encountersState.isLoading
+      body: discoverState.isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
-          : encountersState.error != null
-          ? _buildErrorState(encountersState.error!)
+          : discoverState.error != null
+          ? _buildErrorState(discoverState.error!)
           : profiles.isEmpty
           ? _buildEmptyState()
           : Column(
@@ -258,9 +273,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
     return GestureDetector(
       onTap: () async {
         // Record profile view
-        await ref
-            .read(encountersProvider.notifier)
-            .recordProfileView(profile.id);
+        await ref.read(discoverProvider.notifier).recordProfileView(profile.id);
 
         if (context.mounted) {
           Navigator.push(

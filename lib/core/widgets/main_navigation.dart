@@ -113,40 +113,32 @@ class _MainNavigationState extends State<MainNavigation>
                   index: 0,
                   activeColor: isDark
                       ? AppColors.navEncountersDark
-                      : AppColors.primaryLight,
+                      : Colors.pink,
                 ),
                 _buildNavItem(
                   icon: Icons.grid_view_rounded,
                   label: 'Discover',
                   index: 1,
-                  activeColor: isDark
-                      ? AppColors.navDiscoverDark
-                      : AppColors.navDiscoverLight,
+                  activeColor: isDark ? AppColors.navDiscoverDark : Colors.pink,
                 ),
                 _buildNavItem(
                   icon: Iconsax.heart,
-                  svgPath: 'assets/svgs/heartH.svg',
+
                   label: 'Likes',
                   index: 2,
-                  activeColor: isDark
-                      ? AppColors.navLikesDark
-                      : AppColors.navLikesLight,
+                  activeColor: isDark ? AppColors.navLikesDark : Colors.pink,
                 ),
                 _buildNavItem(
                   svgPath: 'assets/svgs/beacon.svg',
                   label: 'Chats',
                   index: 3,
-                  activeColor: isDark
-                      ? AppColors.navChatsDark
-                      : AppColors.navChatsLight,
+                  activeColor: isDark ? AppColors.navChatsDark : Colors.pink,
                 ),
                 _buildNavItem(
                   icon: Iconsax.user,
                   label: 'Profile',
                   index: 4,
-                  activeColor: isDark
-                      ? AppColors.navProfileDark
-                      : AppColors.navProfileLight,
+                  activeColor: isDark ? AppColors.navProfileDark : Colors.pink,
                 ),
               ],
             ),

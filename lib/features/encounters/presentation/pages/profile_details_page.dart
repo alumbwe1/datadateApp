@@ -2,28 +2,33 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:datadate/core/constants/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/profile.dart';
+import '../providers/encounters_provider.dart';
+import 'match_page.dart';
 import 'dart:math' as math;
 
-class ProfileDetailsPage extends StatefulWidget {
+class ProfileDetailsPage extends ConsumerStatefulWidget {
   final Profile profile;
 
   const ProfileDetailsPage({super.key, required this.profile});
 
   @override
-  State<ProfileDetailsPage> createState() => _ProfileDetailsPageState();
+  ConsumerState<ProfileDetailsPage> createState() => _ProfileDetailsPageState();
 }
 
-class _ProfileDetailsPageState extends State<ProfileDetailsPage>
+class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
     with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentPhotoIndex = 0;
   late AnimationController _matchAnimationController;
   late Animation<double> _matchScaleAnimation;
   late Animation<double> _matchProgressAnimation;
+  bool _isLiking = false;
 
   @override
   void initState() {
@@ -65,6 +70,168 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
   int _calculateMatchPercentage() {
     // Calculate match percentage based on profile data
     return 85 + (widget.profile.interests.length * 2);
+  }
+
+  Future<void> _handleLike() async {
+    if (_isLiking) return;
+
+    setState(() => _isLiking = true);
+    HapticFeedback.mediumImpact();
+
+    try {
+      final matchInfo = await ref
+          .read(encountersProvider.notifier)
+          .likeProfile(widget.profile.id.toString());
+
+      if (mounted) {
+        // Check if it's a match
+        if (matchInfo != null && matchInfo['matched'] == true) {
+          // Show match dialog
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  MatchPage(
+                    profileName: widget.profile.displayName,
+                    profilePhoto: widget.profile.photos.first,
+                  ),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+              transitionDuration: const Duration(milliseconds: 400),
+            ),
+          );
+        } else {
+          // Just show success message and go back
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Iconsax.heart, color: AppColors.primaryLight, size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Like sent!',
+                    style: appStyle(14, Colors.white, FontWeight.w600),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.black87,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          );
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to send like',
+              style: appStyle(14, Colors.white, FontWeight.w600),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLiking = false);
+      }
+    }
+  }
+
+  Future<void> _handleSuperLike() async {
+    if (_isLiking) return;
+
+    setState(() => _isLiking = true);
+    HapticFeedback.heavyImpact();
+
+    try {
+      final matchInfo = await ref
+          .read(encountersProvider.notifier)
+          .likeProfile(widget.profile.id.toString());
+
+      if (mounted) {
+        // Check if it's a match
+        if (matchInfo != null && matchInfo['matched'] == true) {
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  MatchPage(
+                    profileName: widget.profile.displayName,
+                    profilePhoto: widget.profile.photos.first,
+                  ),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+              transitionDuration: const Duration(milliseconds: 400),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    Icons.star_rounded,
+                    color: Color(0xFFFFB800),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Super Like sent! ⭐',
+                    style: appStyle(14, Colors.white, FontWeight.w600),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.black87,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          );
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to send super like',
+              style: appStyle(14, Colors.white, FontWeight.w600),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLiking = false);
+      }
+    }
   }
 
   @override
@@ -516,18 +683,21 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
                             icon: Icons.close,
                             color: Colors.black,
                             size: 50,
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.pop(context);
+                            },
                           ),
                           const SizedBox(width: 16),
 
                           // Center button (Like) - Larger
                           _buildActionButton(
-                            icon: Iconsax.heart,
-                            color: Colors.black,
+                            icon: _isLiking
+                                ? Icons.hourglass_empty
+                                : Iconsax.heart,
+                            color: AppColors.primaryLight,
                             size: 50,
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
+                            onPressed: _isLiking ? null : _handleLike,
                           ),
                           const SizedBox(width: 16),
 
@@ -536,9 +706,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
                             icon: Iconsax.star,
                             color: const Color(0xFFFFB800),
                             size: 50,
-                            onPressed: () {
-                              // Super like action
-                            },
+                            onPressed: _isLiking ? null : _handleSuperLike,
                           ),
                         ],
                       ),
@@ -768,7 +936,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
     required IconData icon,
     required Color color,
     required double size,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) {
     return Container(
       width: size,
@@ -792,7 +960,11 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage>
           child: Container(
             decoration: BoxDecoration(shape: BoxShape.circle),
             child: Center(
-              child: Icon(icon, color: color, size: size * 0.45),
+              child: Icon(
+                icon,
+                color: onPressed == null ? color.withValues(alpha: 0.5) : color,
+                size: size * 0.45,
+              ),
             ),
           ),
         ),

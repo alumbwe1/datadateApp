@@ -71,7 +71,7 @@ class AppColors {
   );
 
   static const LinearGradient heartGradient = LinearGradient(
-    colors: [Color(0xFFFF6B9D), Color(0xFFFF4177)],
+    colors: [Colors.pink, Color(0xFFFF4177)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
