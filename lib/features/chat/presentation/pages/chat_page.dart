@@ -296,7 +296,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
                 child: Text(
                   'HeartLink',
                   style: appStyle(
-                    25,
+                    26.sp,
                     Colors.white,
                     FontWeight.w800,
                   ).copyWith(letterSpacing: -0.3),
@@ -317,7 +317,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(16.r),
         ),
         child: TextField(
           controller: _searchController,
@@ -402,7 +402,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
           ),
         ),
         SizedBox(
-          height: 140.h,
+          height: 135.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),

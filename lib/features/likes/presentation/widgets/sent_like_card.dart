@@ -65,7 +65,7 @@ class _SentLikeCardState extends State<SentLikeCard>
         scale: _scaleAnimation,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(10.r),
             gradient: LinearGradient(
               colors: [
                 AppColors.primaryLight.withValues(alpha: 0.15),
@@ -85,11 +85,11 @@ class _SentLikeCardState extends State<SentLikeCard>
           child: Container(
             margin: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(8.r),
               border: Border.all(color: Colors.white, width: 2),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(8.r),
               child: Stack(
                 fit: StackFit.expand,
                 children: [

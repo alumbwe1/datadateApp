@@ -75,7 +75,7 @@ class _ReceivedLikeCardState extends State<ReceivedLikeCard>
         scale: _scaleAnimation,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(10.r),
             gradient: LinearGradient(
               colors: [
                 borderColor.withValues(alpha: 0.2),
@@ -95,11 +95,11 @@ class _ReceivedLikeCardState extends State<ReceivedLikeCard>
           child: Container(
             margin: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(8.r),
               border: Border.all(color: Colors.white, width: 2),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(8.r),
               child: Stack(
                 fit: StackFit.expand,
                 children: [

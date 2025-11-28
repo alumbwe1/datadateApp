@@ -131,7 +131,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   child: Text(
                     'HeartLink',
                     style: appStyle(
-                      26,
+                      26.sp,
                       Colors.white,
                       FontWeight.w800,
                     ).copyWith(letterSpacing: -0.5, height: 1),
