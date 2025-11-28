@@ -39,7 +39,8 @@ class ApiEndpoints {
   // Interactions
   static const String matches = '/api/v1.0/interactions/matches/';
   static const String likes = '/api/v1.0/interactions/likes/';
-  static const String profileViews = '/api/v1.0/profile-views/';
+  static const String profileViews =
+      '/api/v1.0/interactions/profile-views/record_views/';
 
   // Chat
   static const String chatRooms = '/api/v1.0/chat/rooms/';

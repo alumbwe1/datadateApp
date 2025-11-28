@@ -105,11 +105,27 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
    - Tracks profile impressions
    - Used for analytics and recommendations
 
+## API Format Fix
+
+### Profile View Recording
+**Issue**: API was receiving wrong data format
+- **Expected**: `{"profile_ids": [9]}` (array of IDs)
+- **Was Sending**: `{"viewed": 9}` (single integer)
+
+**Fix**: Updated `ProfileRemoteDataSourceImpl.recordProfileView()` to send correct format:
+```dart
+await apiClient.post(
+  ApiEndpoints.profileViews,
+  data: {'profile_ids': [profileId]}, // Now sends as array
+);
+```
+
 ## Testing Checklist
 
 - [x] Like a profile successfully
 - [x] Try to like the same profile again (should show warning)
 - [x] Tap on profile card (should record view and navigate)
-- [x] Check API logs for view tracking calls
+- [x] Check API logs for view tracking calls (correct format)
 - [x] Verify custom snackbar appears with correct styling
 - [x] Test error handling for network failures
+- [x] Profile views now use correct API format (`profile_ids` array)

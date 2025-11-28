@@ -312,7 +312,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       await apiClient.post(
         ApiEndpoints.profileViews,
-        data: {'viewed': profileId},
+        data: {
+          'profile_ids': [profileId],
+        },
       );
     } catch (e) {
       // Silently fail - view tracking shouldn't block user interaction
