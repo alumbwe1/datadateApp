@@ -87,41 +87,9 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
       body: encountersState.isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
           : encountersState.error != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text(
-                    encountersState.error!,
-                    style: appStyle(14, Colors.grey.shade600, FontWeight.w400),
-                  ),
-                ],
-              ),
-            )
+          ? _buildErrorState(encountersState.error!)
           : profiles.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '🎉',
-                    style: appStyle(80, Colors.black, FontWeight.normal),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'No more profiles',
-                    style: appStyle(24, Colors.black, FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Check back later for new matches',
-                    style: appStyle(14, Colors.grey.shade600, FontWeight.w400),
-                  ),
-                ],
-              ),
-            )
+          ? _buildEmptyState()
           : Column(
               children: [
                 Container(
@@ -159,6 +127,130 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Text('✨', style: TextStyle(fontSize: 60)),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'You\'re All Caught Up!',
+              style: appStyle(
+                28,
+                Colors.black,
+                FontWeight.w900,
+              ).copyWith(letterSpacing: -0.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Check back soon for new\nrecommended profiles',
+              style: appStyle(
+                16,
+                Colors.grey[600]!,
+                FontWeight.w400,
+              ).copyWith(height: 1.5, letterSpacing: -0.2),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: _loadRecommendedProfiles,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Text(
+                'Refresh',
+                style: appStyle(16, Colors.white, FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(Icons.error_outline, size: 60, color: Colors.grey),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Oops!',
+              style: appStyle(
+                28,
+                Colors.black,
+                FontWeight.w900,
+              ).copyWith(letterSpacing: -0.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              error,
+              style: appStyle(
+                16,
+                Colors.grey[600]!,
+                FontWeight.w400,
+              ).copyWith(height: 1.5, letterSpacing: -0.2),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: _loadRecommendedProfiles,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Text(
+                'Try Again',
+                style: appStyle(16, Colors.white, FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

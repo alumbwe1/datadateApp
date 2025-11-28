@@ -21,13 +21,30 @@ class _MainNavigationState extends State<MainNavigation>
   int _currentIndex = 0;
   late List<AnimationController> _animationControllers;
 
-  final List<Widget> _pages = [
-    const EncountersPage(),
-    const DiscoverPage(),
-    const LikesPage(),
-    const ChatPage(),
-    const ProfilePage(),
-  ];
+  // Track which pages have been visited
+  final Set<int> _visitedPages = {0}; // Start with encounters page
+
+  // Build pages lazily
+  Widget _buildPage(int index) {
+    if (!_visitedPages.contains(index)) {
+      return const SizedBox.shrink(); // Empty widget for unvisited pages
+    }
+
+    switch (index) {
+      case 0:
+        return const EncountersPage();
+      case 1:
+        return const DiscoverPage();
+      case 2:
+        return const LikesPage();
+      case 3:
+        return const ChatPage();
+      case 4:
+        return const ProfilePage();
+      default:
+        return const SizedBox.shrink();
+    }
+  }
 
   @override
   void initState() {
@@ -57,6 +74,8 @@ class _MainNavigationState extends State<MainNavigation>
         _animationControllers[_currentIndex].reverse();
         _currentIndex = index;
         _animationControllers[index].forward();
+        // Mark page as visited so it gets built
+        _visitedPages.add(index);
       });
     }
   }
@@ -66,7 +85,10 @@ class _MainNavigationState extends State<MainNavigation>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: List.generate(5, (index) => _buildPage(index)),
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,

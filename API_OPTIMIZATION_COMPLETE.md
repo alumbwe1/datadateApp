@@ -70,18 +70,24 @@ Future<bool> shouldRefreshUserData() async {
 
 **Result**: Auth API call only once every 7 days (instead of every app start)
 
-### 3. **Lazy Loading - Already Implemented** ✅
+### 3. **True Lazy Loading - Fixed IndexedStack** ✅
 
 **Files**: 
+- `lib/core/widgets/main_navigation.dart` (CRITICAL FIX)
 - `lib/features/discover/presentation/pages/discover_page.dart`
 - `lib/features/likes/presentation/pages/likes_page.dart`
+- `lib/features/chat/presentation/pages/chat_page.dart`
 
-**Features**:
-- Pages load only when tapped
-- State preserved with `AutomaticKeepAliveClientMixin`
-- No unnecessary API calls on startup
+**Problem**: `IndexedStack` was building ALL pages immediately, even unvisited ones
 
-**Result**: Discover and Likes don't load until user taps them
+**Solution**:
+- Track visited pages with `Set<int> _visitedPages`
+- Build pages lazily with `_buildPage(int index)`
+- Return empty widget for unvisited pages
+- Mark page as visited when user taps tab
+- Combined with `AutomaticKeepAliveClientMixin` for state preservation
+
+**Result**: Pages only build when user actually taps them (true lazy loading)
 
 ### 4. **Endpoint Optimization** ✅
 
@@ -102,13 +108,15 @@ Future<bool> shouldRefreshUserData() async {
 
 ### After Optimization:
 
-**On First App Start**:
+**On First App Start** (Encounters tab):
 ```
 1. GET /auth/users/me/ (auth check - cached for 7 days)
 2. GET /api/v1.0/profiles/discover/?gender=female (encounters only)
 ```
 
 **Total: 2 API calls on startup** 🎉
+
+**Note**: Other tabs (Discover, Likes, Chat, Profile) don't load until tapped!
 
 **When User Taps Discover Tab**:
 ```
