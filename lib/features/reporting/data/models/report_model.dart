@@ -8,8 +8,8 @@ class ReportModel with _$ReportModel {
   const factory ReportModel({
     required int id,
     required String reporterUsername,
-    @JsonKey(name: 'reported_username') required String reportedUsername,
-    @JsonKey(name: 'report_type') required String reportType,
+    required String reportedUsername,
+    required String reportType,
     required String reason,
     String? description,
     @JsonKey(name: 'message_id') String? messageId,

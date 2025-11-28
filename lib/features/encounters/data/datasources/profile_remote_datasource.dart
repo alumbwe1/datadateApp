@@ -221,17 +221,26 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     Map<String, dynamic> filters,
   ) async {
     try {
-      final response = await apiClient.get<Map<String, dynamic>>(
+      final response = await apiClient.get<dynamic>(
         ApiEndpoints.discoverProfiles,
         queryParameters: filters,
       );
 
-      final paginatedResponse = PaginatedResponse.fromJson(
-        response,
-        (json) => ProfileModel.fromJson(json),
-      );
+      // The discover endpoint returns a list directly, not paginated
+      if (response is List) {
+        return response
+            .map((json) => ProfileModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else if (response is Map<String, dynamic>) {
+        // If it's paginated, handle it
+        final paginatedResponse = PaginatedResponse.fromJson(
+          response,
+          (json) => ProfileModel.fromJson(json),
+        );
+        return paginatedResponse.results;
+      }
 
-      return paginatedResponse.results;
+      return [];
     } catch (e) {
       // Fallback to mock data if API fails
       return _getMockProfiles(gender: filters['gender']);

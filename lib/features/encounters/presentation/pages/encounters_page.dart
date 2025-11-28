@@ -13,7 +13,7 @@ import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/swipe_overlay.dart';
 import '../widgets/animated_action_button.dart';
-import '../widgets/enhanced_filter_bottom_sheet.dart';
+import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/boost_bottom_sheet.dart';
 import 'match_page.dart';
 
@@ -33,8 +33,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   bool _showLikeOverlay = false;
   bool _showNopeOverlay = false;
   double _overlayOpacity = 0.0;
-
-  // No need for local filter state anymore - managed by provider
 
   @override
   void initState() {
@@ -141,68 +139,26 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 ),
                 const Spacer(),
 
-                // Filter Icon Button - Modern Style with Badge
-                Stack(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 8.h,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: AppColors.primaryLight.withValues(alpha: 0.3),
-                          width: 1.w,
-                        ),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: IconButton(
-                        icon: Icon(IconlyLight.filter, size: 20.sp),
-                        color: AppColors.primaryLight,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          _showFilterBottomSheet();
-                        },
-                        splashRadius: 24,
-                        padding: EdgeInsets.zero,
-                      ),
+                // Filter Icon Button - Modern Style
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.primaryLight.withValues(alpha: 0.3),
+                      width: 1.w,
                     ),
-                    if (encountersState.activeFilterCount > 0)
-                      Positioned(
-                        right: 4,
-                        top: 4,
-                        child: Container(
-                          padding: EdgeInsets.all(4.w),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLight,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primaryLight.withValues(
-                                  alpha: 0.3,
-                                ),
-                                blurRadius: 4,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                          constraints: BoxConstraints(
-                            minWidth: 18.w,
-                            minHeight: 18.h,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${encountersState.activeFilterCount}',
-                              style: appStyle(
-                                10,
-                                Colors.white,
-                                FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: IconButton(
+                    icon: Icon(IconlyLight.filter, size: 20.sp),
+                    color: AppColors.primaryLight,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      _showFilterBottomSheet();
+                    },
+                    splashRadius: 24,
+                    padding: EdgeInsets.zero,
+                  ),
                 ),
 
                 const SizedBox(width: 8),
@@ -277,7 +233,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               ),
             )
           : profiles.isEmpty
-          ? _buildEmptyState()
+          ? _buildEmptyState(encountersState.activeFilterCount > 0)
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
@@ -342,7 +298,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool hasActiveFilters) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -356,13 +312,16 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 color: Colors.grey[100],
                 shape: BoxShape.circle,
               ),
-              child: const Center(
-                child: Text('✨', style: TextStyle(fontSize: 60)),
+              child: Center(
+                child: Text(
+                  hasActiveFilters ? '🔍' : '✨',
+                  style: const TextStyle(fontSize: 60),
+                ),
               ),
             ),
             const SizedBox(height: 32),
             Text(
-              'You\'re All Caught Up!',
+              hasActiveFilters ? 'No Matches Found' : 'You\'re All Caught Up!',
               style: appStyle(
                 28,
                 Colors.black,
@@ -372,7 +331,9 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             ),
             const SizedBox(height: 12),
             Text(
-              'Check back soon for new profiles\nto connect with',
+              hasActiveFilters
+                  ? 'Try adjusting your filters\nto see more profiles'
+                  : 'Check back soon for new profiles\nto connect with',
               style: appStyle(
                 16,
                 Colors.grey[600]!,
@@ -381,30 +342,86 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () {
-                final user = ref.read(authProvider).user;
-                if (user != null) {
-                  ref
-                      .read(encountersProvider.notifier)
-                      .loadProfiles(user.gender);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
+            if (hasActiveFilters)
+              OutlinedButton(
+                onPressed: () {
+                  final user = ref.read(authProvider).user;
+                  if (user != null) {
+                    ref
+                        .read(encountersProvider.notifier)
+                        .clearFilters(user.gender);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(
+                              Icons.refresh_rounded,
+                              color: AppColors.primaryLight,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Filters cleared',
+                              style: appStyle(
+                                14,
+                                Colors.white,
+                                FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        backgroundColor: Colors.black87,
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 2),
+                        margin: const EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    );
+                  }
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.black, width: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                child: Text(
+                  'Clear Filters',
+                  style: appStyle(16, Colors.black, FontWeight.w700),
+                ),
+              )
+            else
+              ElevatedButton(
+                onPressed: () {
+                  final user = ref.read(authProvider).user;
+                  if (user != null) {
+                    ref
+                        .read(encountersProvider.notifier)
+                        .loadProfiles(user.gender);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: Text(
+                  'Refresh',
+                  style: appStyle(16, Colors.white, FontWeight.w700),
                 ),
               ),
-              child: Text(
-                'Refresh',
-                style: appStyle(16, Colors.white, FontWeight.w700),
-              ),
-            ),
           ],
         ),
       ),
@@ -517,28 +534,33 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     final encountersState = ref.read(encountersProvider);
     final user = ref.read(authProvider).user;
 
+    // Get current age filters or defaults
+    final currentMinAge =
+        encountersState.activeFilters['minAge']?.toDouble() ?? 18.0;
+    final currentMaxAge =
+        encountersState.activeFilters['maxAge']?.toDouble() ?? 35.0;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => EnhancedFilterBottomSheet(
-        initialFilters: encountersState.activeFilters,
-        onApply: (filters) {
+      builder: (context) => FilterBottomSheet(
+        initialMinAge: currentMinAge,
+        initialMaxAge: currentMaxAge,
+        onApply: (minAge, maxAge) {
           if (user != null) {
+            // Create filter map with age range
+            final filters = {
+              'minAge': minAge.round(),
+              'maxAge': maxAge.round(),
+            };
+
+            // Apply filters through provider
             ref
                 .read(encountersProvider.notifier)
                 .applyFilters(filters, user.gender);
 
             // Show confirmation
-            final filterCount = filters.values
-                .where(
-                  (v) =>
-                      v != null &&
-                      (v is! bool || v == true) &&
-                      (v is! String || v.isNotEmpty),
-                )
-                .length;
-
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
@@ -550,38 +572,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '$filterCount filter${filterCount != 1 ? 's' : ''} applied',
-                      style: appStyle(14, Colors.white, FontWeight.w600),
-                    ),
-                  ],
-                ),
-                backgroundColor: Colors.black87,
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 2),
-                margin: const EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            );
-          }
-        },
-        onClear: () {
-          if (user != null) {
-            ref.read(encountersProvider.notifier).clearFilters(user.gender);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Icon(
-                      Icons.refresh_rounded,
-                      color: AppColors.primaryLight,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Filters cleared',
+                      'Age filter: ${minAge.round()}-${maxAge.round()} years',
                       style: appStyle(14, Colors.white, FontWeight.w600),
                     ),
                   ],
