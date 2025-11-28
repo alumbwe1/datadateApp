@@ -17,6 +17,7 @@ abstract class ProfileRemoteDataSource {
   );
 
   Future<List<ProfileModel>> getRecommendedProfiles();
+  Future<List<ProfileModel>> getProfilesWithVideos();
 
   Future<ProfileModel> getProfileDetail(int id);
   Future<Map<String, dynamic>> likeProfile(int profileId);
@@ -318,6 +319,34 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
     } catch (e) {
       // Silently fail - view tracking shouldn't block user interaction
+    }
+  }
+
+  @override
+  Future<List<ProfileModel>> getProfilesWithVideos() async {
+    try {
+      final response = await apiClient.get<dynamic>(
+        ApiEndpoints.discoverWithVideos,
+      );
+
+      // The endpoint returns a list directly
+      if (response is List) {
+        return response
+            .map((json) => ProfileModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else if (response is Map<String, dynamic>) {
+        // If it's paginated, handle it
+        final paginatedResponse = PaginatedResponse.fromJson(
+          response,
+          (json) => ProfileModel.fromJson(json),
+        );
+        return paginatedResponse.results;
+      }
+
+      return [];
+    } catch (e) {
+      // Fallback to mock data if API fails
+      return _getMockProfiles();
     }
   }
 

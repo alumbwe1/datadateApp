@@ -95,6 +95,8 @@ class ApiEndpoints {
   static const String discoverStudents =
       '/api/v1.0/profiles/discover/students/';
   static const String discoverBoosted = '/api/v1.0/profiles/discover/boosted/';
+  static const String discoverWithVideos =
+      '/api/v1.0/profiles/discover/with_videos/';
 
   // Blocking & Reporting
   static const String blockedUsers = '/api/v1.0/profiles/blocked-users/';

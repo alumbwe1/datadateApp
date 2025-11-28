@@ -158,4 +158,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Left(ServerFailure('Failed to record view: ${e.toString()}'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Profile>>> getProfilesWithVideos() async {
+    try {
+      final profiles = await remoteDataSource.getProfilesWithVideos();
+      return Right(profiles);
+    } on NetworkFailure catch (e) {
+      return Left(e);
+    } on ServerFailure catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(
+        ServerFailure('Failed to load video profiles: ${e.toString()}'),
+      );
+    }
+  }
 }

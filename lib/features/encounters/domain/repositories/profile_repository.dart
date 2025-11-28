@@ -16,6 +16,7 @@ abstract class ProfileRepository {
   });
 
   Future<Either<Failure, List<Profile>>> getRecommendedProfiles();
+  Future<Either<Failure, List<Profile>>> getProfilesWithVideos();
 
   Future<Either<Failure, Map<String, dynamic>>> likeProfile(String profileId);
   Future<Either<Failure, void>> skipProfile(String profileId);

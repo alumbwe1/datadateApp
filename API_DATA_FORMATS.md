@@ -239,6 +239,8 @@ This document shows the exact JSON format for all API endpoints based on the Dja
     "profiles/user1/photo1_abc123",
     "profiles/user1/photo2_def456"
   ],
+  "video_url": "http://localhost:8000/media/profile_videos/1/video_abc123.mp4",
+  "video_duration": 8.5,
   "last_active": "2025-11-17T10:30:00Z",
   "created_at": "2025-11-10T14:30:00Z",
   "updated_at": "2025-11-15T09:20:00Z"
@@ -391,6 +393,71 @@ This document shows the exact JSON format for all API endpoints based on the Dja
     "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/photo2.jpg"
   ],
   "imagePublicIds": ["profiles/user1/photo2_def456"]
+}
+```
+
+### POST `/api/v1.0/profiles/me/upload_video/` - Upload Profile Video
+
+Upload a profile video file (maximum 10 seconds duration, max 50MB).
+
+**Request (multipart/form-data):**
+
+```
+video: <video file> (required)
+duration: 9.5 (optional - video duration in seconds)
+```
+
+**Allowed formats:** MP4, MOV, AVI, WEBM, MPEG
+
+**Response (201 Created):**
+
+```json
+{
+  "detail": "Video uploaded successfully.",
+  "video_url": "http://localhost:8000/media/profile_videos/1/video_abc123.mp4",
+  "video_duration": 9.5
+}
+```
+
+**Error (400 Bad Request - Duration Too Long):**
+
+```json
+{
+  "detail": "Video duration exceeds 10 seconds limit."
+}
+```
+
+**Error (400 Bad Request - File Too Large):**
+
+```json
+{
+  "detail": "File too large. Maximum size is 50MB."
+}
+```
+
+**Error (400 Bad Request - Invalid Type):**
+
+```json
+{
+  "detail": "Invalid file type. Allowed: MP4, MOV, AVI, WEBM, MPEG"
+}
+```
+
+### DELETE `/api/v1.0/profiles/me/delete_video/` - Delete Profile Video
+
+**Response (200 OK):**
+
+```json
+{
+  "detail": "Profile video deleted successfully."
+}
+```
+
+**Error (404 Not Found):**
+
+```json
+{
+  "detail": "No video to delete."
 }
 ```
 
@@ -1034,6 +1101,7 @@ Record multiple profile views at once. Perfect for swipe-based interfaces where 
 ```
 
 **Notes:**
+
 - Maximum 50 profiles per request
 - Automatically skips profiles viewed within the last hour (avoids duplicates)
 - Skips your own profile ID
@@ -1549,7 +1617,7 @@ or
     - **FCM Token:**
       - POST `/auth/fcm-token/` (update FCM token for push notifications)
 
-11. **Profile Photos**:
+11. **Profile Photos & Video**:
 
     - Photos are stored as Cloudinary URLs in `imageUrls` array
     - `imagePublicIds` array stores Cloudinary public IDs for deletion
@@ -1557,6 +1625,10 @@ or
     - POST `/api/v1.0/profiles/me/photos/` appends new photos
     - PATCH `/api/v1.0/profiles/me/photos/` replaces all photos
     - DELETE `/api/v1.0/profiles/me/delete_photo/` removes specific photo by publicId
+    - **Profile Video**: Single video per profile (max 10 seconds)
+    - POST `/api/v1.0/profiles/me/video/` uploads/replaces video
+    - DELETE `/api/v1.0/profiles/me/delete_video/` removes video
+    - Video stored locally on server with URL and duration
 
 12. **Profile Privacy**:
 
@@ -1964,6 +2036,71 @@ Returns personalized profile recommendations based on intelligent matching algor
   }
 ]
 ```
+
+### GET `/api/v1.0/profiles/discover/with_videos/` - Get Profiles with Videos
+
+Get profiles that have uploaded videos, with optional filtering.
+
+**Query Parameters:**
+
+```
+?university_id=1&min_age=20&max_age=25&gender=female&city=Lusaka&compound=Meanwood
+```
+
+**Available Filters:**
+
+- `university_id`: Filter by university ID
+- `min_age`: Minimum age (e.g., 20)
+- `max_age`: Maximum age (e.g., 25)
+- `gender`: Filter by gender (male, female, other)
+- `city`: Filter by city name
+- `compound`: Filter by compound/area name
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 15,
+    "display_name": "Jessica Smith",
+    "age": 22,
+    "gender": "female",
+    "course": "Marketing",
+    "city": "Lusaka",
+    "compound": "Meanwood",
+    "interests": ["travel", "music", "fitness"],
+    "imageUrls": ["http://localhost:8000/media/profiles/15/photo1.jpg"],
+    "video_url": "http://localhost:8000/media/profile_videos/15/video_abc123.mp4",
+    "video_duration": 9.2,
+    "last_active": "2025-11-28T14:30:00Z",
+    "university_data": {
+      "id": 1,
+      "name": "University of Zambia",
+      "slug": "unza"
+    }
+  },
+  {
+    "id": 18,
+    "display_name": "Amanda Lee",
+    "age": 23,
+    "gender": "female",
+    "course": "Business",
+    "city": "Lusaka",
+    "interests": ["photography", "art", "coffee"],
+    "imageUrls": ["http://localhost:8000/media/profiles/18/photo1.jpg"],
+    "video_url": "http://localhost:8000/media/profile_videos/18/video_xyz789.mp4",
+    "video_duration": 8.5,
+    "last_active": "2025-11-28T15:00:00Z",
+    "university_data": {
+      "id": 1,
+      "name": "University of Zambia",
+      "slug": "unza"
+    }
+  }
+]
+```
+
+**Note:** Returns up to 50 profiles, ordered by most recently active
 
 ---
 

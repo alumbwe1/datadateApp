@@ -18,6 +18,8 @@ class Profile extends Equatable {
   final List<String> interests;
   final List<String> photos;
   final DateTime? lastActive;
+  final String? videoUrl;
+  final double? videoDuration;
 
   const Profile({
     required this.id,
@@ -37,6 +39,8 @@ class Profile extends Equatable {
     this.interests = const [],
     this.photos = const [],
     this.lastActive,
+    this.videoUrl,
+    this.videoDuration,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) {
@@ -60,6 +64,8 @@ class Profile extends Equatable {
       lastActive: json['last_active'] != null
           ? DateTime.parse(json['last_active'])
           : null,
+      videoUrl: json['video_url'],
+      videoDuration: json['video_duration']?.toDouble(),
     );
   }
 
@@ -82,5 +88,7 @@ class Profile extends Equatable {
     interests,
     photos,
     lastActive,
+    videoUrl,
+    videoDuration,
   ];
 }

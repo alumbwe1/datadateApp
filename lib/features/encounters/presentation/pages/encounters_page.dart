@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../reels/presentation/pages/reels_page.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -34,6 +35,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   bool _showLikeOverlay = false;
   bool _showNopeOverlay = false;
   double _overlayOpacity = 0.0;
+  bool _showReels = false;
 
   @override
   void initState() {
@@ -189,6 +191,35 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
 
                 const SizedBox(width: 8),
 
+                // Reels Toggle Button
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.primaryLight.withValues(alpha: 0.3),
+                      width: 1.w,
+                    ),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      _showReels
+                          ? Icons.grid_view_rounded
+                          : Icons.play_circle_outline_rounded,
+                      size: 20.sp,
+                    ),
+                    color: AppColors.primaryLight,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _showReels = !_showReels);
+                    },
+                    splashRadius: 24,
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
                 // Boost Button - Premium Style with Gradient
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
@@ -230,7 +261,9 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           ),
         ),
       ),
-      body: encountersState.isLoading
+      body: _showReels
+          ? const ReelsPage()
+          : encountersState.isLoading
           ? const Center(child: ProfileCardShimmer())
           : encountersState.error != null
           ? Center(
