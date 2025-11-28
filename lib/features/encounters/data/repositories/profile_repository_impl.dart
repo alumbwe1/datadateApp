@@ -120,4 +120,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Left(ServerFailure('Failed to skip profile: ${e.toString()}'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Profile>>> getRecommendedProfiles() async {
+    try {
+      final profiles = await remoteDataSource.getRecommendedProfiles();
+      return Right(profiles);
+    } on NetworkFailure catch (e) {
+      return Left(e);
+    } on ServerFailure catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(
+        ServerFailure('Failed to load recommended profiles: ${e.toString()}'),
+      );
+    }
+  }
 }

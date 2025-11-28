@@ -16,6 +16,8 @@ abstract class ProfileRemoteDataSource {
     Map<String, dynamic> filters,
   );
 
+  Future<List<ProfileModel>> getRecommendedProfiles();
+
   Future<ProfileModel> getProfileDetail(int id);
   Future<Map<String, dynamic>> likeProfile(int profileId);
   Future<ProfileModel> createProfile({
@@ -331,5 +333,33 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         lastActive: DateTime.now().second % 2 == 0 ? DateTime.now() : null,
       );
     }).toList();
+  }
+
+  @override
+  Future<List<ProfileModel>> getRecommendedProfiles() async {
+    try {
+      final response = await apiClient.get<dynamic>(
+        ApiEndpoints.recommendedProfiles,
+      );
+
+      // The recommended endpoint returns a list directly
+      if (response is List) {
+        return response
+            .map((json) => ProfileModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else if (response is Map<String, dynamic>) {
+        // If it's paginated, handle it
+        final paginatedResponse = PaginatedResponse.fromJson(
+          response,
+          (json) => ProfileModel.fromJson(json),
+        );
+        return paginatedResponse.results;
+      }
+
+      return [];
+    } catch (e) {
+      // Fallback to mock data if API fails
+      return _getMockProfiles();
+    }
   }
 }

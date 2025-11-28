@@ -12,13 +12,13 @@ class ReportModel with _$ReportModel {
     required String reportType,
     required String reason,
     String? description,
-    @JsonKey(name: 'message_id') String? messageId,
+    String? messageId,
     required String status,
-    @JsonKey(name: 'admin_notes') String? adminNotes,
-    @JsonKey(name: 'resolved_at') DateTime? resolvedAt,
-    @JsonKey(name: 'resolved_by_username') String? resolvedByUsername,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+    required String? adminNotes,
+    required DateTime? resolvedAt,
+    required String? resolvedByUsername,
+    required DateTime createdAt,
+    required DateTime updatedAt,
   }) = _ReportModel;
 
   factory ReportModel.fromJson(Map<String, dynamic> json) =>

@@ -7,9 +7,8 @@ part 'system_status_model.g.dart';
 class SystemStatusModel with _$SystemStatusModel {
   const factory SystemStatusModel({
     required String mode,
-    @JsonKey(name: 'is_maintenance') required bool isMaintenance,
-    @JsonKey(name: 'maintenance_message') required String maintenanceMessage,
-    @JsonKey(name: 'features_enabled')
+    required bool isMaintenance,
+    required String maintenanceMessage,
     required FeaturesEnabledModel featuresEnabled,
   }) = _SystemStatusModel;
 

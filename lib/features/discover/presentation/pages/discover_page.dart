@@ -6,7 +6,6 @@ import '../../../../core/constants/app_style.dart';
 import '../../../encounters/domain/entities/profile.dart';
 import '../../../encounters/presentation/pages/profile_details_page.dart';
 import '../../../encounters/presentation/providers/encounters_provider.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 
 class DiscoverPage extends ConsumerStatefulWidget {
   const DiscoverPage({super.key});
@@ -20,11 +19,12 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = ref.read(authProvider).user;
-      if (user != null) {
-        ref.read(encountersProvider.notifier).loadProfiles(user.gender);
-      }
+      _loadRecommendedProfiles();
     });
+  }
+
+  Future<void> _loadRecommendedProfiles() async {
+    await ref.read(encountersProvider.notifier).loadRecommendedProfiles();
   }
 
   @override

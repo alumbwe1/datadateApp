@@ -163,6 +163,22 @@ class EncountersNotifier extends StateNotifier<EncountersState> {
       state = state.copyWith(profiles: [], currentIndex: 0);
     }
   }
+
+  Future<void> loadRecommendedProfiles() async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await _profileRepository.getRecommendedProfiles();
+
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (profiles) => state = state.copyWith(
+        isLoading: false,
+        profiles: profiles,
+        error: null,
+      ),
+    );
+  }
 }
 
 final encountersProvider =

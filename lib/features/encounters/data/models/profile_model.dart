@@ -30,7 +30,7 @@ class ProfileModel extends Profile {
 
     return ProfileModel(
       id: json['id'] as int,
-      displayName: json['display_name'] as String? ?? 'Unknown',
+      displayName: json['real_name'] as String? ?? 'Unknown',
       username: userData?['username'] as String? ?? '',
       email: userData?['email'] as String? ?? '',
       firstName: userData?['first_name'] as String?,
