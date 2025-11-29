@@ -1,44 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'dart:ui';
 import 'package:video_player/video_player.dart';
-import 'dart:developer' as developer;
 import '../../../encounters/domain/entities/profile.dart';
 import '../../../../core/constants/app_style.dart';
+import '../controllers/reels_video_controller.dart';
 
-class ReelVideoPlayer extends StatefulWidget {
+/// Optimized video player widget with keep-alive to prevent rebuilds
+/// Uses pre-initialized controllers for instant playback
+class OptimizedReelVideoPlayer extends StatefulWidget {
   final Profile profile;
   final bool isActive;
   final VoidCallback onLike;
   final VoidCallback onProfileTap;
+  final ReelsVideoController videoController;
 
-  const ReelVideoPlayer({
+  const OptimizedReelVideoPlayer({
     super.key,
     required this.profile,
     required this.isActive,
     required this.onLike,
     required this.onProfileTap,
+    required this.videoController,
   });
 
   @override
-  State<ReelVideoPlayer> createState() => _ReelVideoPlayerState();
+  State<OptimizedReelVideoPlayer> createState() =>
+      _OptimizedReelVideoPlayerState();
 }
 
-class _ReelVideoPlayerState extends State<ReelVideoPlayer>
-    with TickerProviderStateMixin {
-  VideoPlayerController? _controller;
-  bool _isInitialized = false;
-  bool _hasError = false;
-  String? _errorMessage;
+class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   bool _isLiked = false;
   late AnimationController _likeAnimationController;
   late Animation<double> _likeScaleAnimation;
   late AnimationController _heartOverlayController;
   late Animation<double> _heartOverlayAnimation;
   bool _showHeartOverlay = false;
+
+  @override
+  bool get wantKeepAlive => true; // Prevent widget rebuilds
 
   @override
   void initState() {
@@ -62,155 +65,13 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer>
     _heartOverlayAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _heartOverlayController, curve: Curves.easeOut),
     );
-
-    developer.log(
-      '🎥 VideoPlayer: Initializing for profile ${widget.profile.id}',
-      name: 'ReelVideoPlayer',
-    );
-    _initializeVideo();
-  }
-
-  @override
-  void didUpdateWidget(ReelVideoPlayer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.isActive != oldWidget.isActive) {
-      developer.log(
-        '🎥 VideoPlayer: Active state changed to ${widget.isActive} for profile ${widget.profile.id}',
-        name: 'ReelVideoPlayer',
-      );
-
-      if (widget.isActive) {
-        _playVideo();
-      } else {
-        _pauseVideo();
-      }
-    }
-
-    if (widget.profile.id != oldWidget.profile.id) {
-      developer.log(
-        '🎥 VideoPlayer: Profile changed from ${oldWidget.profile.id} to ${widget.profile.id}',
-        name: 'ReelVideoPlayer',
-      );
-      _disposeController();
-      _initializeVideo();
-    }
   }
 
   @override
   void dispose() {
-    developer.log(
-      '🎥 VideoPlayer: Disposing for profile ${widget.profile.id}',
-      name: 'ReelVideoPlayer',
-    );
-    _disposeController();
     _likeAnimationController.dispose();
     _heartOverlayController.dispose();
     super.dispose();
-  }
-
-  void _disposeController() {
-    _controller?.dispose();
-    _controller = null;
-    _isInitialized = false;
-  }
-
-  Future<void> _initializeVideo() async {
-    final videoUrl = widget.profile.videoUrl;
-
-    if (videoUrl == null || videoUrl.isEmpty) {
-      developer.log(
-        '⚠️ VideoPlayer: No video URL found for profile ${widget.profile.id}',
-        name: 'ReelVideoPlayer',
-      );
-      setState(() {
-        _hasError = true;
-        _errorMessage = 'No video available';
-      });
-      return;
-    }
-
-    developer.log(
-      '🎥 VideoPlayer: Initializing video from URL: $videoUrl',
-      name: 'ReelVideoPlayer',
-    );
-
-    try {
-      _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
-
-      await _controller!.initialize();
-
-      developer.log(
-        '✅ VideoPlayer: Video initialized successfully for profile ${widget.profile.id}',
-        name: 'ReelVideoPlayer',
-      );
-      developer.log(
-        '📊 VideoPlayer: Duration: ${_controller!.value.duration}, Size: ${_controller!.value.size}',
-        name: 'ReelVideoPlayer',
-      );
-
-      _controller!.setLooping(true);
-      _controller!.setVolume(1.0);
-
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-          _hasError = false;
-        });
-
-        if (widget.isActive) {
-          _playVideo();
-        }
-      }
-
-      _controller!.addListener(() {
-        if (_controller!.value.hasError) {
-          developer.log(
-            '❌ VideoPlayer: Playback error - ${_controller!.value.errorDescription}',
-            name: 'ReelVideoPlayer',
-            error: _controller!.value.errorDescription,
-          );
-          if (mounted) {
-            setState(() {
-              _hasError = true;
-              _errorMessage = 'Playback error';
-            });
-          }
-        }
-      });
-    } catch (e) {
-      developer.log(
-        '❌ VideoPlayer: Initialization error - $e',
-        name: 'ReelVideoPlayer',
-        error: e,
-      );
-      if (mounted) {
-        setState(() {
-          _hasError = true;
-          _errorMessage = 'Failed to load video';
-        });
-      }
-    }
-  }
-
-  Future<void> _playVideo() async {
-    if (_controller != null && _isInitialized && !_hasError) {
-      developer.log(
-        '▶️ VideoPlayer: Playing video for profile ${widget.profile.id}',
-        name: 'ReelVideoPlayer',
-      );
-      await _controller!.play();
-    }
-  }
-
-  Future<void> _pauseVideo() async {
-    if (_controller != null && _isInitialized) {
-      developer.log(
-        '⏸️ VideoPlayer: Pausing video for profile ${widget.profile.id}',
-        name: 'ReelVideoPlayer',
-      );
-      await _controller!.pause();
-    }
   }
 
   void _handleLike() {
@@ -240,19 +101,21 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer>
   }
 
   void _togglePlayPause() {
-    if (_controller == null || !_isInitialized) return;
-
     HapticFeedback.lightImpact();
-
-    if (_controller!.value.isPlaying) {
-      _pauseVideo();
-    } else {
-      _playVideo();
-    }
+    widget.videoController.togglePlayPause(widget.profile.id);
+    setState(() {}); // Refresh UI
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+
+    final controller = widget.videoController.getController(widget.profile.id);
+    final isInitialized = widget.videoController.isInitialized(
+      widget.profile.id,
+    );
+    final error = widget.videoController.getError(widget.profile.id);
+
     return GestureDetector(
       onTap: _togglePlayPause,
       onDoubleTap: () {
@@ -260,81 +123,101 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer>
           _handleLike();
         }
       },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Video player or placeholder
-          if (_isInitialized && !_hasError)
-            Center(
-              child: AspectRatio(
-                aspectRatio: _controller!.value.aspectRatio,
-                child: VideoPlayer(_controller!),
-              ),
-            )
-          else if (_hasError)
-            _buildErrorPlaceholder()
-          else
-            _buildLoadingPlaceholder(),
+      child: Container(
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Video player - fills entire screen with proper aspect ratio
+            if (isInitialized && controller != null && error == null)
+              Center(
+                child: AspectRatio(
+                  aspectRatio: controller.value.aspectRatio,
+                  child: VideoPlayer(controller),
+                ),
+              )
+            else if (error != null)
+              _buildErrorPlaceholder(error)
+            else
+              _buildLoadingPlaceholder(),
 
-          // Bottom gradient overlay
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              height: 400,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
-                    Colors.black.withValues(alpha: 0.7),
-                    Colors.black.withValues(alpha: 0.9),
-                  ],
+            // Bottom gradient overlay
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                height: 400,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.3),
+                      Colors.black.withValues(alpha: 0.7),
+                      Colors.black.withValues(alpha: 0.9),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // Heart overlay for double-tap
-          if (_showHeartOverlay)
-            Center(
-              child: AnimatedBuilder(
-                animation: _heartOverlayAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: 0.5 + (_heartOverlayAnimation.value * 1.5),
-                    child: Opacity(
-                      opacity: 1.0 - _heartOverlayAnimation.value,
-                      child: const Icon(
-                        Icons.favorite_rounded,
-                        size: 120,
-                        color: Colors.red,
+            // Heart overlay for double-tap
+            if (_showHeartOverlay)
+              Center(
+                child: AnimatedBuilder(
+                  animation: _heartOverlayAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: 0.5 + (_heartOverlayAnimation.value * 1.5),
+                      child: Opacity(
+                        opacity: 1.0 - _heartOverlayAnimation.value,
+                        child: const Icon(
+                          Icons.favorite_rounded,
+                          size: 120,
+                          color: Colors.red,
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
 
-          // Profile info and action buttons
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [Expanded(child: _buildProfileInfo())],
+            // Profile info and action buttons
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [Expanded(child: _buildProfileInfo())],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+
+            // Play/Pause indicator
+            if (controller != null && !controller.value.isPlaying)
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -417,12 +300,15 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer>
           buttonSize: 56,
           onTap: () {
             HapticFeedback.lightImpact();
-            if (_controller != null && _isInitialized) {
-              _controller!.seekTo(Duration.zero);
+            final controller = widget.videoController.getController(
+              widget.profile.id,
+            );
+            if (controller != null) {
+              controller.seekTo(Duration.zero);
             }
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(width: 8),
         _buildLiquidGlassButton(
           icon: Icons.close_rounded,
           iconSize: 32,
@@ -431,7 +317,7 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer>
             HapticFeedback.mediumImpact();
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(width: 8),
         _buildLiquidGlassButton(
           icon: Icons.star_rounded,
           iconSize: 32,
@@ -441,7 +327,7 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer>
             HapticFeedback.mediumImpact();
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(width: 8),
         AnimatedBuilder(
           animation: _likeScaleAnimation,
           builder: (context, child) {
@@ -458,7 +344,7 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer>
             );
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(width: 8),
         _buildLiquidGlassButton(
           icon: IconlyBold.send,
           iconSize: 28,
@@ -521,54 +407,45 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer>
   }
 
   Widget _buildLoadingPlaceholder() {
-    return Container(
-      color: Colors.black,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 3,
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+          const SizedBox(height: 16),
+          Text(
+            'Loading video...',
+            style: appStyle(
+              14,
+              Colors.white.withValues(alpha: 0.7),
+              FontWeight.w500,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Loading video...',
-              style: appStyle(
-                14,
-                Colors.white.withValues(alpha: 0.7),
-                FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildErrorPlaceholder() {
-    return Container(
-      color: Colors.black,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 64,
-              color: Colors.white.withValues(alpha: 0.5),
+  Widget _buildErrorPlaceholder(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline_rounded,
+            size: 64,
+            color: Colors.white.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            error,
+            style: appStyle(
+              14,
+              Colors.white.withValues(alpha: 0.7),
+              FontWeight.w500,
             ),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage ?? 'Failed to load video',
-              style: appStyle(
-                14,
-                Colors.white.withValues(alpha: 0.7),
-                FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -64,7 +64,7 @@ class Profile extends Equatable {
       lastActive: json['last_active'] != null
           ? DateTime.parse(json['last_active'])
           : null,
-      videoUrl: json['video_url'],
+      videoUrl: json['video'] ?? json['video_url'],
       videoDuration: json['video_duration']?.toDouble(),
     );
   }

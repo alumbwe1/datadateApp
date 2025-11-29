@@ -19,6 +19,8 @@ class ProfileModel extends Profile {
     super.interests,
     super.photos,
     super.lastActive,
+    super.videoUrl,
+    super.videoDuration,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
@@ -38,7 +40,7 @@ class ProfileModel extends Profile {
       universityName:
           universityData?['name'] as String? ?? 'Unknown University',
       universityLogo: universityData?['logo'] as String? ?? '',
-      bio: json['display_bio'] as String?,
+      bio: json['bio'] as String?,
       gender: json['gender'] as String? ?? '',
       intent: json['intent'] as String? ?? 'dating',
       age: json['age'] as int? ?? 18,
@@ -57,6 +59,8 @@ class ProfileModel extends Profile {
       lastActive: json['last_active'] != null
           ? DateTime.tryParse(json['last_active'] as String)
           : null,
+      videoUrl: json['video'] as String?,
+      videoDuration: (json['video_duration'] as num?)?.toDouble(),
     );
   }
 

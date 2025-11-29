@@ -11,6 +11,7 @@ import '../../../../core/widgets/loading_shimmer.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../reels/presentation/widgets/reel_video_player.dart';
 import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/swipe_overlay.dart';
@@ -35,7 +36,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   bool _showLikeOverlay = false;
   bool _showNopeOverlay = false;
   double _overlayOpacity = 0.0;
-  bool _showReels = false;
 
   @override
   void initState() {
@@ -202,68 +202,66 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: IconButton(
-                    icon: Icon(
-                      _showReels
-                          ? Icons.grid_view_rounded
-                          : Icons.play_circle_outline_rounded,
-                      size: 20.sp,
-                    ),
+                    icon: Icon(Icons.play_circle_outline_rounded, size: 20.sp),
                     color: AppColors.primaryLight,
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      setState(() => _showReels = !_showReels);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ReelsPage(),
+                          fullscreenDialog: true,
+                        ),
+                      );
                     },
                     splashRadius: 24,
                     padding: EdgeInsets.zero,
                   ),
                 ),
 
-                const SizedBox(width: 8),
+                //const SizedBox(width: 8),
 
-                // Boost Button - Premium Style with Gradient
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.accentLight,
-                        AppColors.accentLight.withValues(alpha: 0.8),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20.sp),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.accentLight.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.bolt_rounded,
-                      size: 20.sp,
-                      color: Colors.black,
-                    ),
-                    color: Colors.white,
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      _showBoostBottomSheet();
-                    },
-                    splashRadius: 24,
-                    padding: EdgeInsets.zero,
-                  ),
-                ),
+                // // Boost Button - Premium Style with Gradient
+                // Container(
+                //   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                //   decoration: BoxDecoration(
+                //     gradient: LinearGradient(
+                //       colors: [
+                //         AppColors.accentLight,
+                //         AppColors.accentLight.withValues(alpha: 0.8),
+                //       ],
+                //       begin: Alignment.topLeft,
+                //       end: Alignment.bottomRight,
+                //     ),
+                //     borderRadius: BorderRadius.circular(20.sp),
+                //     boxShadow: [
+                //       BoxShadow(
+                //         color: AppColors.accentLight.withValues(alpha: 0.3),
+                //         blurRadius: 8,
+                //         offset: const Offset(0, 2),
+                //       ),
+                //     ],
+                //   ),
+                //   child: IconButton(
+                //     icon: Icon(
+                //       Icons.bolt_rounded,
+                //       size: 20.sp,
+                //       color: Colors.black,
+                //     ),
+                //     color: Colors.white,
+                //     onPressed: () {
+                //       HapticFeedback.mediumImpact();
+                //       _showBoostBottomSheet();
+                //     },
+                //     splashRadius: 24,
+                //     padding: EdgeInsets.zero,
+                //   ),
+                // ),
               ],
             ),
           ),
         ),
       ),
-      body: _showReels
-          ? const ReelsPage()
-          : encountersState.isLoading
+      body: encountersState.isLoading
           ? const Center(child: ProfileCardShimmer())
           : encountersState.error != null
           ? Center(
