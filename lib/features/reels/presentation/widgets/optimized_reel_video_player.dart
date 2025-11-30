@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'dart:ui';
@@ -8,8 +9,9 @@ import '../../../encounters/domain/entities/profile.dart';
 import '../../../../core/constants/app_style.dart';
 import '../controllers/reels_video_controller.dart';
 
-/// Optimized video player widget with keep-alive to prevent rebuilds
-/// Uses pre-initialized controllers for instant playback
+/// 🎬 PRODUCTION-READY TikTok-Style Video Player
+/// Features: Instant autoplay, full-screen immersion, liquid glass UI
+/// Uses AutomaticKeepAliveClientMixin to prevent rebuilds and maintain state
 class OptimizedReelVideoPlayer extends StatefulWidget {
   final Profile profile;
   final bool isActive;
@@ -34,6 +36,7 @@ class OptimizedReelVideoPlayer extends StatefulWidget {
 class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   bool _isLiked = false;
+  bool _isMuted = false; // Start unmuted
   late AnimationController _likeAnimationController;
   late Animation<double> _likeScaleAnimation;
   late AnimationController _heartOverlayController;
@@ -41,12 +44,13 @@ class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
   bool _showHeartOverlay = false;
 
   @override
-  bool get wantKeepAlive => true; // Prevent widget rebuilds
+  bool get wantKeepAlive => true; // CRITICAL: Prevents rebuilds during swipes
 
   @override
   void initState() {
     super.initState();
 
+    // Animation controllers for smooth interactions
     _likeAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -65,10 +69,52 @@ class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
     _heartOverlayAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _heartOverlayController, curve: Curves.easeOut),
     );
+
+    // Listen to video controller changes
+    widget.videoController.addListener(_onVideoControllerUpdate);
+
+    // 🚀 INSTANT AUTOPLAY: Start video when widget becomes active
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleActiveStateChange();
+    });
+  }
+
+  void _onVideoControllerUpdate() {
+    if (mounted) {
+      setState(() {
+        // Rebuild when video controller state changes
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(OptimizedReelVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Handle active state changes (when user swipes to this video)
+    if (oldWidget.isActive != widget.isActive) {
+      _handleActiveStateChange();
+    }
+  }
+
+  /// 🎯 Handle video playback based on active state
+  Future<void> _handleActiveStateChange() async {
+    if (widget.isActive) {
+      // This video is now visible - play it!
+      // Wait a bit for initialization if needed
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (mounted) {
+        await widget.videoController.playVideo(widget.profile.id);
+      }
+    } else {
+      // This video is no longer visible - pause it
+      await widget.videoController.pauseVideo(widget.profile.id);
+    }
   }
 
   @override
   void dispose() {
+    widget.videoController.removeListener(_onVideoControllerUpdate);
     _likeAnimationController.dispose();
     _heartOverlayController.dispose();
     super.dispose();
@@ -100,15 +146,17 @@ class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
     }
   }
 
-  void _togglePlayPause() {
+  void _toggleMute() {
     HapticFeedback.lightImpact();
-    widget.videoController.togglePlayPause(widget.profile.id);
-    setState(() {}); // Refresh UI
+    setState(() {
+      _isMuted = !_isMuted;
+    });
+    widget.videoController.setVolume(widget.profile.id, _isMuted ? 0.0 : 1.0);
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    super.build(context);
 
     final controller = widget.videoController.getController(widget.profile.id);
     final isInitialized = widget.videoController.isInitialized(
@@ -117,7 +165,6 @@ class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
     final error = widget.videoController.getError(widget.profile.id);
 
     return GestureDetector(
-      onTap: _togglePlayPause,
       onDoubleTap: () {
         if (!_isLiked) {
           _handleLike();
@@ -128,40 +175,22 @@ class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Video player - fills entire screen with proper aspect ratio
+            // 🎬 FULL-SCREEN VIDEO: BoxFit.cover for edge-to-edge immersion
             if (isInitialized && controller != null && error == null)
-              Center(
-                child: AspectRatio(
-                  aspectRatio: controller.value.aspectRatio,
-                  child: VideoPlayer(controller),
+              SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: controller.value.size.width,
+                    height: controller.value.size.height,
+                    child: VideoPlayer(controller),
+                  ),
                 ),
               )
             else if (error != null)
               _buildErrorPlaceholder(error)
             else
               _buildLoadingPlaceholder(),
-
-            // Bottom gradient overlay
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                height: 400,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.3),
-                      Colors.black.withValues(alpha: 0.7),
-                      Colors.black.withValues(alpha: 0.9),
-                    ],
-                  ),
-                ),
-              ),
-            ),
 
             // Heart overlay for double-tap
             if (_showHeartOverlay)
@@ -200,22 +229,24 @@ class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
               ),
             ),
 
-            // Play/Pause indicator
-            if (controller != null && !controller.value.isPlaying)
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.play_arrow_rounded,
-                    color: Colors.white,
-                    size: 50,
+            // 🔇 Mute/Unmute button (top right)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _buildLiquidGlassButton(
+                    icon: _isMuted
+                        ? Icons.volume_off_rounded
+                        : Icons.volume_up_rounded,
+                    iconSize: 24,
+                    buttonSize: 48,
+                    onTap: _toggleMute,
                   ),
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -263,22 +294,15 @@ class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      width: 1,
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 0.7.w,
                     ),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Text(
-                        interest,
-                        style: appStyle(13, Colors.white, FontWeight.w600),
-                      ),
-                    ),
+                  child: Text(
+                    interest,
+                    style: appStyle(13, Colors.white, FontWeight.w600),
                   ),
                 );
               }).toList(),
@@ -373,35 +397,13 @@ class _OptimizedReelVideoPlayerState extends State<OptimizedReelVideoPlayer>
         width: buttonSize,
         height: buttonSize,
         decoration: BoxDecoration(
-          color: (color ?? Colors.white).withValues(
-            alpha: filled ? 0.25 : 0.15,
-          ),
           shape: BoxShape.circle,
           border: Border.all(
             color: (color ?? Colors.white).withValues(alpha: 0.25),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-            if (color != null)
-              BoxShadow(
-                color: color.withValues(alpha: 0.3),
-                blurRadius: 20,
-                spreadRadius: 2,
-              ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(buttonSize / 2),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Icon(icon, color: color ?? Colors.white, size: iconSize),
+            width: 1.w,
           ),
         ),
+        child: Icon(icon, color: color ?? Colors.white, size: iconSize),
       ),
     );
   }

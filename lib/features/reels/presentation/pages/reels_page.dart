@@ -1,6 +1,8 @@
+import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
@@ -11,6 +13,8 @@ import '../providers/reels_provider.dart';
 import '../widgets/optimized_reel_video_player.dart';
 import '../controllers/reels_video_controller.dart';
 
+/// 🎬 PRODUCTION-READY TikTok-Style Reels Page
+/// Features: Instant autoplay, full-screen immersion, intelligent preloading
 class ReelsPage extends ConsumerStatefulWidget {
   const ReelsPage({super.key});
 
@@ -23,19 +27,31 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
   late final ReelsVideoController _videoController;
   int _currentIndex = 0;
   bool _isInitialized = false;
+  bool _hasLoadedReels = false;
 
   @override
   void initState() {
     super.initState();
+
+    // 🎯 IMMERSIVE MODE: Hide all system UI for full-screen experience
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
     _videoController = ReelsVideoController();
 
+    // Load reels and initialize videos after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(reelsProvider.notifier).loadReels();
+      // Only load reels if not already loaded
+      final reelsState = ref.read(reelsProvider);
+      if (reelsState.profiles.isEmpty && !_hasLoadedReels) {
+        _hasLoadedReels = true;
+        await ref.read(reelsProvider.notifier).loadReels();
+      }
       _initializeVideos();
     });
   }
 
-  void _initializeVideos() {
+  /// 🚀 Initialize video controller with profiles and start autoplay
+  Future<void> _initializeVideos() async {
     final reelsState = ref.read(reelsProvider);
     if (reelsState.profiles.isNotEmpty && !_isInitialized) {
       _isInitialized = true;
@@ -45,17 +61,30 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
           .map((profile) => {'id': profile.id, 'videoUrl': profile.videoUrl})
           .toList();
 
-      _videoController.initializeVideos(profiles: profileMaps, startIndex: 0);
+      // Start preloading from index 0
+      await _videoController.initializeVideos(
+        profiles: profileMaps,
+        startIndex: 0,
+      );
+
+      // 🚀 AUTOPLAY: Start playing the first video immediately
+      if (mounted && reelsState.profiles.isNotEmpty) {
+        final firstProfileId = reelsState.profiles[0].id;
+        await _videoController.playVideo(firstProfileId);
+      }
     }
   }
 
   @override
   void dispose() {
+    // 🔄 Restore normal system UI when leaving Reels
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _pageController.dispose();
     _videoController.dispose();
     super.dispose();
   }
 
+  /// ❤️ Handle like action with match detection
   Future<void> _handleLike(
     int profileId,
     String profileName,
@@ -68,6 +97,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
 
       if (mounted) {
         if (matchInfo != null && matchInfo['matched'] == true) {
+          // It's a match! Show match page
           Navigator.of(context).push(
             PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) =>
@@ -118,20 +148,13 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
     final reelsState = ref.watch(reelsProvider);
     final profiles = reelsState.profiles;
 
-    // Initialize videos when profiles are loaded
-    if (profiles.isNotEmpty && !_isInitialized) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _initializeVideos();
-      });
-    }
-
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       extendBody: true,
       body: Stack(
         children: [
-          // Main content
+          // 🎬 Main video content
           if (reelsState.isLoading)
             _buildShimmerLoading()
           else if (reelsState.error != null)
@@ -150,7 +173,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
                     .read(reelsProvider.notifier)
                     .recordProfileView(profiles[index].id);
 
-                // Handle video playback and preloading
+                // 🎯 CRITICAL: Handle video playback and preloading
                 final profileMaps = profiles
                     .map(
                       (profile) => {
@@ -195,12 +218,13 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
               },
             ),
 
-          // Close button and title (top)
+          // 💎 Liquid Glass Top Bar: Close button + Reels title
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
+                  // Close button
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();
@@ -209,7 +233,6 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.2),
@@ -218,60 +241,10 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(50),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: const Icon(
-                            Icons.close_rounded,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.play_circle_filled,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Reels',
-                              style: appStyle(18, Colors.white, FontWeight.w700)
-                                  .copyWith(
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.5,
-                                        ),
-                                        offset: const Offset(0, 2),
-                                        blurRadius: 4,
-                                      ),
-                                    ],
-                                  ),
-                            ),
-                          ],
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 24,
                         ),
                       ),
                     ),
@@ -285,6 +258,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
     );
   }
 
+  /// 💫 Shimmer loading state with pulsing animation
   Widget _buildShimmerLoading() {
     return Container(
       color: Colors.black,
@@ -348,13 +322,9 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
-                  width: 200,
-                  child: LinearProgressIndicator(
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.white.withValues(alpha: 0.5),
-                    ),
-                  ),
+                  width: 60.w,
+                  height: 60.h,
+                  child: LottieLoadingIndicator(),
                 ),
               ],
             ),
@@ -364,6 +334,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
     );
   }
 
+  /// 📭 Empty state with refresh button
   Widget _buildEmptyState() {
     return Container(
       color: Colors.black,
@@ -469,6 +440,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
     );
   }
 
+  /// ❌ Error state with retry button
   Widget _buildErrorState(String error) {
     return Container(
       color: Colors.black,
