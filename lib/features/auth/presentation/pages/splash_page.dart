@@ -164,8 +164,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
                             child: AnimatedBuilder(
                               animation: _pulseController,
                               builder: (context, child) {
-                                final pulseValue =
-                                    0.85 + (_pulseController.value * 0.15);
                                 return Stack(
                                   alignment: Alignment.center,
                                   children: [
@@ -294,7 +292,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                     const LinearGradient(
                                       colors: [
                                         AppColors.accentLight,
-                                        const Color(0xFFFF6B9D),
+                                        Color(0xFFFF6B9D),
                                       ],
                                     ).createShader(bounds),
                                 child: Text(

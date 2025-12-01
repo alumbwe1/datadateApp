@@ -88,8 +88,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildProfileHeader(context, profile),
-                      const SizedBox(height: 32),
-                      _buildStatsRow(),
+
                       const SizedBox(height: 32),
                       _buildInfoSection('About', profile),
                       const SizedBox(height: 24),
@@ -260,38 +259,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatsRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildStatItem('Views', '0', Icons.visibility_outlined),
-        Container(width: 1, height: 40, color: Colors.grey[200]),
-        _buildStatItem('Likes', '0', Iconsax.heart_copy),
-        Container(width: 1, height: 40, color: Colors.grey[200]),
-        _buildStatItem('Matches', '0', Iconsax.people_copy),
-      ],
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.grey[600], size: 24),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: appStyle(
-            20,
-            Colors.black,
-            FontWeight.w700,
-          ).copyWith(letterSpacing: -0.5),
-        ),
-        const SizedBox(height: 2),
-        Text(label, style: appStyle(11, Colors.grey[600]!, FontWeight.w500)),
-      ],
     );
   }
 

@@ -68,16 +68,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<Either<Failure, List<Profile>>> getProfilesWithFilters({
-    required String userGender,
     required Map<String, dynamic> filters,
     int count = 20,
   }) async {
     try {
-      // Get opposite gender if not specified in filters
-      if (filters['gender'] == null) {
-        filters['gender'] = _getOppositeGender(userGender);
-      }
-
       final profiles = await remoteDataSource.getProfilesWithFilters(filters);
       return Right(profiles);
     } on NetworkFailure catch (e) {

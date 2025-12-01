@@ -5,19 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../reels/presentation/pages/reels_page.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
-import '../../../reels/presentation/widgets/reel_video_player.dart';
 import '../providers/encounters_provider.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/swipe_overlay.dart';
 import '../widgets/animated_action_button.dart';
 import '../widgets/filter_bottom_sheet.dart';
-import '../widgets/boost_bottom_sheet.dart';
 import 'match_page.dart';
 
 class EncountersPage extends ConsumerStatefulWidget {
@@ -51,11 +49,20 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     )..repeat(reverse: true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = ref.read(authProvider).user;
-      if (user != null) {
-        ref.read(encountersProvider.notifier).loadProfiles(user.gender);
-      }
+      _loadProfilesWithPreference();
     });
+  }
+
+  Future<void> _loadProfilesWithPreference() async {
+    // Load user profile to get gender preference
+    await ref.read(profileProvider.notifier).loadProfile();
+
+    final profile = ref.read(profileProvider).profile;
+    if (profile != null && profile.preferredGenders.isNotEmpty) {
+      // Use the first preferred gender (or you can modify to support multiple)
+      final preferredGender = profile.preferredGenders.first;
+      ref.read(encountersProvider.notifier).loadProfiles(preferredGender);
+    }
   }
 
   Future<void> _handleSwipe(
@@ -277,12 +284,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      final user = ref.read(authProvider).user;
-                      if (user != null) {
-                        ref
-                            .read(encountersProvider.notifier)
-                            .loadProfiles(user.gender);
-                      }
+                      _loadProfilesWithPreference();
                     },
                     child: const Text('Retry'),
                   ),
@@ -401,12 +403,13 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             const SizedBox(height: 40),
             if (hasActiveFilters)
               OutlinedButton(
-                onPressed: () {
-                  final user = ref.read(authProvider).user;
-                  if (user != null) {
+                onPressed: () async {
+                  final profile = ref.read(profileProvider).profile;
+                  if (profile != null && profile.preferredGenders.isNotEmpty) {
+                    final preferredGender = profile.preferredGenders.first;
                     ref
                         .read(encountersProvider.notifier)
-                        .clearFilters(user.gender);
+                        .clearFilters(preferredGender);
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -457,12 +460,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             else
               ElevatedButton(
                 onPressed: () {
-                  final user = ref.read(authProvider).user;
-                  if (user != null) {
-                    ref
-                        .read(encountersProvider.notifier)
-                        .loadProfiles(user.gender);
-                  }
+                  _loadProfilesWithPreference();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
@@ -589,7 +587,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
 
   void _showFilterBottomSheet() {
     final encountersState = ref.read(encountersProvider);
-    final user = ref.read(authProvider).user;
+    final profile = ref.read(profileProvider).profile;
 
     // Get current age filters or defaults
     final currentMinAge =
@@ -605,7 +603,9 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
         initialMinAge: currentMinAge,
         initialMaxAge: currentMaxAge,
         onApply: (minAge, maxAge) {
-          if (user != null) {
+          if (profile != null && profile.preferredGenders.isNotEmpty) {
+            final preferredGender = profile.preferredGenders.first;
+
             // Create filter map with age range
             final filters = {
               'minAge': minAge.round(),
@@ -615,7 +615,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             // Apply filters through provider
             ref
                 .read(encountersProvider.notifier)
-                .applyFilters(filters, user.gender);
+                .applyFilters(filters, preferredGender);
 
             // Show confirmation
             ScaffoldMessenger.of(context).showSnackBar(
@@ -649,16 +649,16 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     );
   }
 
-  void _showBoostBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      isDismissible: true,
-      useSafeArea: true,
-      builder: (context) => const BoostBottomSheet(),
-    );
-  }
+  // void _showBoostBottomSheet() {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     backgroundColor: Colors.transparent,
+  //     isScrollControlled: true,
+  //     isDismissible: true,
+  //     useSafeArea: true,
+  //     builder: (context) => const BoostBottomSheet(),
+  //   );
+  // }
 
   void _showMatchDialog(String profileName, String profilePhoto) {
     Navigator.of(context).push(

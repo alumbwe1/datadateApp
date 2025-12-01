@@ -103,7 +103,6 @@ class EncountersNotifier extends StateNotifier<EncountersState> {
     final queryParams = _filterService.buildQueryParams(filtersToUse);
 
     final result = await _profileRepository.getProfilesWithFilters(
-      userGender: userGender,
       filters: queryParams,
       count: 20,
     );

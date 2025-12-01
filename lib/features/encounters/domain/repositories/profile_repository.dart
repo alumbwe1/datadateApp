@@ -10,7 +10,6 @@ abstract class ProfileRepository {
   });
 
   Future<Either<Failure, List<Profile>>> getProfilesWithFilters({
-    required String userGender,
     required Map<String, dynamic> filters,
     int count = 20,
   });

@@ -363,9 +363,9 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
                           width: 2,
                         ),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Icon(
-                          Icons.video_library_outlined,
+                          Icons.play_circle,
                           size: 70,
                           color: Colors.white38,
                         ),
