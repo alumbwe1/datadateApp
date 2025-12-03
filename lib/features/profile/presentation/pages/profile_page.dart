@@ -300,6 +300,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
+  // Interest emoji mapping (same as edit_profile_page.dart)
+  String _getInterestEmoji(String interest) {
+    const interestEmojis = {
+      'hiking': '🥾',
+      'coffee': '☕',
+      'coding': '💻',
+      'AI': '🤖',
+      'reading': '📚',
+      'music': '🎵',
+      'travel': '✈️',
+      'fitness': '💪',
+      'photography': '📸',
+      'cooking': '🍳',
+      'gaming': '🎮',
+      'art': '🎨',
+      'movies': '🎬',
+      'sports': '⚽',
+      'yoga': '🧘',
+      'dancing': '💃',
+      'nature': '🌿',
+      'pets': '🐾',
+      'fashion': '👗',
+      'food': '🍕',
+    };
+    return interestEmojis[interest.toLowerCase()] ?? '✨';
+  }
+
   Widget _buildInterestsSection(dynamic profile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,13 +347,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1a1a1a), Color(0xFF000000)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.grey[300]!),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: Text(
-                interest,
-                style: appStyle(14, Colors.grey[800]!, FontWeight.w600),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _getInterestEmoji(interest),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    interest,
+                    style: appStyle(14, Colors.white, FontWeight.w600),
+                  ),
+                ],
               ),
             );
           }).toList(),
@@ -513,7 +560,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               _buildBottomSheetOption(
                 'Account Settings',
                 Icons.person_outline,
-                () => Navigator.pop(context),
+                () {
+                  Navigator.pop(context);
+                  _showAccountSettingsBottomSheet(context);
+                },
               ),
               _buildBottomSheetOption(
                 'Privacy',
@@ -537,25 +587,222 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
+  void _showAccountSettingsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Account Settings',
+                  style: appStyle(20, Colors.black, FontWeight.w700),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildBottomSheetOption('Reset Password', Icons.lock_reset, () {
+                Navigator.pop(context);
+                _showResetPasswordDialog(context);
+              }),
+              _buildBottomSheetOption(
+                'Delete Account',
+                Icons.delete_forever_outlined,
+                () {
+                  Navigator.pop(context);
+                  _showDeleteAccountDialog(context);
+                },
+                isDestructive: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showResetPasswordDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.lock_reset, color: Colors.blue, size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Reset Password',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          'A password reset link will be sent to your email address.',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // TODO: Implement password reset
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Password reset link sent to your email!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Send Link',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.warning_rounded,
+                color: Colors.red,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Delete Account',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // TODO: Implement account deletion via API
+              Navigator.pop(context);
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                context.go('/login');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Account deleted successfully'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBottomSheetOption(
     String label,
     IconData icon,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    bool isDestructive = false,
+  }) {
+    final color = isDestructive ? Colors.red : Colors.grey[700]!;
+    final bgColor = isDestructive
+        ? Colors.red.withOpacity(0.1)
+        : Colors.grey[100]!;
+
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: bgColor,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: Colors.grey[700], size: 20),
+        child: Icon(icon, color: color, size: 20),
       ),
       title: Text(
         label,
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: isDestructive ? Colors.red : Colors.black,
+        ),
       ),
-      trailing: Icon(Icons.chevron_right, color: Colors.grey[400]),
+      trailing: Icon(
+        Icons.chevron_right,
+        color: isDestructive ? Colors.red.withOpacity(0.5) : Colors.grey[400],
+      ),
       onTap: () {
         HapticFeedback.lightImpact();
         onTap();

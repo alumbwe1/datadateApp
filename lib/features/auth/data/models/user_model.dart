@@ -27,13 +27,15 @@ class UserModel extends User {
     return UserModel(
       id: json['id']?.toString() ?? '',
       email: json['email'] ?? '',
-      name: json['username'] ?? '', // API uses 'username'
+      name: json['username'] ?? '',
       age: json['age'] ?? 18,
       gender: json['gender'] ?? '',
       university: json['university']?.toString() ?? '',
       bio: json['bio'],
-      photos: json['photos'] != null ? List<String>.from(json['photos']) : [],
-      relationshipGoal: json['intent'] ?? 'dating', // API uses 'intent'
+      photos: json['imageUrls'] != null
+          ? List<String>.from(json['imageUrls'])
+          : [],
+      relationshipGoal: json['intent'] ?? 'dating',
       isSubscribed: json['subscription_active'] ?? false,
       anonHandle: json['anon_handle'],
       showRealNameOnMatch: json['show_real_name_on_match'] ?? true,

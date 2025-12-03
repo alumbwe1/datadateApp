@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -710,6 +711,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final profile = ref.watch(profileProvider).profile;
     final photos = profile?.imageUrls ?? [];
 
+    // Debug logging
+    print('📸 Edit Profile - Photos count: ${photos.length}');
+    if (photos.isNotEmpty) {
+      print('📸 Edit Profile - Photos: $photos');
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -805,52 +812,50 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16.r),
-                  child: Container(
+                  child: CachedNetworkImage(
+                    imageUrl: photos[index],
                     width: double.infinity,
                     height: double.infinity,
-                    decoration: BoxDecoration(color: Colors.grey[200]),
-                    child: Image.network(
-                      photos[index],
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) {
+                      print('🔄 Loading image: $url');
+                      return Container(
+                        color: Colors.grey[200],
+                        child: Center(
                           child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                : null,
                             strokeWidth: 2,
                             color: Colors.black,
                           ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.broken_image_outlined,
-                                size: 32.sp,
-                                color: Colors.grey[600],
+                        ),
+                      );
+                    },
+                    errorWidget: (context, url, error) {
+                      print('❌ Failed to load image: $url');
+                      print('❌ Error: $error');
+                      return Container(
+                        color: Colors.grey[300],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.broken_image_outlined,
+                              size: 32.sp,
+                              color: Colors.grey[600],
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              'Failed to load',
+                              style: appStyle(
+                                9.sp,
+                                Colors.grey[600]!,
+                                FontWeight.w500,
                               ),
-                              SizedBox(height: 4.h),
-                              Text(
-                                'Failed to load',
-                                style: appStyle(
-                                  9.sp,
-                                  Colors.grey[600]!,
-                                  FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
                 // Delete button
