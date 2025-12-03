@@ -65,7 +65,7 @@ class CustomTextField extends StatelessWidget {
     validator: validator ?? (value) => null,
     style: appStyle(
       14.sp,
-      enabled ? AppColors.primaryLight : Colors.grey.shade600,
+      enabled ? AppColors.textPrimaryLight : Colors.grey.shade600,
       FontWeight.w500,
     ),
     decoration: InputDecoration(
