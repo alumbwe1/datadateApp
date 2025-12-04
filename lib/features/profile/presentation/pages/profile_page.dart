@@ -661,7 +661,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.r),
+        ),
         title: Row(
           children: [
             Container(
@@ -703,7 +705,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(30.r),
               ),
             ),
             child: Text(

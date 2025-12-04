@@ -522,40 +522,40 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               _controller.swipe(CardSwiperDirection.left);
             },
           ),
-          SizedBox(width: buttonSpacing),
-          AnimatedActionButton(
-            icon: Icons.star_rounded,
-            iconColor: Colors.blue,
-            size: screenWidth * 0.13,
-            iconSize: screenWidth * 0.06,
-            onPressed: () {
-              _controller.swipe(CardSwiperDirection.right);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        color: Colors.blue,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Super Like sent! ⭐',
-                        style: appStyle(14, Colors.white, FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                  backgroundColor: Colors.black,
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
-            },
-          ),
+          // SizedBox(width: buttonSpacing),
+          // AnimatedActionButton(
+          //   icon: Icons.star_rounded,
+          //   iconColor: Colors.blue,
+          //   size: screenWidth * 0.13,
+          //   iconSize: screenWidth * 0.06,
+          //   onPressed: () {
+          //     _controller.swipe(CardSwiperDirection.right);
+          //     ScaffoldMessenger.of(context).showSnackBar(
+          //       SnackBar(
+          //         content: Row(
+          //           children: [
+          //             const Icon(
+          //               Icons.star_rounded,
+          //               color: Colors.blue,
+          //               size: 20,
+          //             ),
+          //             const SizedBox(width: 12),
+          //             Text(
+          //               'Super Like sent! ⭐',
+          //               style: appStyle(14, Colors.white, FontWeight.w600),
+          //             ),
+          //           ],
+          //         ),
+          //         backgroundColor: Colors.black,
+          //         behavior: SnackBarBehavior.floating,
+          //         duration: const Duration(seconds: 2),
+          //         shape: RoundedRectangleBorder(
+          //           borderRadius: BorderRadius.circular(12),
+          //         ),
+          //       ),
+          //     );
+          //   },
+          // ),
           SizedBox(width: buttonSpacing),
           AnimatedActionButton(
             icon: Iconsax.heart,
