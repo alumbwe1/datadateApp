@@ -278,7 +278,6 @@ class _ChatPageState extends ConsumerState<ChatPage>
 
   PreferredSizeWidget _buildModernAppBar(int roomsCount, int matchesCount) {
     return AppBar(
-      backgroundColor: Colors.white,
       elevation: 0,
       surfaceTintColor: Colors.white,
       centerTitle: false,
@@ -616,13 +615,8 @@ class _ChatPageState extends ConsumerState<ChatPage>
         );
         ref.read(chatRoomsProvider.notifier).loadChatRooms();
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 8.0),
         child: Row(
           children: [
             Stack(

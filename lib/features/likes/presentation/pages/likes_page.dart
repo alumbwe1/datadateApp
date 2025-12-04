@@ -44,7 +44,6 @@ class _LikesPageState extends ConsumerState<LikesPage>
     final likesState = ref.watch(likesProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [

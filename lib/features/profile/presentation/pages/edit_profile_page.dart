@@ -309,7 +309,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.r),
+          borderRadius: BorderRadius.circular(30.r),
         ),
         contentPadding: EdgeInsets.all(24.w),
         title: Column(
@@ -329,7 +329,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             SizedBox(height: 16.h),
             Text(
               'Discard Changes?',
-              style: appStyle(20.sp, Colors.black, FontWeight.w700),
+              style: appStyle(
+                20.sp,
+                Colors.black,
+                FontWeight.w700,
+              ).copyWith(letterSpacing: -0.3),
               textAlign: TextAlign.center,
             ),
           ],
@@ -349,7 +353,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     backgroundColor: Colors.grey[100],
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(16.r),
                     ),
                   ),
                   child: Text(
@@ -370,7 +374,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     backgroundColor: Colors.red,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(16.r),
                     ),
                   ),
                   child: Text(

@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:datadate/core/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_style.dart';
@@ -345,13 +347,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 children: [
                   Text(
                     _getInterestEmoji(interest),
-                    style: const TextStyle(fontSize: 16),
+                    style: appStyle(16.sp, Colors.black, FontWeight.w600),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     interest,
                     style: appStyle(
-                      14,
+                      14.sp,
                       Colors.black,
                       FontWeight.w600,
                     ).copyWith(letterSpacing: -0.3),
@@ -544,22 +546,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ),
               const SizedBox(height: 20),
-              _buildThemeToggle(context),
+              // _buildThemeToggle(context),
               _buildBottomSheetOption(
                 'Account Settings',
-                Icons.person_outline,
+                Iconsax.user_copy,
                 () {
                   Navigator.pop(context);
                   _showAccountSettingsBottomSheet(context);
                 },
               ),
-              _buildBottomSheetOption('Privacy Policy', Icons.lock_outline, () {
+              _buildBottomSheetOption('Privacy Policy', IconlyLight.lock, () {
                 Navigator.pop(context);
                 _launchUrl('https://your-privacy-policy-url.com');
               }),
               _buildBottomSheetOption(
                 'Terms & Conditions',
-                Icons.description_outlined,
+                Iconsax.document_text_copy,
                 () {
                   Navigator.pop(context);
                   _launchUrl('https://your-terms-url.com');
@@ -567,7 +569,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               _buildBottomSheetOption(
                 'Notifications',
-                Icons.notifications_outlined,
+                IconlyLight.notification,
                 () => Navigator.pop(context),
               ),
               _buildBottomSheetOption(
@@ -582,51 +584,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildThemeToggle(BuildContext context) {
-    final isDarkMode = ref.watch(themeProvider.notifier).isDarkMode;
-    final textColor = isDarkMode ? Colors.white : Colors.black;
-    final bgColor = isDarkMode ? Colors.grey[800] : Colors.grey[100];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              isDarkMode ? Icons.dark_mode : Icons.light_mode,
-              color: isDarkMode ? Colors.white : Colors.grey[700],
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              'Dark Mode',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: textColor,
-              ),
-            ),
-          ),
-          Switch(
-            value: isDarkMode,
-            onChanged: (value) {
-              HapticFeedback.lightImpact();
-              ref.read(themeProvider.notifier).toggleTheme();
-            },
-            activeColor: Colors.black,
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _launchUrl(String urlString) async {
     final url = Uri.parse(urlString);
     try {
@@ -634,22 +591,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open link'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          CustomSnackbar.show(context, message: 'Could not open link');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error opening link: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        CustomSnackbar.show(context, message: 'Error opening link');
       }
     }
   }
@@ -726,30 +673,31 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: const Icon(Icons.lock_reset, color: Colors.blue, size: 24),
             ),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               'Reset Password',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: appStyle(18, Colors.black, FontWeight.w700),
             ),
           ],
         ),
-        content: const Text(
+        content: Text(
           'A password reset link will be sent to your email address.',
-          style: TextStyle(fontSize: 14),
+          style: appStyle(14, Colors.black, FontWeight.w400),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+            child: Text(
+              'Cancel',
+              style: appStyle(14.sp, Colors.grey.shade600, FontWeight.w600),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               // TODO: Implement password reset
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Password reset link sent to your email!'),
-                  backgroundColor: Colors.green,
-                ),
+              CustomSnackbar.show(
+                context,
+                message: 'Password reset link sent to your email',
               );
             },
             style: ElevatedButton.styleFrom(
@@ -758,12 +706,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Send Link',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: appStyle(14.sp, Colors.white, FontWeight.bold),
             ),
           ),
         ],
@@ -775,38 +720,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.r),
+        ),
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.warning_rounded,
-                color: Colors.red,
-                size: 24,
-              ),
-            ),
+            const Icon(Icons.warning_rounded, color: Colors.red, size: 24),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               'Delete Account',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: appStyle(18, Colors.black, FontWeight.w800),
             ),
           ],
         ),
-        content: const Text(
+        content: Text(
           'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
-          style: TextStyle(fontSize: 14),
+          style: appStyle(14, Colors.black, FontWeight.w400),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+              style: appStyle(14.sp, Colors.grey, FontWeight.w600),
             ),
           ),
           ElevatedButton(
@@ -816,26 +752,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               await ref.read(authProvider.notifier).logout();
               if (context.mounted) {
                 context.go('/login');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Account deleted successfully'),
-                    backgroundColor: Colors.red,
-                  ),
+
+                CustomSnackbar.show(
+                  context,
+                  message: 'Your account has been deleted',
                 );
               }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(16.r),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Delete',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: appStyle(14.sp, Colors.white, FontWeight.w600),
             ),
           ),
         ],
@@ -875,14 +807,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         child: Icon(icon, color: color, size: 20),
       ),
-      title: Text(
-        label,
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: textColor,
-        ),
-      ),
+      title: Text(label, style: appStyle(15.sp, textColor, FontWeight.w600)),
       trailing: Icon(
         Icons.chevron_right,
         color: isDestructive
@@ -903,15 +828,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Logout',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: appStyle(18, Colors.black, FontWeight.w700),
         ),
-        content: const Text('Are you sure you want to logout?'),
+        content: Text(
+          'Are you sure you want to logout?',
+          style: appStyle(14, Colors.black, FontWeight.w400),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+            child: Text(
+              'Cancel',
+              style: appStyle(14.sp, Colors.grey.shade600, FontWeight.w600),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -921,9 +852,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 context.go('/login');
               }
             },
-            child: const Text(
+            child: Text(
               'Logout',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              style: appStyle(14.sp, Colors.red, FontWeight.bold),
             ),
           ),
         ],

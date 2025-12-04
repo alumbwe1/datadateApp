@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -386,7 +387,7 @@ class _PremiumDialogState extends State<PremiumDialog>
           22,
           Colors.black,
           FontWeight.w800,
-        ).copyWith(letterSpacing: -0.5, height: 1.2),
+        ).copyWith(letterSpacing: -0.3, height: 1.2),
         textAlign: TextAlign.center,
       ),
     );
@@ -469,16 +470,7 @@ class _PremiumDialogState extends State<PremiumDialog>
       color: widget.confirmColor,
       isLoading: _isConfirming,
       child: _isConfirming
-          ? SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Colors.white.withValues(alpha: 0.9),
-                ),
-              ),
-            )
+          ? SizedBox(width: 20, height: 20, child: LottieLoadingIndicator())
           : Text(
               widget.confirmText,
               style: appStyle(16, Colors.white, FontWeight.w700),

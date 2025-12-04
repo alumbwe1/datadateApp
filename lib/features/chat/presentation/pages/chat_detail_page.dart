@@ -1,3 +1,4 @@
+import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -205,7 +206,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     PremiumDialog.show(
       context: context,
       icon: Icons.block_outlined,
-      iconColor: Colors.orange,
+      iconColor: Colors.white,
       title: 'Block User',
       message:
           'Are you sure you want to block this user? They won\'t be able to message you.',
@@ -308,12 +309,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     if (chatState.isLoading && room == null) {
       return Scaffold(
         backgroundColor: Colors.white,
-        body: const Center(
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-          ),
-        ),
+        body: const Center(child: LottieLoadingIndicator()),
       );
     }
 
@@ -370,12 +366,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                           return const Center(
                             child: Padding(
                               padding: EdgeInsets.all(16.0),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.black,
-                                ),
-                              ),
+                              child: LottieLoadingIndicator(),
                             ),
                           );
                         }

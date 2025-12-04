@@ -149,12 +149,11 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     final profiles = encountersState.profiles;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(55.h),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
             child: Row(
               children: [
                 // HeartLink Logo with Gradient
@@ -196,34 +195,32 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   ),
                 ),
 
-                const SizedBox(width: 8),
-
                 // Reels Toggle Button
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.primaryLight.withValues(alpha: 0.3),
-                      width: 1.w,
-                    ),
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: IconButton(
-                    icon: Icon(Icons.play_circle_outline_rounded, size: 20.sp),
-                    color: AppColors.primaryLight,
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ReelsPage(),
-                          fullscreenDialog: true,
-                        ),
-                      );
-                    },
-                    splashRadius: 24,
-                    padding: EdgeInsets.zero,
-                  ),
-                ),
+                // Container(
+                //   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                //   decoration: BoxDecoration(
+                //     border: Border.all(
+                //       color: AppColors.primaryLight.withValues(alpha: 0.3),
+                //       width: 1.w,
+                //     ),
+                //     borderRadius: BorderRadius.circular(20.r),
+                //   ),
+                //   child: IconButton(
+                //     icon: Icon(Icons.play_circle_outline_rounded, size: 20.sp),
+                //     color: AppColors.primaryLight,
+                //     onPressed: () {
+                //       HapticFeedback.lightImpact();
+                //       Navigator.of(context).push(
+                //         MaterialPageRoute(
+                //           builder: (context) => const ReelsPage(),
+                //           fullscreenDialog: true,
+                //         ),
+                //       );
+                //     },
+                //     splashRadius: 24,
+                //     padding: EdgeInsets.zero,
+                //   ),
+                // ),
 
                 //const SizedBox(width: 8),
 

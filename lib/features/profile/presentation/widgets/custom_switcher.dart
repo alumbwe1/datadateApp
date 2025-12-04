@@ -5,7 +5,7 @@ class CustomSwitch extends StatefulWidget {
   final bool value;
   final void Function(bool) onChanged;
 
-  const CustomSwitch({required this.value, required this.onChanged});
+  const CustomSwitch({super.key, required this.value, required this.onChanged});
   @override
   State<CustomSwitch> createState() => CustomSwitchState();
 }
@@ -13,7 +13,6 @@ class CustomSwitch extends StatefulWidget {
 class CustomSwitchState extends State<CustomSwitch>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _slideAnimation;
   late Animation<double> _scaleAnimation;
 
   @override
@@ -23,11 +22,6 @@ class CustomSwitchState extends State<CustomSwitch>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
-    _slideAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.9).animate(
       CurvedAnimation(

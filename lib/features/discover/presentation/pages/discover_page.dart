@@ -52,7 +52,6 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
     final profiles = discoverState.profiles;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(55.h),
         child: SafeArea(
