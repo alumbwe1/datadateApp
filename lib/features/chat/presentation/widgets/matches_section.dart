@@ -57,7 +57,7 @@ class MatchesSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 135.h,
+          height: 160.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
