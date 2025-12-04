@@ -178,6 +178,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 4.h),
               ShaderMask(
                 shaderCallback: (bounds) =>
                     AppColors.heartGradient.createShader(
