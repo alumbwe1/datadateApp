@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
@@ -31,28 +33,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final profileState = ref.watch(profileProvider);
     final profile = profileState.profile;
+    final isDarkMode = ref.watch(themeProvider.notifier).isDarkMode;
+    final bgColor = isDarkMode ? const Color(0xFF121212) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: bgColor,
         elevation: 0,
-        surfaceTintColor: Colors.white,
+        surfaceTintColor: bgColor,
         title: Text(
           'Profile',
           style: appStyle(
             24,
-            Colors.black,
+            textColor,
             FontWeight.w700,
           ).copyWith(letterSpacing: -0.5),
         ),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.settings_outlined,
-              color: Colors.black,
-              size: 24,
-            ),
+            icon: Icon(Icons.settings_outlined, color: textColor, size: 24),
             onPressed: () {
               HapticFeedback.lightImpact();
               _showSettingsBottomSheet(context);
@@ -234,7 +235,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               28,
               Colors.black,
               FontWeight.w700,
-            ).copyWith(letterSpacing: -0.8),
+            ).copyWith(letterSpacing: -0.3),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
@@ -277,24 +278,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ).copyWith(letterSpacing: -0.5),
         ),
         const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: hasBio ? Colors.grey[50] : Colors.orange[50],
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: hasBio ? Colors.grey[200]! : Colors.orange[200]!,
-            ),
-          ),
-          child: Text(
-            profile.bio ?? 'No bio yet. Tap edit to add one!',
-            style: appStyle(
-              14,
-              hasBio ? Colors.grey[800]! : Colors.orange[900]!,
-              FontWeight.w500,
-            ).copyWith(height: 1.5),
-          ),
+        Text(
+          profile.bio ?? 'No bio yet. Tap edit to add one!',
+          style: appStyle(
+            14,
+            hasBio ? Colors.grey[800]! : Colors.orange[900]!,
+            FontWeight.w500,
+          ).copyWith(height: 1.5),
         ),
       ],
     );
@@ -334,10 +324,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Text(
           'Interests',
           style: appStyle(
-            20,
+            20.sp,
             Colors.black,
-            FontWeight.w700,
-          ).copyWith(letterSpacing: -0.5),
+            FontWeight.w800,
+          ).copyWith(letterSpacing: -0.3),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -347,19 +337,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1a1a1a), Color(0xFF000000)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(color: Colors.grey[200]!),
+                borderRadius: BorderRadius.circular(40.r),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -371,7 +350,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   const SizedBox(width: 6),
                   Text(
                     interest,
-                    style: appStyle(14, Colors.white, FontWeight.w600),
+                    style: appStyle(
+                      14,
+                      Colors.black,
+                      FontWeight.w600,
+                    ).copyWith(letterSpacing: -0.3),
                   ),
                 ],
               ),
@@ -535,13 +518,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _showSettingsBottomSheet(BuildContext context) {
+    final isDarkMode = ref.read(themeProvider.notifier).isDarkMode;
+    final bgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    final handleColor = isDarkMode ? Colors.grey[700] : Colors.grey[300];
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: SafeArea(
@@ -552,11 +539,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: handleColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 20),
+              _buildThemeToggle(context),
               _buildBottomSheetOption(
                 'Account Settings',
                 Icons.person_outline,
@@ -565,10 +553,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   _showAccountSettingsBottomSheet(context);
                 },
               ),
+              _buildBottomSheetOption('Privacy Policy', Icons.lock_outline, () {
+                Navigator.pop(context);
+                _launchUrl('https://your-privacy-policy-url.com');
+              }),
               _buildBottomSheetOption(
-                'Privacy',
-                Icons.lock_outline,
-                () => Navigator.pop(context),
+                'Terms & Conditions',
+                Icons.description_outlined,
+                () {
+                  Navigator.pop(context);
+                  _launchUrl('https://your-terms-url.com');
+                },
               ),
               _buildBottomSheetOption(
                 'Notifications',
@@ -587,14 +582,91 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
+  Widget _buildThemeToggle(BuildContext context) {
+    final isDarkMode = ref.watch(themeProvider.notifier).isDarkMode;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
+    final bgColor = isDarkMode ? Colors.grey[800] : Colors.grey[100];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              isDarkMode ? Icons.dark_mode : Icons.light_mode,
+              color: isDarkMode ? Colors.white : Colors.grey[700],
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              'Dark Mode',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
+            ),
+          ),
+          Switch(
+            value: isDarkMode,
+            onChanged: (value) {
+              HapticFeedback.lightImpact();
+              ref.read(themeProvider.notifier).toggleTheme();
+            },
+            activeColor: Colors.black,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    final url = Uri.parse(urlString);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open link'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening link: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _showAccountSettingsBottomSheet(BuildContext context) {
+    final isDarkMode = ref.read(themeProvider.notifier).isDarkMode;
+    final bgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    final handleColor = isDarkMode ? Colors.grey[700] : Colors.grey[300];
+    final textColor = isDarkMode ? Colors.white : Colors.black;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: SafeArea(
@@ -605,7 +677,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: handleColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -614,7 +686,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Account Settings',
-                  style: appStyle(20, Colors.black, FontWeight.w700),
+                  style: appStyle(20, textColor, FontWeight.w700),
                 ),
               ),
               const SizedBox(height: 16),
@@ -777,10 +849,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     VoidCallback onTap, {
     bool isDestructive = false,
   }) {
-    final color = isDestructive ? Colors.red : Colors.grey[700]!;
+    final isDarkMode = ref.read(themeProvider.notifier).isDarkMode;
+    final color = isDestructive
+        ? Colors.red
+        : isDarkMode
+        ? Colors.white
+        : Colors.grey[700]!;
     final bgColor = isDestructive
         ? Colors.red.withOpacity(0.1)
+        : isDarkMode
+        ? Colors.grey[800]!
         : Colors.grey[100]!;
+    final textColor = isDestructive
+        ? Colors.red
+        : isDarkMode
+        ? Colors.white
+        : Colors.black;
 
     return ListTile(
       leading: Container(
@@ -796,12 +880,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w600,
-          color: isDestructive ? Colors.red : Colors.black,
+          color: textColor,
         ),
       ),
       trailing: Icon(
         Icons.chevron_right,
-        color: isDestructive ? Colors.red.withOpacity(0.5) : Colors.grey[400],
+        color: isDestructive
+            ? Colors.red.withOpacity(0.5)
+            : isDarkMode
+            ? Colors.grey[600]
+            : Colors.grey[400],
       ),
       onTap: () {
         HapticFeedback.lightImpact();
