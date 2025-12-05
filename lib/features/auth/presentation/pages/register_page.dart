@@ -8,6 +8,7 @@ import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../core/widgets/password_error_bottom_sheet.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../onboarding/presentation/providers/onboarding_provider.dart';
@@ -286,10 +287,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                 SizedBox(height: 40.h),
 
-                CustomButton(
-                  text: _isLoading ? 'Creating Account...' : 'Continue',
-                  onPressed: _isLoading ? null : _handleRegister,
-                ),
+                _isLoading
+                    ? Container(
+                        height: 58.h,
+                        alignment: Alignment.center,
+                        child: LottieLoadingIndicator(),
+                      )
+                    : CustomButton(
+                        text: _isLoading ? 'Creating Account...' : 'Continue',
+                        onTap: _handleRegister,
+                      ),
 
                 SizedBox(height: 24.h),
 

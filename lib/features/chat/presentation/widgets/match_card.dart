@@ -21,7 +21,6 @@ class MatchCard extends StatefulWidget {
 class _MatchCardState extends State<MatchCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
   late Animation<double> _pulseAnimation;
   late Animation<double> _glowAnimation;
   bool _isPressed = false;
@@ -35,17 +34,6 @@ class _MatchCardState extends State<MatchCard>
       duration: const Duration(milliseconds: 2500),
       vsync: this,
     )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Interval(
-          widget.index * 0.1,
-          0.4 + (widget.index * 0.1),
-          curve: Curves.easeOutBack,
-        ),
-      ),
-    );
 
     _pulseAnimation = Tween<double>(
       begin: 1.0,
@@ -126,8 +114,8 @@ class _MatchCardState extends State<MatchCard>
                           borderRadius: BorderRadius.circular(28.r),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primaryLight.withOpacity(
-                                _glowAnimation.value * 0.4,
+                              color: AppColors.primaryLight.withValues(
+                                alpha: _glowAnimation.value * 0.4,
                               ),
                               blurRadius: 24,
                               spreadRadius: 2,
@@ -147,8 +135,8 @@ class _MatchCardState extends State<MatchCard>
                             borderRadius: BorderRadius.circular(28.r),
                             gradient: LinearGradient(
                               colors: [
-                                AppColors.primaryLight.withOpacity(0.15),
-                                AppColors.secondaryLight.withOpacity(0.1),
+                                AppColors.primaryLight.withValues(alpha: 0.15),
+                                AppColors.secondaryLight.withValues(alpha: 0.1),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -182,7 +170,7 @@ class _MatchCardState extends State<MatchCard>
                                   gradient: LinearGradient(
                                     colors: [
                                       Colors.transparent,
-                                      Colors.black.withOpacity(0.15),
+                                      Colors.black.withValues(alpha: 0.15),
                                     ],
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
@@ -201,8 +189,8 @@ class _MatchCardState extends State<MatchCard>
                                     borderRadius: BorderRadius.circular(20.r),
                                     gradient: LinearGradient(
                                       colors: [
-                                        Colors.white.withOpacity(0.3),
-                                        Colors.white.withOpacity(0.05),
+                                        Colors.white.withValues(alpha: 0.3),
+                                        Colors.white.withValues(alpha: 0.05),
                                       ],
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
@@ -239,8 +227,8 @@ class _MatchCardState extends State<MatchCard>
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryLight.withOpacity(
-                                    0.5,
+                                  color: AppColors.primaryLight.withValues(
+                                    alpha: 0.5,
                                   ),
                                   blurRadius: 12,
                                   spreadRadius: 1,
@@ -277,7 +265,7 @@ class _MatchCardState extends State<MatchCard>
                               borderRadius: BorderRadius.circular(8.r),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.amber.withOpacity(0.4),
+                                  color: Colors.amber.withValues(alpha: 0.4),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -356,8 +344,8 @@ class _MatchCardState extends State<MatchCard>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryLight.withOpacity(0.3),
-            AppColors.secondaryLight.withOpacity(0.3),
+            AppColors.primaryLight.withValues(alpha: 0.3),
+            AppColors.secondaryLight.withValues(alpha: 0.3),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

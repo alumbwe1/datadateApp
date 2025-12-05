@@ -96,7 +96,7 @@ class OnboardingDatingGoalPage extends ConsumerWidget {
               padding: EdgeInsets.all(24.w),
               child: CustomButton(
                 text: 'Continue',
-                onPressed: selectedGoal != null
+                onTap: selectedGoal != null
                     ? () => context.push('/onboarding/interests')
                     : null,
               ),

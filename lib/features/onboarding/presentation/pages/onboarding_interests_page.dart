@@ -149,7 +149,7 @@ class OnboardingInterestsPage extends ConsumerWidget {
               padding: EdgeInsets.all(24.w),
               child: CustomButton(
                 text: 'Continue',
-                onPressed: selectedInterests.isNotEmpty
+                onTap: selectedInterests.isNotEmpty
                     ? () => context.push('/onboarding/complete')
                     : null,
               ),

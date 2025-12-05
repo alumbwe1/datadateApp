@@ -1,5 +1,9 @@
+import 'package:datadate/core/constants/kolors.dart';
+import 'package:datadate/core/widgets/loading_indicator.dart'
+    show LottieLoadingIndicator;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../providers/reporting_provider.dart';
@@ -189,11 +193,17 @@ class _ReportUserDialogState extends ConsumerState<ReportUserDialog> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: CustomButton(
-                      text: 'Submit',
-                      onPressed: _isLoading ? null : _submitReport,
-                      isLoading: _isLoading,
-                    ),
+                    child: _isLoading
+                        ? Container(
+                            height: 58.h,
+                            alignment: Alignment.center,
+                            child: LottieLoadingIndicator(),
+                          )
+                        : CustomButton(
+                            text: 'Submit',
+                            onTap: _submitReport,
+                            btnColor: Kolors.kDanger,
+                          ),
                   ),
                 ],
               ),

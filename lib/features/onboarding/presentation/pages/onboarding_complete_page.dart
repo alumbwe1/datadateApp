@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/loading_indicator.dart';
 import '../providers/onboarding_provider.dart';
 
 class OnboardingCompletePage extends ConsumerStatefulWidget {
@@ -114,10 +115,16 @@ class _OnboardingCompletePageState
 
               const Spacer(),
 
-              CustomButton(
-                text: _isCompleting ? 'Completing...' : 'Start Exploring',
-                onPressed: _isCompleting ? null : _completeOnboarding,
-              ),
+              _isCompleting
+                  ? Container(
+                      height: 58.h,
+                      alignment: Alignment.center,
+                      child: LottieLoadingIndicator(),
+                    )
+                  : CustomButton(
+                      text: 'Start Exploring',
+                      onTap: _completeOnboarding,
+                    ),
 
               SizedBox(height: 20.h),
             ],

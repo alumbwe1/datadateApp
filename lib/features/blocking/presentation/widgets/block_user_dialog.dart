@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/constants/kolors.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/loading_indicator.dart';
 import '../providers/blocking_provider.dart';
 
 class BlockUserDialog extends ConsumerStatefulWidget {
@@ -114,12 +117,17 @@ class _BlockUserDialogState extends ConsumerState<BlockUserDialog> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: CustomButton(
-                    text: 'Block',
-                    onPressed: _isLoading ? null : _blockUser,
-                    isLoading: _isLoading,
-                    backgroundColor: Colors.red,
-                  ),
+                  child: _isLoading
+                      ? Container(
+                          height: 58.h,
+                          alignment: Alignment.center,
+                          child: LottieLoadingIndicator(),
+                        )
+                      : CustomButton(
+                          text: 'Block',
+                          onTap: _isLoading ? null : _blockUser,
+                          btnColor: Kolors.kRed,
+                        ),
                 ),
               ],
             ),

@@ -26,7 +26,7 @@ class CustomSnackbar {
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -40,7 +40,7 @@ class CustomSnackbar {
                   borderRadius: BorderRadius.circular(16.r),
                   child: CustomPaint(
                     painter: _PatternPainter(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                     ),
                   ),
                 ),
@@ -61,10 +61,10 @@ class CustomSnackbar {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                                 width: 2,
                               ),
                             ),
@@ -100,7 +100,9 @@ class CustomSnackbar {
                                     letterSpacing: 0.5,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black.withOpacity(0.2),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.2,
+                                        ),
                                         offset: const Offset(0, 1),
                                         blurRadius: 2,
                                       ),
@@ -112,7 +114,7 @@ class CustomSnackbar {
                               message,
                               style: appStyle(
                                 14,
-                                Colors.white.withOpacity(0.95),
+                                Colors.white.withValues(alpha: 0.95),
                                 FontWeight.w500,
                               ).copyWith(height: 1.4, letterSpacing: 0.2),
                             ),
@@ -127,7 +129,7 @@ class CustomSnackbar {
                         onPressed: onAction,
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.white,
-                          backgroundColor: Colors.white.withOpacity(0.2),
+                          backgroundColor: Colors.white.withValues(alpha: 0.2),
                           padding: EdgeInsets.symmetric(
                             horizontal: 16.w,
                             vertical: 8.h,
@@ -162,9 +164,9 @@ class CustomSnackbar {
                       ),
                       child: LinearProgressIndicator(
                         value: value,
-                        backgroundColor: Colors.white.withOpacity(0.1),
+                        backgroundColor: Colors.white.withValues(alpha: 0.1),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white.withOpacity(0.3),
+                          Colors.white.withValues(alpha: 0.3),
                         ),
                         minHeight: 3,
                       ),

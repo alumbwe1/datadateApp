@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/loading_indicator.dart';
 import '../providers/boost_provider.dart';
 
 class BoostDialog extends ConsumerStatefulWidget {
@@ -146,11 +148,13 @@ class _BoostDialogState extends ConsumerState<BoostDialog> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: CustomButton(
-                    text: 'Create Boost',
-                    onPressed: _isLoading ? null : _createBoost,
-                    isLoading: _isLoading,
-                  ),
+                  child: _isLoading
+                      ? Container(
+                          height: 58.h,
+                          alignment: Alignment.center,
+                          child: LottieLoadingIndicator(),
+                        )
+                      : CustomButton(text: 'Create Boost', onTap: _createBoost),
                 ),
               ],
             ),

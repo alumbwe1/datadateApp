@@ -53,7 +53,7 @@ class ConversationTile extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
           color: hasUnread
-              ? AppColors.secondaryLight.withOpacity(0.02)
+              ? AppColors.secondaryLight.withValues(alpha: 0.02)
               : Colors.white,
           border: Border(
             bottom: BorderSide(color: Colors.grey.shade100, width: 0.5),
@@ -90,7 +90,7 @@ class ConversationTile extends ConsumerWidget {
               boxShadow: hasUnread
                   ? [
                       BoxShadow(
-                        color: AppColors.secondaryLight.withOpacity(0.15),
+                        color: AppColors.secondaryLight.withValues(alpha: 0.15),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -129,7 +129,7 @@ class ConversationTile extends ConsumerWidget {
                 border: Border.all(color: Colors.white, width: 3),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.accentLight.withOpacity(0.5),
+                    color: AppColors.accentLight.withValues(alpha: 0.5),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -194,7 +194,7 @@ class ConversationTile extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: hasUnread
-            ? AppColors.secondaryLight.withOpacity(0.1)
+            ? AppColors.secondaryLight.withValues(alpha: 0.1)
             : Colors.grey[100],
         borderRadius: BorderRadius.circular(8),
       ),
@@ -220,7 +220,7 @@ class ConversationTile extends ConsumerWidget {
         gradient: LinearGradient(
           colors: [
             AppColors.secondaryLight,
-            AppColors.secondaryLight.withOpacity(0.85),
+            AppColors.secondaryLight.withValues(alpha: 0.85),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -228,7 +228,7 @@ class ConversationTile extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.secondaryLight.withOpacity(0.35),
+            color: AppColors.secondaryLight.withValues(alpha: 0.35),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),

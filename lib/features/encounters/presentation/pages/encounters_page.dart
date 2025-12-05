@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
-import '../../../reels/presentation/pages/reels_page.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/constants/app_colors.dart';

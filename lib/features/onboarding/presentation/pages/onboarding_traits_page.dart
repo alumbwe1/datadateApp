@@ -152,7 +152,7 @@ class OnboardingTraitsPage extends ConsumerWidget {
               padding: EdgeInsets.all(24.w),
               child: CustomButton(
                 text: 'Continue',
-                onPressed: selectedTraits.length >= 3
+                onTap: selectedTraits.length >= 3
                     ? () {
                         HapticFeedback.mediumImpact();
                         context.push('/onboarding/dating-goal');

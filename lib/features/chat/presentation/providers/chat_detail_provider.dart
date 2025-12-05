@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:datadate/core/utils/custom_logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/websocket_service.dart';
 import '../../data/models/message_model.dart';
@@ -84,7 +85,9 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   }
 
   Future<void> loadMessages({bool isLoadMore = false}) async {
-    print('📥 loadMessages called for room $roomId (isLoadMore: $isLoadMore)');
+    CustomLogs.info(
+      '📥 loadMessages called for room $roomId (isLoadMore: $isLoadMore)',
+    );
 
     if (isLoadMore) {
       if (!state.hasMore || state.isLoadingMore) return;
@@ -94,7 +97,7 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
     }
 
     try {
-      print('   🌐 Fetching messages from API...');
+      CustomLogs.info('   🌐 Fetching messages from API...');
       final result = await _repository.getMessages(
         roomId: roomId,
         page: isLoadMore ? state.currentPage + 1 : 1,
@@ -104,8 +107,8 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
       final newMessages = result['messages'] as List<MessageModel>;
       final hasMore = result['next'] != null;
 
-      print('   ✅ Received ${newMessages.length} messages from API');
-      print('   📊 Has more pages: $hasMore');
+      CustomLogs.info('   ✅ Received ${newMessages.length} messages from API');
+      CustomLogs.info('   📊 Has more pages: $hasMore');
 
       if (isLoadMore) {
         state = state.copyWith(
@@ -114,7 +117,7 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
           hasMore: hasMore,
           currentPage: state.currentPage + 1,
         );
-        print(
+        CustomLogs.info(
           '   ✅ Added to existing messages. Total: ${state.messages.length}',
         );
       } else {
@@ -124,10 +127,10 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
           hasMore: hasMore,
           currentPage: 1,
         );
-        print('   ✅ Set messages. Total: ${newMessages.length}');
+        CustomLogs.info('   ✅ Set messages. Total: ${newMessages.length}');
       }
     } catch (e) {
-      print('   ❌ Error loading messages: $e');
+      CustomLogs.info('   ❌ Error loading messages: $e');
       state = state.copyWith(
         isLoading: false,
         isLoadingMore: false,
@@ -137,49 +140,49 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   }
 
   Future<void> _connectWebSocket() async {
-    print('🔌 Attempting to connect WebSocket for room $roomId...');
+    CustomLogs.info('🔌 Attempting to connect WebSocket for room $roomId...');
     try {
       await _webSocketService.connect(roomId);
       state = state.copyWith(isConnected: true);
-      print('✅ WebSocket connected successfully');
+      CustomLogs.info('✅ WebSocket connected successfully');
 
       _wsSubscription = _webSocketService.messages.listen((data) {
-        print('📨 WebSocket message received: $data');
+        CustomLogs.info('📨 WebSocket message received: $data');
         _handleWebSocketMessage(data);
       });
     } catch (e) {
-      print('❌ WebSocket connection failed: $e');
+      CustomLogs.info('❌ WebSocket connection failed: $e');
       state = state.copyWith(isConnected: false);
     }
   }
 
   void _handleWebSocketMessage(Map<String, dynamic> data) {
     final type = data['type'] as String?;
-    print('🔄 Handling WebSocket message type: $type');
+    CustomLogs.info('🔄 Handling WebSocket message type: $type');
 
     switch (type) {
       case 'chat_message':
-        print('   💬 New chat message received');
+        CustomLogs.info('   💬 New chat message received');
         final messageData = data['message'] as Map<String, dynamic>;
         final message = MessageModel.fromJson(messageData);
-        print('   Adding message to UI: ${message.content}');
+        CustomLogs.info('   Adding message to UI: ${message.content}');
         _addNewMessage(message);
         break;
 
       case 'typing':
         final isTyping = data['is_typing'] as bool? ?? false;
-        print('   ⌨️ Typing indicator: $isTyping');
+        CustomLogs.info('   ⌨️ Typing indicator: $isTyping');
         state = state.copyWith(isTyping: isTyping);
         break;
 
       case 'message_read':
         final messageId = data['message_id'] as int;
-        print('   ✓✓ Message $messageId marked as read');
+        CustomLogs.info('   ✓✓ Message $messageId marked as read');
         _markMessageAsRead(messageId);
         break;
 
       default:
-        print('   ⚠️ Unknown message type: $type');
+        CustomLogs.info('   ⚠️ Unknown message type: $type');
     }
   }
 
@@ -187,13 +190,17 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
     // Check if message already exists (prevent duplicates from WebSocket echo)
     final exists = state.messages.any((msg) => msg.id == message.id);
     if (exists) {
-      print('   ⚠️ Message ${message.id} already exists, skipping duplicate');
+      CustomLogs.info(
+        '   ⚠️ Message ${message.id} already exists, skipping duplicate',
+      );
       return;
     }
 
     final updatedMessages = [message, ...state.messages];
     state = state.copyWith(messages: updatedMessages);
-    print('   ✅ Message added to UI (total: ${updatedMessages.length})');
+    CustomLogs.info(
+      '   ✅ Message added to UI (total: ${updatedMessages.length})',
+    );
   }
 
   void _markMessageAsRead(int messageId) {
@@ -209,33 +216,35 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   Future<void> sendMessage(String content) async {
     if (content.trim().isEmpty) return;
 
-    print('🟢 ChatDetailNotifier.sendMessage called');
-    print('   Content: "$content"');
-    print('   Room ID: $roomId');
-    print('   WebSocket connected: ${state.isConnected}');
+    CustomLogs.info('🟢 ChatDetailNotifier.sendMessage called');
+    CustomLogs.info('   Content: "$content"');
+    CustomLogs.info('   Room ID: $roomId');
+    CustomLogs.info('   WebSocket connected: ${state.isConnected}');
 
     try {
       // Always send via HTTP to ensure message is saved and appears in UI
-      print('   📤 Sending message via HTTP...');
+      CustomLogs.info('   📤 Sending message via HTTP...');
       final message = await _repository.sendMessage(
         roomId: roomId,
         content: content,
       );
-      print('   ✅ HTTP send successful, adding to UI');
+      CustomLogs.info('   ✅ HTTP send successful, adding to UI');
       _addNewMessage(message);
 
       // Also send via WebSocket if connected for real-time delivery to other user
       if (state.isConnected) {
-        print('   📡 Also sending via WebSocket for real-time...');
+        CustomLogs.info('   📡 Also sending via WebSocket for real-time...');
         try {
           _webSocketService.sendMessage(content);
         } catch (wsError) {
-          print('   ⚠️ WebSocket send failed (non-critical): $wsError');
+          CustomLogs.info(
+            '   ⚠️ WebSocket send failed (non-critical): $wsError',
+          );
           // Non-critical error, message already sent via HTTP
         }
       }
     } catch (e) {
-      print('   ❌ Error sending message: $e');
+      CustomLogs.info('   ❌ Error sending message: $e');
       // Show error to user
       state = state.copyWith(error: 'Failed to send message: ${e.toString()}');
     }
@@ -271,7 +280,9 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   Future<void> editMessage(int messageId, String content) async {
     if (content.trim().isEmpty) return;
 
-    print('📝 Editing message $messageId with new content: "$content"');
+    CustomLogs.info(
+      '📝 Editing message $messageId with new content: "$content"',
+    );
 
     try {
       final updatedMessage = await _repository.editMessage(
@@ -288,16 +299,16 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
       }).toList();
 
       state = state.copyWith(messages: updatedMessages);
-      print('✅ Message updated successfully in UI');
+      CustomLogs.info('✅ Message updated successfully in UI');
     } catch (e) {
-      print('❌ Error editing message: $e');
+      CustomLogs.info('❌ Error editing message: $e');
       state = state.copyWith(error: 'Failed to edit message: ${e.toString()}');
       rethrow;
     }
   }
 
   Future<void> deleteMessage(int messageId) async {
-    print('🗑️ Deleting message $messageId');
+    CustomLogs.info('🗑️ Deleting message $messageId');
 
     try {
       await _repository.deleteMessage(messageId);
@@ -308,9 +319,9 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
           .toList();
 
       state = state.copyWith(messages: updatedMessages);
-      print('✅ Message deleted successfully from UI');
+      CustomLogs.info('✅ Message deleted successfully from UI');
     } catch (e) {
-      print('❌ Error deleting message: $e');
+      CustomLogs.info('❌ Error deleting message: $e');
       state = state.copyWith(
         error: 'Failed to delete message: ${e.toString()}',
       );

@@ -198,7 +198,7 @@ class _OnboardingPhotoPageState extends ConsumerState<OnboardingPhotoPage> {
               SizedBox(height: 16.h),
               CustomButton(
                 text: 'Continue',
-                onPressed: photos.length >= 2
+                onTap: photos.length >= 2
                     ? () {
                         HapticFeedback.mediumImpact();
                         context.push('/onboarding/profile/dob');

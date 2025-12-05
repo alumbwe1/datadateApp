@@ -165,7 +165,7 @@ class _OnboardingCoursePageState extends ConsumerState<OnboardingCoursePage> {
 
             Padding(
               padding: EdgeInsets.all(24.w),
-              child: CustomButton(text: 'Continue', onPressed: _handleContinue),
+              child: CustomButton(text: 'Continue', onTap: _handleContinue),
             ),
           ],
         ),

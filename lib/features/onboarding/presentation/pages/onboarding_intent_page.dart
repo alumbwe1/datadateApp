@@ -112,7 +112,7 @@ class OnboardingIntentPage extends ConsumerWidget {
               padding: EdgeInsets.all(24.w),
               child: CustomButton(
                 text: 'Continue',
-                onPressed: selectedIntent != null
+                onTap: selectedIntent != null
                     ? () {
                         HapticFeedback.mediumImpact();
                         context.push('/onboarding/profile/bio');

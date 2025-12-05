@@ -10,6 +10,9 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String password,
   });
+
+  Future<Map<String, String>> deleteAccount(String password);
+
   Future<String> refreshToken(String refreshToken);
   Future<UserModel> getCurrentUser();
 }
@@ -152,6 +155,40 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         tag: 'AUTH',
         error: e,
         stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, String>> deleteAccount(String password) async {
+    try {
+      CustomLogs.info(
+        'Attempting Account Deletion',
+        tag: 'AUTH',
+        metadata: {'username': password},
+      );
+
+      // Note: Login doesn't require authentication
+      final response = await apiClient.post<Map<String, dynamic>>(
+        ApiEndpoints.login,
+        data: {'password': password},
+      );
+
+      CustomLogs.success(
+        'Account Deletion successful',
+        tag: 'AUTH',
+        metadata: {'password': password},
+      );
+
+      return {'message': response['message'] as String};
+    } catch (e, stackTrace) {
+      CustomLogs.error(
+        'Account Deletion failed',
+        tag: 'AUTH',
+        error: e,
+        stackTrace: stackTrace,
+        metadata: {'password': password},
       );
       rethrow;
     }

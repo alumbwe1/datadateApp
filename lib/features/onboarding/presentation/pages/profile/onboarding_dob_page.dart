@@ -291,8 +291,7 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
               SizedBox(height: 16.h),
               CustomButton(
                 text: 'Continue',
-                onPressed:
-                    dateOfBirth != null && _calculateAge(dateOfBirth) >= 18
+                onTap: dateOfBirth != null && _calculateAge(dateOfBirth) >= 18
                     ? () {
                         HapticFeedback.mediumImpact();
                         // Double-check age before navigation
@@ -507,7 +506,7 @@ class _CustomDatePickerBottomSheetState
             padding: EdgeInsets.all(20.w),
             child: CustomButton(
               text: 'Confirm',
-              onPressed: () {
+              onTap: () {
                 HapticFeedback.mediumImpact();
                 widget.onDateSelected(
                   _selectedDay,

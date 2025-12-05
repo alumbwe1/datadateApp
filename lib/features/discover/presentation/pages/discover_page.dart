@@ -24,12 +24,6 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
   bool get wantKeepAlive => true;
 
   @override
-  void initState() {
-    super.initState();
-    // Don't load immediately - wait for first build
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Load only once when page becomes visible
@@ -352,7 +346,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
                           Icon(
                             Icons.school,
                             size: 12,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -360,7 +354,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
                               profile.universityName,
                               style: appStyle(
                                 12,
-                                Colors.white.withOpacity(0.9),
+                                Colors.white.withValues(alpha: 0.9),
                                 FontWeight.w400,
                               ),
                               maxLines: 1,

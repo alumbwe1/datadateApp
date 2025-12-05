@@ -142,7 +142,7 @@ class _OnboardingGraduationPageState
               padding: EdgeInsets.all(24.w),
               child: CustomButton(
                 text: 'Continue',
-                onPressed: _selectedYear != null ? _handleContinue : null,
+                onTap: _selectedYear != null ? _handleContinue : null,
               ),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:datadate/core/constants/app_colors.dart';
+import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -180,16 +181,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                     SizedBox(height: 32.h),
 
-                    // Sign In button
-                    CustomButton(
-                      text: 'Sign In',
-                      onPressed: _handleLogin,
-                      isLoading: authState.isLoading,
-
-                      // gradient: const LinearGradient(
-                      //   colors: [Color(0xFF6C5CE7), Color(0xFF341F97)],
-                      // ),
-                    ),
+                    authState.isLoading
+                        ? Container(
+                            height: 58.h,
+                            alignment: Alignment.center,
+                            child: LottieLoadingIndicator(),
+                          )
+                        :
+                          // Sign In button
+                          CustomButton(
+                            text: 'Sign In',
+                            onTap: _handleLogin,
+                            // gradient: const LinearGradient(
+                            //   colors: [Color(0xFF6C5CE7), Color(0xFF341F97)],
+                            // ),
+                          ),
 
                     SizedBox(height: 24.h),
 

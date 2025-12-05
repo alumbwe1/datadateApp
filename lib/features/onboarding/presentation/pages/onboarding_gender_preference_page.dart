@@ -108,7 +108,7 @@ class OnboardingGenderPreferencePage extends ConsumerWidget {
               ),
               CustomButton(
                 text: 'Continue',
-                onPressed: preferredGenders.isNotEmpty
+                onTap: preferredGenders.isNotEmpty
                     ? () {
                         HapticFeedback.mediumImpact();
                         context.push('/onboarding/intent');

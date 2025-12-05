@@ -106,7 +106,7 @@ extension GradientExtension on BuildContext {
 
   /// Primary gradient
   LinearGradient get primaryGradient => LinearGradient(
-    colors: [primaryColor, primaryColor.withOpacity(0.8)],
+    colors: [primaryColor, primaryColor.withValues(alpha: 0.8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
