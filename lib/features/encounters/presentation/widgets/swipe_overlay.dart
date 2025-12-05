@@ -47,10 +47,10 @@ class _SwipeOverlayState extends State<SwipeOverlay>
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
+    return IgnorePointer(
       child: AnimatedOpacity(
         opacity: widget.opacity,
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 200),
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

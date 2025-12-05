@@ -83,8 +83,8 @@ class ConversationTile extends ConsumerWidget {
         Hero(
           tag: 'chat_avatar_${room.id}',
           child: Container(
-            width: 62,
-            height: 62,
+            width: 80.w,
+            height: 80.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: hasUnread

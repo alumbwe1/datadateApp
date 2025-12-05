@@ -1,29 +1,37 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../chat/presentation/pages/chat_detail_page.dart';
+import '../../../chat/presentation/providers/chat_detail_provider.dart';
 
-class MatchPage extends StatefulWidget {
+class MatchPage extends ConsumerStatefulWidget {
   final String profileName;
   final String profilePhoto;
+  final int roomId;
 
   const MatchPage({
     super.key,
     required this.profileName,
     required this.profilePhoto,
+    required this.roomId,
   });
 
   @override
-  State<MatchPage> createState() => _MatchPageState();
+  ConsumerState<MatchPage> createState() => _MatchPageState();
 }
 
-class _MatchPageState extends State<MatchPage>
+class _MatchPageState extends ConsumerState<MatchPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   final TextEditingController _messageController = TextEditingController();
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -46,6 +54,55 @@ class _MatchPageState extends State<MatchPage>
     );
 
     _controller.forward();
+  }
+
+  Future<void> _sendMessageAndNavigate() async {
+    final message = _messageController.text.trim();
+
+    if (message.isEmpty) {
+      // Navigate to chat without sending a message
+      _navigateToChat();
+      return;
+    }
+
+    setState(() => _isSending = true);
+    HapticFeedback.mediumImpact();
+
+    try {
+      // Send the message using chat provider
+      await ref
+          .read(chatDetailProvider(widget.roomId).notifier)
+          .sendMessage(message);
+
+      if (mounted) {
+        // Navigate to chat detail page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatDetailPage(roomId: widget.roomId),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isSending = false);
+      if (mounted) {
+        CustomSnackbar.show(
+          context,
+          message: 'Failed to send message. Try again.',
+          type: SnackbarType.error,
+        );
+      }
+    }
+  }
+
+  void _navigateToChat() {
+    HapticFeedback.lightImpact();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatDetailPage(roomId: widget.roomId),
+      ),
+    );
   }
 
   @override
@@ -162,7 +219,7 @@ class _MatchPageState extends State<MatchPage>
                   padding: EdgeInsets.all(24.w),
                   child: Column(
                     children: [
-                      // Message input
+                      // Message input with send button
                       ScaleTransition(
                         scale: _scaleAnimation,
                         child: Container(
@@ -177,25 +234,76 @@ class _MatchPageState extends State<MatchPage>
                               ),
                             ],
                           ),
-                          child: TextField(
-                            controller: _messageController,
-                            decoration: InputDecoration(
-                              hintText: 'Write a message',
-                              hintStyle: appStyle(
-                                16,
-                                Colors.grey[500]!,
-                                FontWeight.w400,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _messageController,
+                                  enabled: !_isSending,
+                                  decoration: InputDecoration(
+                                    hintText: 'Write a message',
+                                    hintStyle: appStyle(
+                                      16,
+                                      Colors.grey[500]!,
+                                      FontWeight.w400,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(30.r),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 24.w,
+                                      vertical: 16.h,
+                                    ),
+                                  ),
+                                  style: appStyle(
+                                    16,
+                                    Colors.black,
+                                    FontWeight.w400,
+                                  ),
+                                  onSubmitted: (_) => _sendMessageAndNavigate(),
+                                ),
                               ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.r),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 24.w,
-                                vertical: 16.h,
-                              ),
-                            ),
-                            style: appStyle(16, Colors.black, FontWeight.w400),
+                              if (_messageController.text.isNotEmpty ||
+                                  _isSending)
+                                Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: GestureDetector(
+                                    onTap: _isSending
+                                        ? null
+                                        : _sendMessageAndNavigate,
+                                    child: Container(
+                                      padding: EdgeInsets.all(12.w),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.pink[400]!,
+                                            Colors.pink[600]!,
+                                          ],
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: _isSending
+                                          ? SizedBox(
+                                              width: 20.w,
+                                              height: 20.w,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(Colors.white),
+                                              ),
+                                            )
+                                          : Icon(
+                                              Icons.send_rounded,
+                                              color: Colors.white,
+                                              size: 20.w,
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -211,7 +319,9 @@ class _MatchPageState extends State<MatchPage>
                               child: _QuickReplyButton(
                                 text: 'How are you?',
                                 onTap: () {
-                                  _messageController.text = 'How are you?';
+                                  setState(() {
+                                    _messageController.text = 'How are you?';
+                                  });
                                 },
                               ),
                             ),
@@ -220,8 +330,10 @@ class _MatchPageState extends State<MatchPage>
                               child: _QuickReplyButton(
                                 text: 'How\'s your day going?',
                                 onTap: () {
-                                  _messageController.text =
-                                      'How\'s your day going?';
+                                  setState(() {
+                                    _messageController.text =
+                                        'How\'s your day going?';
+                                  });
                                 },
                               ),
                             ),
@@ -229,7 +341,49 @@ class _MatchPageState extends State<MatchPage>
                         ),
                       ),
 
-                      SizedBox(height: 24.h),
+                      SizedBox(height: 16.h),
+
+                      // Send message button
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isSending
+                                ? null
+                                : _sendMessageAndNavigate,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.pink[500],
+                              padding: EdgeInsets.symmetric(vertical: 16.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.r),
+                              ),
+                              elevation: 4,
+                            ),
+                            child: _isSending
+                                ? SizedBox(
+                                    height: 20.h,
+                                    width: 20.w,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    'Send Message',
+                                    style: appStyle(
+                                      16,
+                                      Colors.white,
+                                      FontWeight.w700,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 12.h),
 
                       // Keep swiping button
                       ScaleTransition(

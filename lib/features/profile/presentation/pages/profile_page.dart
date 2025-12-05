@@ -9,6 +9,7 @@ import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/constants/kolors.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -523,6 +524,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final isDarkMode = ref.read(themeProvider.notifier).isDarkMode;
     final bgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
     final handleColor = isDarkMode ? Colors.grey[700] : Colors.grey[300];
+    final textColor = isDarkMode ? Colors.white : Kolors.jetBlack;
 
     showModalBottomSheet(
       context: context,
@@ -530,23 +532,51 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
         ),
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: handleColor,
-                  borderRadius: BorderRadius.circular(2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Settings',
+                      style: appStyle(
+                        20.sp,
+                        textColor,
+                        FontWeight.w800,
+                      ).copyWith(letterSpacing: -0.3),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 8.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.grey[800] : Colors.white,
+                          borderRadius: BorderRadius.circular(22.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 20,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(Icons.close, size: 20.w, color: textColor),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 20),
-              // _buildThemeToggle(context),
               _buildBottomSheetOption(
                 'Account Settings',
                 Iconsax.user_copy,
@@ -604,7 +634,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   void _showAccountSettingsBottomSheet(BuildContext context) {
     final isDarkMode = ref.read(themeProvider.notifier).isDarkMode;
     final bgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final handleColor = isDarkMode ? Colors.grey[700] : Colors.grey[300];
     final textColor = isDarkMode ? Colors.white : Colors.black;
 
     showModalBottomSheet(
@@ -620,20 +649,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: handleColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Account Settings',
-                  style: appStyle(20, textColor, FontWeight.w700),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Account Settings',
+                      style: appStyle(
+                        20.sp,
+                        textColor,
+                        FontWeight.w800,
+                      ).copyWith(letterSpacing: -0.3),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 8.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.grey[800] : Colors.white,
+                          borderRadius: BorderRadius.circular(22.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 20,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(Icons.close, size: 20.w, color: textColor),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -719,60 +769,137 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
+    final passwordController = TextEditingController();
+    bool isLoading = false;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.r),
-        ),
-        title: Row(
-          children: [
-            const Icon(Icons.warning_rounded, color: Colors.red, size: 24),
-            const SizedBox(width: 12),
-            Text(
-              'Delete Account',
-              style: appStyle(18, Colors.black, FontWeight.w800),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30.r),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.warning_rounded, color: Colors.red, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Delete Account',
+                  style: appStyle(18, Colors.black, FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
+                style: appStyle(14, Colors.black, FontWeight.w400),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Enter your password to confirm:',
+                style: appStyle(13, Colors.grey[700]!, FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: 'Current password',
+                  hintStyle: appStyle(14, Colors.grey[400]!, FontWeight.w400),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: appStyle(14.sp, Colors.grey, FontWeight.w600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      if (passwordController.text.trim().isEmpty) {
+                        CustomSnackbar.show(
+                          context,
+                          message: 'Please enter your password',
+                          type: SnackbarType.error,
+                        );
+                        return;
+                      }
+
+                      setState(() => isLoading = true);
+
+                      final success = await ref
+                          .read(authProvider.notifier)
+                          .deleteAccount(passwordController.text.trim());
+
+                      if (context.mounted) {
+                        if (success) {
+                          Navigator.pop(context);
+                          context.go('/login');
+                          CustomSnackbar.show(
+                            context,
+                            message: 'Your account has been deleted',
+                            type: SnackbarType.success,
+                          );
+                        } else {
+                          setState(() => isLoading = false);
+                          final error = ref.read(authProvider).error;
+                          CustomSnackbar.show(
+                            context,
+                            message: error ?? 'Failed to delete account',
+                            type: SnackbarType.error,
+                          );
+                        }
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+              ),
+              child: isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      'Delete',
+                      style: appStyle(14.sp, Colors.white, FontWeight.w600),
+                    ),
             ),
           ],
         ),
-        content: Text(
-          'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
-          style: appStyle(14, Colors.black, FontWeight.w400),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: appStyle(14.sp, Colors.grey, FontWeight.w600),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              // TODO: Implement account deletion via API
-              Navigator.pop(context);
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) {
-                context.go('/login');
-
-                CustomSnackbar.show(
-                  context,
-                  message: 'Your account has been deleted',
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-            ),
-            child: Text(
-              'Delete',
-              style: appStyle(14.sp, Colors.white, FontWeight.w600),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -805,6 +932,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: bgColor,
+
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: color, size: 20),

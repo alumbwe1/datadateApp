@@ -80,6 +80,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, void>> deleteAccount(String currentPassword) async {
+    try {
+      await remoteDataSource.deleteAccount(currentPassword);
+      await localDataSource.clearAuthData();
+      return const Right(null);
+    } on AuthFailure catch (e) {
+      return Left(e);
+    } on NetworkFailure catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(AuthFailure('Account deletion failed: ${e.toString()}'));
+    }
+  }
+
+  @override
   Future<Either<Failure, User>> getCurrentUser() async {
     try {
       final token = await localDataSource.getAuthToken();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/constants/kolors.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final double initialMinAge;
@@ -72,7 +72,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         position: _slideAnimation,
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F7),
+            color: Colors.white,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(32.r),
               topRight: Radius.circular(32.r),
@@ -99,7 +99,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    spacing: 5.h,
                     children: [
                       Text(
                         'Filters',
@@ -109,6 +109,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                           FontWeight.w700,
                         ).copyWith(letterSpacing: -0.3),
                       ),
+                      Spacer(),
                       GestureDetector(
                         onTap: _handleReset,
                         child: Container(
@@ -118,15 +119,47 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(20.r),
+                            borderRadius: BorderRadius.circular(22.r),
+
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 20,
+                                offset: const Offset(0, 2), // subtle iOS shadow
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            'Reset',
-                            style: appStyle(
-                              15,
-                              AppColors.primaryLight,
-                              FontWeight.w600,
-                            ),
+                          child: Icon(
+                            Icons.refresh,
+                            size: 20.w,
+                            color: Kolors.jetBlack,
+                          ),
+                        ),
+                      ),
+
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(22.r),
+
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 20,
+                                offset: const Offset(0, 2), // subtle iOS shadow
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            size: 20.w,
+                            color: Kolors.jetBlack,
                           ),
                         ),
                       ),

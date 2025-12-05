@@ -10,6 +10,7 @@ abstract class AuthRepository {
     required String name,
   });
   Future<Either<Failure, void>> logout();
+  Future<Either<Failure, void>> deleteAccount(String currentPassword);
   Future<Either<Failure, User>> getCurrentUser();
   Future<bool> isLoggedIn();
   Future<String?> getAuthToken();

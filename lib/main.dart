@@ -21,10 +21,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
   if (kDebugMode) {
-    print('📬 Background message received: ${message.messageId}');
-    print('Title: ${message.notification?.title}');
-    print('Body: ${message.notification?.body}');
-    print('Data: ${message.data}');
+    CustomLogs.info('📬 Background message received: ${message.messageId}');
+    CustomLogs.info('Title: ${message.notification?.title}');
+    CustomLogs.info('Body: ${message.notification?.body}');
+    CustomLogs.info('Data: ${message.data}');
   }
 
   // Handle the message (e.g., show notification, update local data)

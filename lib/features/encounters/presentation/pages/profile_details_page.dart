@@ -86,21 +86,27 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
       if (mounted) {
         // Check if it's a match
         if (matchInfo != null && matchInfo['matched'] == true) {
-          // Show match dialog
-          Navigator.of(context).pushReplacement(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  MatchPage(
-                    profileName: widget.profile.displayName,
-                    profilePhoto: widget.profile.photos.first,
-                  ),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-              transitionDuration: const Duration(milliseconds: 400),
-            ),
-          );
+          // Extract room_id from match info
+          final roomId = matchInfo['room_id'] as int?;
+
+          if (roomId != null) {
+            // Show match dialog
+            Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    MatchPage(
+                      profileName: widget.profile.displayName,
+                      profilePhoto: widget.profile.photos.first,
+                      roomId: roomId,
+                    ),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                transitionDuration: const Duration(milliseconds: 400),
+              ),
+            );
+          }
         } else {
           // Just show success message and go back
           ScaffoldMessenger.of(context).showSnackBar(
@@ -166,20 +172,26 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
       if (mounted) {
         // Check if it's a match
         if (matchInfo != null && matchInfo['matched'] == true) {
-          Navigator.of(context).pushReplacement(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  MatchPage(
-                    profileName: widget.profile.displayName,
-                    profilePhoto: widget.profile.photos.first,
-                  ),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-              transitionDuration: const Duration(milliseconds: 400),
-            ),
-          );
+          // Extract room_id from match info
+          final roomId = matchInfo['room_id'] as int?;
+
+          if (roomId != null) {
+            Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    MatchPage(
+                      profileName: widget.profile.displayName,
+                      profilePhoto: widget.profile.photos.first,
+                      roomId: roomId,
+                    ),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                transitionDuration: const Duration(milliseconds: 400),
+              ),
+            );
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -79,9 +79,9 @@ class EncountersNotifier extends StateNotifier<EncountersState> {
     int count = 0;
     filters.forEach((key, value) {
       if (value != null) {
-        if (value is bool && value == true)
+        if (value is bool && value == true) {
           count++;
-        else if (value is String && value.isNotEmpty)
+        } else if (value is String && value.isNotEmpty)
           count++;
         else if (value is int)
           count++;

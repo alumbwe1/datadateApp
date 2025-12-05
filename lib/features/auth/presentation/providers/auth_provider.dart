@@ -100,6 +100,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState();
   }
 
+  Future<bool> deleteAccount(String currentPassword) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await _authRepository.deleteAccount(currentPassword);
+
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
+      (_) => state = AuthState(), // Clear state on successful deletion
+    );
+
+    return result.isRight();
+  }
+
   Future<void> checkAuthStatus() async {
     final isLoggedIn = await _authRepository.isLoggedIn();
     if (isLoggedIn) {

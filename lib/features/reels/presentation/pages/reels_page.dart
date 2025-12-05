@@ -97,21 +97,27 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
 
       if (mounted) {
         if (matchInfo != null && matchInfo['matched'] == true) {
-          // It's a match! Show match page
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  MatchPage(
-                    profileName: profileName,
-                    profilePhoto: profilePhoto,
-                  ),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-              transitionDuration: const Duration(milliseconds: 400),
-            ),
-          );
+          // Extract room_id from match info
+          final roomId = matchInfo['room_id'] as int?;
+
+          if (roomId != null) {
+            // It's a match! Show match page
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    MatchPage(
+                      profileName: profileName,
+                      profilePhoto: profilePhoto,
+                      roomId: roomId,
+                    ),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                transitionDuration: const Duration(milliseconds: 400),
+              ),
+            );
+          }
         } else {
           CustomSnackbar.show(
             context,

@@ -52,7 +52,24 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Debug: Log profiles when they change
+    final profiles = ref.watch(encountersProvider).profiles;
+    if (profiles.isNotEmpty) {
+      debugPrint('📋 Loaded ${profiles.length} profiles:');
+      for (var i = 0; i < profiles.length; i++) {
+        debugPrint(
+          '  ${i + 1}. ${profiles[i].displayName}, ${profiles[i].age}',
+        );
+      }
+    }
+  }
+
   Future<void> _loadProfilesWithPreference() async {
+    debugPrint('🔄 Loading profiles with preference...');
+
     // Load user profile to get gender preference
     await ref.read(profileProvider.notifier).loadProfile();
 
@@ -60,7 +77,14 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     if (profile != null && profile.preferredGenders.isNotEmpty) {
       // Use the first preferred gender (or you can modify to support multiple)
       final preferredGender = profile.preferredGenders.first;
-      ref.read(encountersProvider.notifier).loadProfiles(preferredGender);
+      debugPrint('👤 User prefers: $preferredGender');
+
+      await ref.read(encountersProvider.notifier).loadProfiles(preferredGender);
+
+      final loadedProfiles = ref.read(encountersProvider).profiles;
+      debugPrint('✅ Successfully loaded ${loadedProfiles.length} profiles');
+    } else {
+      debugPrint('⚠️ No gender preference found');
     }
   }
 
@@ -70,9 +94,14 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     String profileName,
     String profilePhoto,
   ) async {
+    debugPrint(
+      '👆 Swiped ${direction == CardSwiperDirection.right ? "RIGHT ❤️" : "LEFT ❌"} on $profileName (ID: $profileId)',
+    );
+
     // Instant API call based on direction
     if (direction == CardSwiperDirection.right) {
       try {
+        debugPrint('💕 Sending like to $profileName...');
         final matchInfo = await ref
             .read(encountersProvider.notifier)
             .likeProfile(profileId);
@@ -80,14 +109,23 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
         if (mounted) {
           // Check if it's a match
           if (matchInfo != null && matchInfo['matched'] == true) {
-            Future.delayed(const Duration(milliseconds: 400), () {
-              if (mounted) {
-                _showMatchDialog(profileName, profilePhoto);
-              }
-            });
+            debugPrint('🎉 IT\'S A MATCH with $profileName!');
+            // Extract room_id from match info
+            final roomId = matchInfo['room_id'] as int?;
+
+            if (roomId != null) {
+              Future.delayed(const Duration(milliseconds: 400), () {
+                if (mounted) {
+                  _showMatchDialog(profileName, profilePhoto, roomId);
+                }
+              });
+            }
+          } else {
+            debugPrint('✅ Like sent to $profileName (no match yet)');
           }
         }
       } catch (e) {
+        debugPrint('❌ Error liking $profileName: $e');
         if (mounted) {
           // Handle "already liked" error
           final errorMessage = e.toString();
@@ -109,11 +147,14 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
         }
       }
     } else if (direction == CardSwiperDirection.left) {
+      debugPrint('⏭️ Skipping $profileName');
       ref.read(encountersProvider.notifier).skipProfile(profileId);
     }
   }
 
   void _animateSwipeFeedback(bool isLike) {
+    debugPrint('🎬 Animating ${isLike ? "LIKE" : "NOPE"} overlay');
+
     setState(() {
       if (isLike) {
         _showLikeOverlay = true;
@@ -125,20 +166,22 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
       _overlayOpacity = 1.0;
     });
 
-    _swipeAnimationController.forward().then((_) {
-      Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted) {
-          _swipeAnimationController.reverse().then((_) {
-            if (mounted) {
-              setState(() {
-                _showLikeOverlay = false;
-                _showNopeOverlay = false;
-                _overlayOpacity = 0.0;
-              });
-            }
-          });
-        }
-      });
+    // Quick fade out animation
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _overlayOpacity = 0.0;
+        });
+
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (mounted) {
+            setState(() {
+              _showLikeOverlay = false;
+              _showNopeOverlay = false;
+            });
+          }
+        });
+      }
     });
   }
 
@@ -164,7 +207,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   child: Text(
                     'HeartLink',
                     style: appStyle(
-                      26.sp,
+                      24.sp,
                       Colors.white,
                       FontWeight.w800,
                     ).copyWith(letterSpacing: -0.5, height: 1),
@@ -294,34 +337,39 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
                 child: Stack(
                   children: [
-                    Stack(
-                      children: [
-                        CardSwiper(
-                          controller: _controller,
-                          cardsCount: profiles.length,
-                          numberOfCardsDisplayed: 1,
-                          backCardOffset: const Offset(0, -20),
-                          padding: EdgeInsets.zero,
-                          duration: const Duration(milliseconds: 200),
-                          onSwipe: (previousIndex, currentIndex, direction) {
-                            final profile = profiles[previousIndex];
+                    CardSwiper(
+                      controller: _controller,
+                      cardsCount: profiles.length,
+                      numberOfCardsDisplayed: 1,
+                      backCardOffset: const Offset(0, -20),
+                      padding: EdgeInsets.zero,
+                      duration: const Duration(milliseconds: 200),
+                      onSwipe: (previousIndex, currentIndex, direction) {
+                        final profile = profiles[previousIndex];
 
-                            if (direction == CardSwiperDirection.right) {
-                              _animateSwipeFeedback(true);
-                            } else if (direction == CardSwiperDirection.left) {
-                              _animateSwipeFeedback(false);
-                            }
+                        if (direction == CardSwiperDirection.right) {
+                          _animateSwipeFeedback(true);
+                        } else if (direction == CardSwiperDirection.left) {
+                          _animateSwipeFeedback(false);
+                        }
 
-                            _handleSwipe(
-                              direction,
-                              profile.id.toString(),
-                              profile.displayName,
-                              profile.photos.first,
-                            );
-                            return true;
-                          },
-                          cardBuilder: (context, index, x, y) {
-                            return AnimatedBuilder(
+                        // Safe check for photos
+                        final profilePhoto = profile.photos.isNotEmpty
+                            ? profile.photos.first
+                            : '';
+
+                        _handleSwipe(
+                          direction,
+                          profile.id.toString(),
+                          profile.displayName,
+                          profilePhoto,
+                        );
+                        return true;
+                      },
+                      cardBuilder: (context, index, x, y) {
+                        return Stack(
+                          children: [
+                            AnimatedBuilder(
                               animation: _breatheController,
                               builder: (context, child) {
                                 return Transform.scale(
@@ -331,14 +379,21 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                                 );
                               },
                               child: ProfileCard(profile: profiles[index]),
-                            );
-                          },
-                        ),
-                        if (_showLikeOverlay)
-                          SwipeOverlay(isLike: true, opacity: _overlayOpacity),
-                        if (_showNopeOverlay)
-                          SwipeOverlay(isLike: false, opacity: _overlayOpacity),
-                      ],
+                            ),
+                            // Overlay on the CURRENT card being swiped
+                            if (_showLikeOverlay)
+                              SwipeOverlay(
+                                isLike: true,
+                                opacity: _overlayOpacity,
+                              ),
+                            if (_showNopeOverlay)
+                              SwipeOverlay(
+                                isLike: false,
+                                opacity: _overlayOpacity,
+                              ),
+                          ],
+                        );
+                      },
                     ),
                     Positioned(
                       bottom: 2.h,
@@ -656,11 +711,14 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   //   );
   // }
 
-  void _showMatchDialog(String profileName, String profilePhoto) {
+  void _showMatchDialog(String profileName, String profilePhoto, int roomId) {
     Navigator.of(context).push(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            MatchPage(profileName: profileName, profilePhoto: profilePhoto),
+        pageBuilder: (context, animation, secondaryAnimation) => MatchPage(
+          profileName: profileName,
+          profilePhoto: profilePhoto,
+          roomId: roomId,
+        ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },

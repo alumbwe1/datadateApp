@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/utils/interest_emoji_mapper.dart';
 import '../../domain/entities/profile.dart';
 import '../pages/profile_details_page.dart';
 import '../providers/encounters_provider.dart';
@@ -315,7 +316,7 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                           ],
                         ),
 
-                        // Interests
+                        // Interests with emojis
                         if (widget.profile.interests.isNotEmpty) ...[
                           SizedBox(height: 12.h),
                           Wrap(
@@ -330,20 +331,31 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                                       vertical: 6.h,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
                                         color: Colors.white.withOpacity(0.3),
-                                        width: 1,
+                                        width: 0.7.w,
                                       ),
                                     ),
-                                    child: Text(
-                                      interest,
-                                      style: appStyle(
-                                        12.sp,
-                                        Colors.white,
-                                        FontWeight.w600,
-                                      ).copyWith(letterSpacing: 0.1),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          InterestEmojiMapper.getEmoji(
+                                            interest,
+                                          ),
+                                          style: TextStyle(fontSize: 14.sp),
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          interest,
+                                          style: appStyle(
+                                            12.sp,
+                                            Colors.white,
+                                            FontWeight.w600,
+                                          ).copyWith(letterSpacing: 0.1),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 )
@@ -367,7 +379,6 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withOpacity(0.25), width: 1),
       ),
