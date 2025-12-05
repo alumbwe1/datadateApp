@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:datadate/core/widgets/custom_snackbar.dart';
+import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -442,7 +443,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   style: appStyle(
                     15,
                     Colors.black,
-                    FontWeight.w600,
+                    FontWeight.w800,
                   ).copyWith(letterSpacing: -0.3),
                 ),
               ],
@@ -496,8 +497,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           child: OutlinedButton(
             onPressed: () => _showLogoutDialog(context, ref),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              side: const BorderSide(color: Colors.red, width: 1.5),
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              side: BorderSide(color: Colors.red, width: 1.0.w),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(40.r),
               ),
@@ -886,12 +887,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               child: isLoading
                   ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
+                      width: 20.w,
+                      height: 20.h,
+                      child: LottieLoadingIndicator(),
                     )
                   : Text(
                       'Delete',
@@ -957,10 +955,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(32.r),
+        ),
         title: Text(
           'Logout',
-          style: appStyle(18, Colors.black, FontWeight.w700),
+          style: appStyle(18.sp, Colors.black, FontWeight.w700),
         ),
         content: Text(
           'Are you sure you want to logout?',

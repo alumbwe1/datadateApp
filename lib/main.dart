@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'
+    show FlutterSecureStorage;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/constants/app_constants.dart';
 import 'core/network/api_client.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
@@ -33,7 +36,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  final secureStorage = const FlutterSecureStorage();
+  final String? token = await secureStorage.read(
+    key: AppConstants.keyAuthToken,
+  );
+  if (token != null && token.isNotEmpty) {
+    CustomLogs.info('Auth token loaded from secure storage', tag: 'MAIN');
+    CustomLogs.debug('Auth Token: $token', tag: 'MAIN');
+  } else {
+    CustomLogs.info('No auth token found in secure storage', tag: 'MAIN');
+  }
   // Configure logging system
   _configureLogging();
 
@@ -132,10 +144,10 @@ void _configureLogging() {
       includeStackTrace: kDebugMode,
 
       // Limit stack trace lines to prevent log overflow
-      maxStackTraceLines: 10,
+      maxStackTraceLines: 15,
 
       // Maximum log length before truncation
-      maxLogLength: 2000,
+      maxLogLength: 3000,
 
       // Include metadata for better debugging
       includeMetadata: true,
