@@ -21,6 +21,8 @@ class ProfileModel extends Profile {
     super.lastActive,
     super.videoUrl,
     super.videoDuration,
+    super.matchScore,
+    super.sharedInterests,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,12 @@ class ProfileModel extends Profile {
           : null,
       videoUrl: json['video'] as String?,
       videoDuration: (json['video_duration'] as num?)?.toDouble(),
+      matchScore: json['match_score'] as int?,
+      sharedInterests:
+          (json['shared_interests'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
     );
   }
 
@@ -84,6 +92,8 @@ class ProfileModel extends Profile {
       'interests': interests,
       'imageUrls': photos,
       'last_active': lastActive?.toIso8601String(),
+      'match_score': matchScore,
+      'shared_interests': sharedInterests,
     };
   }
 }

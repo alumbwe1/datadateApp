@@ -179,6 +179,53 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                     ),
                   ),
 
+                // Match Score Badge
+                if (widget.profile.matchScore != null)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: _getMatchScoreGradient(
+                            widget.profile.matchScore!,
+                          ),
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 14.sp,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            '${widget.profile.matchScore}%',
+                            style: appStyle(
+                              12.sp,
+                              Colors.white,
+                              FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                 // Cleaner gradient overlay
                 Positioned(
                   bottom: 0,
@@ -316,16 +363,15 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                           ],
                         ),
 
-                        // Interests with emojis
+                        // Interests with emojis (prioritize shared interests)
                         if (widget.profile.interests.isNotEmpty) ...[
                           SizedBox(height: 12.h),
                           Wrap(
                             spacing: 6.w,
                             runSpacing: 6.h,
-                            children: widget.profile.interests
-                                .take(3)
+                            children: _getDisplayInterests()
                                 .map(
-                                  (interest) => Container(
+                                  (interestData) => Container(
                                     padding: EdgeInsets.symmetric(
                                       horizontal: 12.w,
                                       vertical: 6.h,
@@ -333,22 +379,29 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: Colors.white.withOpacity(0.3),
-                                        width: 0.7.w,
+                                        color: interestData['isShared']
+                                            ? Colors.pink.withOpacity(0.6)
+                                            : Colors.white.withOpacity(0.3),
+                                        width: interestData['isShared']
+                                            ? 1.2.w
+                                            : 0.7.w,
                                       ),
+                                      color: interestData['isShared']
+                                          ? Colors.pink.withOpacity(0.15)
+                                          : null,
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
                                           InterestEmojiMapper.getEmoji(
-                                            interest,
+                                            interestData['interest'],
                                           ),
                                           style: TextStyle(fontSize: 14.sp),
                                         ),
                                         SizedBox(width: 4.w),
                                         Text(
-                                          interest,
+                                          interestData['interest'],
                                           style: appStyle(
                                             12.sp,
                                             Colors.white,
@@ -402,5 +455,35 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
         ],
       ),
     );
+  }
+
+  List<Color> _getMatchScoreGradient(int score) {
+    if (score >= 75) {
+      return [const Color(0xFF4CAF50), const Color(0xFF66BB6A)]; // Green
+    } else if (score >= 50) {
+      return [const Color(0xFFFF9800), const Color(0xFFFFB74D)]; // Orange
+    } else {
+      return [const Color(0xFF9E9E9E), const Color(0xFFBDBDBD)]; // Grey
+    }
+  }
+
+  List<Map<String, dynamic>> _getDisplayInterests() {
+    final sharedSet = widget.profile.sharedInterests.toSet();
+    final displayInterests = <Map<String, dynamic>>[];
+
+    // Add shared interests first
+    for (final interest in widget.profile.sharedInterests.take(2)) {
+      displayInterests.add({'interest': interest, 'isShared': true});
+    }
+
+    // Add remaining interests up to 3 total
+    for (final interest in widget.profile.interests) {
+      if (displayInterests.length >= 3) break;
+      if (!sharedSet.contains(interest)) {
+        displayInterests.add({'interest': interest, 'isShared': false});
+      }
+    }
+
+    return displayInterests;
   }
 }

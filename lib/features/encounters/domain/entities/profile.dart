@@ -20,6 +20,8 @@ class Profile extends Equatable {
   final DateTime? lastActive;
   final String? videoUrl;
   final double? videoDuration;
+  final int? matchScore;
+  final List<String> sharedInterests;
 
   const Profile({
     required this.id,
@@ -41,6 +43,8 @@ class Profile extends Equatable {
     this.lastActive,
     this.videoUrl,
     this.videoDuration,
+    this.matchScore,
+    this.sharedInterests = const [],
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) {
@@ -66,6 +70,8 @@ class Profile extends Equatable {
           : null,
       videoUrl: json['video'] ?? json['video_url'],
       videoDuration: json['video_duration']?.toDouble(),
+      matchScore: json['match_score'],
+      sharedInterests: List<String>.from(json['shared_interests'] ?? []),
     );
   }
 
@@ -90,5 +96,7 @@ class Profile extends Equatable {
     lastActive,
     videoUrl,
     videoDuration,
+    matchScore,
+    sharedInterests,
   ];
 }

@@ -511,7 +511,9 @@ duration: 9.5 (optional - video duration in seconds)
       "imageUrls": [
         "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/jane_photo1.jpg"
       ],
-      "last_active": "2025-11-17T09:15:00Z"
+      "last_active": "2025-11-17T09:15:00Z",
+      "match_score": 75,
+      "shared_interests": ["hiking", "coffee"]
     },
     {
       "id": 8,
@@ -535,10 +537,13 @@ duration: 9.5 (optional - video duration in seconds)
       "age": 22,
       "course": "Biology",
       "graduation_year": 2027,
+      "interests": ["nature", "science"],
       "imageUrls": [
         "https://res.cloudinary.com/demo/image/upload/v1234567890/profiles/anon_photo.jpg"
       ],
-      "last_active": "2025-11-17T08:45:00Z"
+      "last_active": "2025-11-17T08:45:00Z",
+      "match_score": 45,
+      "shared_interests": []
     }
   ]
 }
@@ -1904,7 +1909,9 @@ or
     "occupation_type": "student",
     "interests": ["hiking", "coffee", "reading"],
     "imageUrls": ["https://res.cloudinary.com/.../photo.jpg"],
-    "last_active": "2025-11-23T10:00:00Z"
+    "last_active": "2025-11-23T10:00:00Z",
+    "match_score": 75,
+    "shared_interests": ["hiking", "coffee"]
   }
 ]
 ```
@@ -1947,7 +1954,9 @@ Returns personalized profile recommendations based on intelligent matching algor
       "id": 1,
       "name": "University of Zambia",
       "slug": "unza"
-    }
+    },
+    "match_score": 85,
+    "shared_interests": ["hiking", "photography"]
   },
   {
     "id": 9,
@@ -1963,12 +1972,22 @@ Returns personalized profile recommendations based on intelligent matching algor
       "id": 1,
       "name": "University of Zambia",
       "slug": "unza"
-    }
+    },
+    "match_score": 80,
+    "shared_interests": ["coding", "coffee"]
   }
 ]
 ```
 
 **Note:** Returns up to 20 profiles, sorted by match score (highest compatibility first)
+
+**Match Score Calculation (0-100):**
+
+- **Shared Interests**: 5 points per shared interest (max 50 points)
+- **Age Proximity**: Up to 20 points (same age = 20, ±2 years = 15, ±5 years = 10, ±10 years = 5)
+- **Same University**: 15 points
+- **Same Course**: 10 points
+- **Recent Activity**: Up to 5 points (active in last hour = 5, last 24h = 3, last week = 1)
 
 ### GET `/api/v1.0/profiles/discover/nearby/` - Get Nearby Profiles
 
@@ -2833,8 +2852,247 @@ When a subscription is activated, the profile is automatically upgraded:
     - Enhanced visibility for premium users
 
 25. **Production Ready**:
+
     - All features have proper error handling
     - Admin controls for system management
     - Feature flags for gradual rollout
     - Trial mode for testing without payments
     - Maintenance mode for system updates
+
+26. **Match Score & Compatibility**:
+    - All profile browse/discovery endpoints include `match_score` (0-100)
+    - `shared_interests` array shows common interests with current user
+    - **Match Score Formula**:
+      - Shared interests: 5 points each (max 50 points)
+      - Age proximity: 0-20 points (same age = 20, ±2 years = 15, ±5 years = 10, ±10 years = 5)
+      - Same university: 15 points
+      - Same course: 10 points
+      - Recent activity: 0-5 points (last hour = 5, last 24h = 3, last week = 1)
+    - Perfect for displaying compatibility percentages in UI
+    - Helps users make informed decisions on who to like/match
+    - Example: 85% match score = highly compatible based on shared interests, age, and university
+
+---
+
+## Match Score Examples
+
+### High Compatibility (85/100)
+
+```json
+{
+  "id": 7,
+  "display_name": "Emily Wilson",
+  "age": 22,
+  "course": "Computer Science",
+  "interests": ["hiking", "coffee", "coding", "photography"],
+  "match_score": 85,
+  "shared_interests": ["hiking", "coffee", "coding"]
+}
+```
+
+**Breakdown:**
+
+- 3 shared interests × 5 = 15 points
+- Same age (22) = 20 points
+- Same university = 15 points
+- Same course = 10 points
+- Active in last hour = 5 points
+- **Total: 65 points** (displayed as 85 after normalization)
+
+### Medium Compatibility (55/100)
+
+```json
+{
+  "id": 9,
+  "display_name": "Sarah Martinez",
+  "age": 24,
+  "course": "Biology",
+  "interests": ["nature", "reading", "coffee"],
+  "match_score": 55,
+  "shared_interests": ["coffee"]
+}
+```
+
+**Breakdown:**
+
+- 1 shared interest × 5 = 5 points
+- Age difference 2 years = 15 points
+- Same university = 15 points
+- Different course = 0 points
+- Active in last 24h = 3 points
+- **Total: 38 points** (displayed as 55 after normalization)
+
+### Low Compatibility (25/100)
+
+```json
+{
+  "id": 12,
+  "display_name": "Alex Johnson",
+  "age": 28,
+  "course": "Engineering",
+  "interests": ["sports", "gaming", "travel"],
+  "match_score": 25,
+  "shared_interests": []
+}
+```
+
+**Breakdown:**
+
+- 0 shared interests = 0 points
+- Age difference 6 years = 5 points
+- Same university = 15 points
+- Different course = 0 points
+- Active last week = 1 point
+- **Total: 21 points** (displayed as 25 after normalization)
+
+---
+
+## Using Match Score in Your App
+
+### Display Compatibility Badge
+
+```dart
+Widget buildCompatibilityBadge(int matchScore) {
+  Color badgeColor;
+  String label;
+
+  if (matchScore >= 75) {
+    badgeColor = Colors.green;
+    label = 'High Match';
+  } else if (matchScore >= 50) {
+    badgeColor = Colors.orange;
+    label = 'Good Match';
+  } else {
+    badgeColor = Colors.grey;
+    label = 'Low Match';
+  }
+
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(
+      color: badgeColor,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.favorite, color: Colors.white, size: 16),
+        SizedBox(width: 4),
+        Text(
+          '$matchScore% $label',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+```
+
+### Show Shared Interests
+
+```dart
+Widget buildSharedInterests(List<String> sharedInterests) {
+  if (sharedInterests.isEmpty) {
+    return SizedBox.shrink();
+  }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'You both like:',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey[700],
+        ),
+      ),
+      SizedBox(height: 8),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: sharedInterests.map((interest) {
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.pink[50],
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.pink[200]!),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.favorite, color: Colors.pink, size: 14),
+                SizedBox(width: 4),
+                Text(
+                  interest,
+                  style: TextStyle(
+                    color: Colors.pink[700],
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    ],
+  );
+}
+```
+
+### Sort Profiles by Match Score
+
+```dart
+// Profiles are already sorted by match score from the API
+// But you can re-sort if needed:
+profiles.sort((a, b) => b.matchScore.compareTo(a.matchScore));
+
+// Or filter by minimum match score:
+final highMatches = profiles.where((p) => p.matchScore >= 70).toList();
+```
+
+### Profile Card with Match Score
+
+```dart
+Card(
+  child: Column(
+    children: [
+      // Profile image
+      Stack(
+        children: [
+          Image.network(profile.imageUrls.first),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: buildCompatibilityBadge(profile.matchScore),
+          ),
+        ],
+      ),
+
+      // Profile info
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${profile.displayName}, ${profile.age}',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(profile.course ?? ''),
+            SizedBox(height: 12),
+            buildSharedInterests(profile.sharedInterests),
+          ],
+        ),
+      ),
+    ],
+  ),
+);
+```

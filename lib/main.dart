@@ -29,9 +29,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     CustomLogs.info('Body: ${message.notification?.body}');
     CustomLogs.info('Data: ${message.data}');
   }
-
-  // Handle the message (e.g., show notification, update local data)
-  // Note: You can't update UI here, only handle data
 }
 
 void main() async {

@@ -68,8 +68,8 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
   }
 
   int _calculateMatchPercentage() {
-    // Calculate match percentage based on profile data
-    return 85 + (widget.profile.interests.length * 2);
+    // Use match score from API if available, otherwise default to 75
+    return widget.profile.matchScore ?? 75;
   }
 
   Future<void> _handleLike() async {
@@ -573,6 +573,81 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                               ),
                             ),
                             const SizedBox(height: 28),
+                            // Shared Interests Section
+                            if (widget.profile.sharedInterests.isNotEmpty)
+                              TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                duration: const Duration(milliseconds: 750),
+                                curve: Curves.easeOut,
+                                builder: (context, value, child) {
+                                  return Transform.translate(
+                                    offset: Offset(0, 20 * (1 - value)),
+                                    child: Opacity(
+                                      opacity: value,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.favorite,
+                                          color: Colors.pink,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'You Both Like',
+                                          style: appStyle(
+                                            18,
+                                            Colors.black,
+                                            FontWeight.w800,
+                                          ).copyWith(letterSpacing: -0.4),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 10,
+                                      runSpacing: 10,
+                                      children: widget.profile.sharedInterests
+                                          .asMap()
+                                          .entries
+                                          .map(
+                                            (entry) =>
+                                                TweenAnimationBuilder<double>(
+                                                  tween: Tween(
+                                                    begin: 0.0,
+                                                    end: 1.0,
+                                                  ),
+                                                  duration: Duration(
+                                                    milliseconds:
+                                                        750 + (entry.key * 100),
+                                                  ),
+                                                  curve: Curves.easeOutBack,
+                                                  builder:
+                                                      (context, value, child) {
+                                                        return Transform.scale(
+                                                          scale: value,
+                                                          child: child,
+                                                        );
+                                                      },
+                                                  child: _buildInterestChip(
+                                                    entry.value,
+                                                    isShared: true,
+                                                  ),
+                                                ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (widget.profile.sharedInterests.isNotEmpty)
+                              const SizedBox(height: 28),
                             TweenAnimationBuilder<double>(
                               tween: Tween(begin: 0.0, end: 1.0),
                               duration: const Duration(milliseconds: 800),
@@ -851,7 +926,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
     );
   }
 
-  Widget _buildInterestChip(String interest) {
+  Widget _buildInterestChip(String interest, {bool isShared = false}) {
     IconData icon;
     Color iconColor;
 
@@ -897,12 +972,17 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isShared ? Colors.pink[50] : Colors.white,
         borderRadius: BorderRadius.circular(44),
-        border: Border.all(color: Colors.grey.shade300, width: 0.7.w),
+        border: Border.all(
+          color: isShared ? Colors.pink[300]! : Colors.grey.shade300,
+          width: isShared ? 1.5 : 0.7.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: isShared
+                ? Colors.pink.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -924,7 +1004,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
             interest,
             style: appStyle(
               14,
-              Colors.black87,
+              isShared ? Colors.pink[700]! : Colors.black87,
               FontWeight.w600,
             ).copyWith(letterSpacing: -0.2),
           ),
