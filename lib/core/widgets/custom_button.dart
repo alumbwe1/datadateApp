@@ -54,16 +54,16 @@ class CustomButton extends StatelessWidget {
 
     return Material(
       elevation: elevation ?? 0,
-      borderRadius: BorderRadius.circular(radius ?? 6.r),
+      borderRadius: BorderRadius.circular(radius ?? 40.r),
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(radius ?? 6.r),
+        borderRadius: BorderRadius.circular(radius ?? 40.r),
         onTap: onTap,
         child: Container(
           width: btnWidth ?? ScreenUtil().screenWidth,
-          height: btnHieght ?? 48.h,
+          height: btnHieght ?? 56.h,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(radius ?? 6.r),
+            borderRadius: BorderRadius.circular(radius ?? 40.r),
             gradient: gradient,
             color: gradient == null ? resolvedColors.backgroundColor : null,
             boxShadow: boxShadow,
@@ -87,7 +87,7 @@ class CustomButton extends StatelessWidget {
     switch (variant) {
       case ButtonVariant.filled:
         return _ButtonColors(
-          backgroundColor: btnColor ?? Kolors.kPrimary,
+          backgroundColor: btnColor ?? Kolors.jetBlack,
           borderColor: borderColor ?? Colors.transparent,
           textColor: textColor ?? Colors.white,
         );

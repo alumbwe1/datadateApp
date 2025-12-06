@@ -436,11 +436,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: appStyle(
-                    15,
-                    Colors.black,
-                    FontWeight.w800,
-                  ).copyWith(letterSpacing: -0.3),
+                  style: appStyle(15.sp, Colors.black, FontWeight.w700),
                 ),
               ],
             ),

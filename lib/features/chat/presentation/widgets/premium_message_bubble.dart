@@ -166,14 +166,14 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
     if (widget.isSent) {
       return BorderRadius.only(
         bottomLeft: Radius.circular(30.r),
-        bottomRight: Radius.circular(2),
+        bottomRight: Radius.circular(2.r),
         topLeft: Radius.circular(30.r),
         topRight: Radius.circular(30.r),
       );
     } else {
       return BorderRadius.only(
-        bottomLeft: Radius.circular(20.r),
-        bottomRight: Radius.circular(2.r),
+        bottomLeft: Radius.circular(2.r),
+        bottomRight: Radius.circular(30.r),
         topLeft: Radius.circular(30.r),
         topRight: Radius.circular(30.r),
       );
@@ -286,8 +286,8 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
 
   Widget _buildAvatar() {
     return Container(
-      width: 36,
-      height: 36,
+      width: 40.w,
+      height: 40.h,
       margin: const EdgeInsets.only(right: 10, bottom: 2),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
