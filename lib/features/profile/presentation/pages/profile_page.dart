@@ -57,7 +57,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings_outlined, color: textColor, size: 24),
+            icon: Icon(Iconsax.setting_copy, color: textColor, size: 24),
             onPressed: () {
               HapticFeedback.lightImpact();
               _showSettingsBottomSheet(context);
@@ -327,11 +327,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       children: [
         Text(
           'Interests',
-          style: appStyle(
-            20.sp,
-            Colors.black,
-            FontWeight.w800,
-          ).copyWith(letterSpacing: -0.3),
+          style: appStyle(20.sp, Colors.black, FontWeight.w700),
         ),
         const SizedBox(height: 12),
         Wrap(

@@ -190,7 +190,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
                     26.sp,
                     Colors.white,
                     FontWeight.w800,
-                  ).copyWith(letterSpacing: -0.3),
+                  ).copyWith(letterSpacing: -0.5),
                 ),
               ),
             ],

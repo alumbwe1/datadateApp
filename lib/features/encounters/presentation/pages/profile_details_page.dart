@@ -4,13 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/interest_emoji_mapper.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
 import '../../domain/entities/profile.dart';
 import '../providers/encounters_provider.dart';
 import 'match_page.dart';
 import 'dart:math' as math;
+
+extension StringExtension on String {
+  String capitalize() {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
+  }
+}
 
 class ProfileDetailsPage extends ConsumerStatefulWidget {
   final Profile profile;
@@ -29,6 +37,32 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
   late Animation<double> _matchScaleAnimation;
   late Animation<double> _matchProgressAnimation;
   bool _isLiking = false;
+
+  void _nextImage() {
+    print(
+      '_nextImage called - Current: $_currentPhotoIndex, Total: ${widget.profile.photos.length}',
+    );
+    if (_currentPhotoIndex < widget.profile.photos.length - 1) {
+      setState(() {
+        _currentPhotoIndex++;
+        print('Updated to: $_currentPhotoIndex');
+      });
+    } else {
+      print('Already at last image');
+    }
+  }
+
+  void _previousImage() {
+    print('_previousImage called - Current: $_currentPhotoIndex');
+    if (_currentPhotoIndex > 0) {
+      setState(() {
+        _currentPhotoIndex--;
+        print('Updated to: $_currentPhotoIndex');
+      });
+    } else {
+      print('Already at first image');
+    }
+  }
 
   @override
   void initState() {
@@ -109,46 +143,28 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
           }
         } else {
           // Just show success message and go back
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(Iconsax.heart, color: AppColors.primaryLight, size: 20),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Like sent!',
-                    style: appStyle(14, Colors.white, FontWeight.w600),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.black87,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
+          CustomSnackbar.show(
+            context,
+            message: 'Your like has been sent successfully!',
+            type: SnackbarType.success,
           );
           Navigator.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to send like',
-              style: appStyle(14, Colors.white, FontWeight.w600),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
+        // Parse error message
+        String errorMessage = 'Failed to send like. Please try again.';
+        if (e.toString().contains('already liked')) {
+          errorMessage = 'You have already liked this profile.';
+        } else if (e.toString().contains('network')) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+
+        CustomSnackbar.show(
+          context,
+          message: errorMessage,
+          type: SnackbarType.error,
         );
       }
     } finally {
@@ -193,50 +209,28 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
             );
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(
-                    Icons.star_rounded,
-                    color: Color(0xFFFFB800),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Super Like sent! ⭐',
-                    style: appStyle(14, Colors.white, FontWeight.w600),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.black87,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
+          CustomSnackbar.show(
+            context,
+            message: 'Super Like sent! They\'ll definitely notice you ⭐',
+            type: SnackbarType.success,
           );
           Navigator.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to send super like',
-              style: appStyle(14, Colors.white, FontWeight.w600),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
+        // Parse error message
+        String errorMessage = 'Failed to send super like. Please try again.';
+        if (e.toString().contains('already liked')) {
+          errorMessage = 'You have already liked this profile.';
+        } else if (e.toString().contains('network')) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+
+        CustomSnackbar.show(
+          context,
+          message: errorMessage,
+          type: SnackbarType.error,
         );
       }
     } finally {
@@ -246,42 +240,47 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
     }
   }
 
+  void _handleMessage() {
+    HapticFeedback.lightImpact();
+    CustomSnackbar.show(
+      context,
+      message: 'Messaging is only available after matching! 💬',
+      type: SnackbarType.info,
+      duration: const Duration(seconds: 3),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final imageHeight = screenHeight * 0.5;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Photo Gallery with looping
+          // Photo Gallery - Full width, starts from top with smooth transitions
           Positioned.fill(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPhotoIndex = index % widget.profile.photos.length;
-                });
-              },
-              itemCount: widget.profile.photos.length * 1000,
-              itemBuilder: (context, index) {
-                final photoIndex = index % widget.profile.photos.length;
-                return GestureDetector(
-                  onTapUp: (details) {
-                    final screenWidth = MediaQuery.of(context).size.width;
-                    if (details.globalPosition.dx > screenWidth / 2) {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    } else {
-                      _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    }
+            top: 0,
+            bottom: screenHeight - imageHeight,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Image
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  switchInCurve: Curves.easeInOut,
+                  switchOutCurve: Curves.easeInOut,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(opacity: animation, child: child);
                   },
                   child: CachedNetworkImage(
-                    imageUrl: widget.profile.photos[photoIndex],
+                    key: ValueKey(_currentPhotoIndex),
+                    imageUrl: widget.profile.photos[_currentPhotoIndex],
                     fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
                     placeholder: (context, url) => Container(
                       color: Colors.grey[200],
                       child: const Center(
@@ -293,26 +292,70 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                       child: const Icon(Icons.person, size: 100),
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-
-          // Gradient overlay
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.3),
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.7),
-                  ],
-                  stops: const [0.0, 0.4, 1.0],
                 ),
-              ),
+
+                // Minimal gradient overlay - only at top and bottom edges
+                IgnorePointer(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.2),
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.white.withValues(alpha: 0.3),
+                        ],
+                        stops: const [0.0, 0.15, 0.85, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Tap detector on top
+                if (widget.profile.photos.length > 1)
+                  Positioned.fill(
+                    child: Row(
+                      children: [
+                        // Left half - previous
+                        Expanded(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () {
+                              print(
+                                'Left tap detected - Current: $_currentPhotoIndex',
+                              );
+                              HapticFeedback.lightImpact();
+                              _previousImage();
+                              print(
+                                'After previous - New index: $_currentPhotoIndex',
+                              );
+                            },
+                            child: Container(color: Colors.transparent),
+                          ),
+                        ),
+                        // Right half - next
+                        Expanded(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () {
+                              print(
+                                'Right tap detected - Current: $_currentPhotoIndex',
+                              );
+                              HapticFeedback.lightImpact();
+                              _nextImage();
+                              print(
+                                'After next - New index: $_currentPhotoIndex',
+                              );
+                            },
+                            child: Container(color: Colors.transparent),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
           ),
 
@@ -355,37 +398,45 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
           ),
 
           // Photo indicators
-          Positioned(
-            top: 60,
-            left: 0,
-            right: 0,
-            child: widget.profile.photos.length > 1
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 80),
-                    child: Row(
-                      children: List.generate(
-                        widget.profile.photos.length,
-                        (index) => Expanded(
-                          child: Container(
-                            height: 3,
-                            margin: const EdgeInsets.symmetric(horizontal: 2),
-                            decoration: BoxDecoration(
-                              color: _currentPhotoIndex == index
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
+          if (widget.profile.photos.length > 1)
+            Positioned(
+              top: 60,
+              left: 16,
+              right: 16,
+              child: Row(
+                children: List.generate(widget.profile.photos.length, (index) {
+                  final isActive = index == _currentPhotoIndex;
+                  return Expanded(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 3,
+                      margin: EdgeInsets.only(
+                        right: index < widget.profile.photos.length - 1 ? 4 : 0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(2),
+                        boxShadow: isActive
+                            ? [
+                                BoxShadow(
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                  blurRadius: 4,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                            : [],
                       ),
                     ),
-                  )
-                : const SizedBox.shrink(),
-          ),
+                  );
+                }),
+              ),
+            ),
 
-          // Circular Match Percentage in Center
+          // Circular Match Percentage - positioned above the card
           Positioned(
-            top: MediaQuery.of(context).size.height * 0.35,
+            top: imageHeight - 120,
             left: 0,
             right: 0,
             child: Center(
@@ -405,7 +456,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
           // Scrollable Profile info card
           Positioned(
             left: 0,
-            top: MediaQuery.of(context).size.height * 0.45,
+            top: imageHeight - 40,
             right: 0,
             bottom: 0,
             child: Container(
@@ -480,54 +531,66 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 6),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              IconlyLight.location,
-                                              size: 16,
-                                              color: Colors.grey[600],
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              widget.profile.universityName,
-                                              style: appStyle(
-                                                14,
-                                                Colors.grey[700]!,
-                                                FontWeight.w500,
-                                              ).copyWith(letterSpacing: -0.2),
-                                            ),
-                                          ],
-                                        ),
+                                        if (widget.profile.course != null) ...[
+                                          const SizedBox(height: 6),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.menu_book_rounded,
+                                                size: 16,
+                                                color: Colors.grey[600],
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Flexible(
+                                                child: Text(
+                                                  widget.profile.course!,
+                                                  style:
+                                                      appStyle(
+                                                        14,
+                                                        Colors.grey[700]!,
+                                                        FontWeight.w500,
+                                                      ).copyWith(
+                                                        letterSpacing: -0.2,
+                                                      ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.all(14),
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFF000000),
-                                          Color(0xFF2a2a2a),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(
-                                            alpha: 0.2,
-                                          ),
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 4),
+                                  GestureDetector(
+                                    onTap: _handleMessage,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(14),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF000000),
+                                            Color(0xFF2a2a2a),
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
                                         ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Iconsax.message,
-                                      color: Colors.white,
-                                      size: 22,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.2,
+                                            ),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Iconsax.message,
+                                        color: Colors.white,
+                                        size: 22,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -702,22 +765,86 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildInfoItem(
-                                    'Age',
-                                    widget.profile.age.toString(),
+                            const SizedBox(height: 28),
+                            // Additional Info Cards
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 850),
+                              curve: Curves.easeOut,
+                              builder: (context, value, child) {
+                                return Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: Opacity(opacity: value, child: child),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  border: Border.all(
+                                    color: Colors.grey[200]!,
+                                    width: 1,
                                   ),
                                 ),
-                                Expanded(
-                                  child: _buildInfoItem(
-                                    'University',
-                                    widget.profile.universityName,
-                                  ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildInfoItem(
+                                            'Age',
+                                            widget.profile.age.toString(),
+                                            Icons.cake_outlined,
+                                          ),
+                                        ),
+
+                                        Expanded(
+                                          child: _buildInfoItem(
+                                            'Gender',
+                                            widget.profile.gender.capitalize(),
+                                            widget.profile.gender
+                                                        .toLowerCase() ==
+                                                    'male'
+                                                ? Icons.male
+                                                : Icons.female,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (widget.profile.course != null ||
+                                        widget.profile.graduationYear !=
+                                            null) ...[
+                                      const SizedBox(height: 16),
+
+                                      Row(
+                                        children: [
+                                          if (widget.profile.course != null)
+                                            Expanded(
+                                              child: _buildInfoItem(
+                                                'Program',
+                                                widget.profile.course!,
+                                                Icons.school_outlined,
+                                              ),
+                                            ),
+                                          if (widget.profile.course != null &&
+                                              widget.profile.graduationYear !=
+                                                  null)
+                                            if (widget.profile.graduationYear !=
+                                                null)
+                                              Expanded(
+                                                child: _buildInfoItem(
+                                                  'Graduation',
+                                                  widget.profile.graduationYear
+                                                      .toString(),
+                                                  Icons.calendar_today_outlined,
+                                                ),
+                                              ),
+                                        ],
+                                      ),
+                                    ],
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                             const SizedBox(height: 100),
                           ],
@@ -927,47 +1054,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
   }
 
   Widget _buildInterestChip(String interest, {bool isShared = false}) {
-    IconData icon;
-    Color iconColor;
-
-    switch (interest.toLowerCase()) {
-      case 'gaming':
-        icon = Icons.sports_esports;
-        iconColor = Colors.purple;
-        break;
-      case 'music':
-        icon = Icons.music_note;
-        iconColor = Colors.pink;
-        break;
-      case 'book':
-      case 'reading':
-        icon = Icons.book;
-        iconColor = Colors.blue;
-        break;
-      case 'photography':
-        icon = Icons.camera_alt;
-        iconColor = Colors.orange;
-        break;
-      case 'travel':
-        icon = Icons.flight;
-        iconColor = Colors.teal;
-        break;
-      case 'fitness':
-        icon = Icons.fitness_center;
-        iconColor = Colors.red;
-        break;
-      case 'cooking':
-        icon = Icons.restaurant;
-        iconColor = Colors.deepOrange;
-        break;
-      case 'art':
-        icon = Icons.palette;
-        iconColor = Colors.indigo;
-        break;
-      default:
-        icon = Icons.favorite;
-        iconColor = Colors.pink;
-    }
+    final emoji = InterestEmojiMapper.getEmoji(interest);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -991,14 +1078,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 16, color: iconColor),
-          ),
+          Text(emoji, style: const TextStyle(fontSize: 20)),
           const SizedBox(width: 10),
           Text(
             interest,
@@ -1013,13 +1093,31 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
     );
   }
 
-  Widget _buildInfoItem(String label, String value) {
+  Widget _buildInfoItem(String label, String value, IconData icon) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: appStyle(12, Colors.grey[600]!, FontWeight.normal)),
+        Icon(icon, size: 24, color: Colors.black87),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: appStyle(
+            12,
+            Colors.grey[600]!,
+            FontWeight.w500,
+          ).copyWith(letterSpacing: -0.2),
+        ),
         const SizedBox(height: 4),
-        Text(value, style: appStyle(16, Colors.black, FontWeight.w600)),
+        Text(
+          value,
+          style: appStyle(
+            15,
+            Colors.black,
+            FontWeight.w700,
+          ).copyWith(letterSpacing: -0.3),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
@@ -1030,32 +1128,48 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
     required double size,
     required VoidCallback? onPressed,
   }) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          customBorder: const CircleBorder(),
-          child: Container(
-            decoration: BoxDecoration(shape: BoxShape.circle),
-            child: Center(
-              child: Icon(
-                icon,
-                color: onPressed == null ? color.withValues(alpha: 0.5) : color,
-                size: size * 0.45,
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutBack,
+      builder: (context, value, child) {
+        return Transform.scale(scale: value, child: child);
+      },
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            customBorder: const CircleBorder(),
+            splashColor: color.withValues(alpha: 0.2),
+            highlightColor: color.withValues(alpha: 0.1),
+            child: AnimatedScale(
+              scale: onPressed == null ? 0.9 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              child: Container(
+                decoration: const BoxDecoration(shape: BoxShape.circle),
+                child: Center(
+                  child: Icon(
+                    icon,
+                    color: onPressed == null
+                        ? color.withValues(alpha: 0.5)
+                        : color,
+                    size: size * 0.45,
+                  ),
+                ),
               ),
             ),
           ),

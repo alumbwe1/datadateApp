@@ -1,3 +1,4 @@
+import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,9 +63,9 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
                   child: Text(
                     'Discover',
                     style: appStyle(
-                      26.sp,
+                      24.sp,
                       Colors.white,
-                      FontWeight.w800,
+                      FontWeight.w700,
                     ).copyWith(letterSpacing: -0.5, height: 1),
                   ),
                 ),
@@ -93,7 +94,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
         ),
       ),
       body: discoverState.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.black))
+          ? const Center(child: LottieLoadingIndicator())
           : discoverState.error != null
           ? _buildErrorState(discoverState.error!)
           : profiles.isEmpty

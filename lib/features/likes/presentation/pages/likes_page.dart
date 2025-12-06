@@ -76,10 +76,10 @@ class _LikesPageState extends ConsumerState<LikesPage>
           Text(
             'HeartLink',
             style: appStyle(
-              28.sp,
+              24.sp,
               const Color(0xFFFE3C72),
               FontWeight.w700,
-            ).copyWith(letterSpacing: -0.3),
+            ).copyWith(letterSpacing: -0.5),
           ),
         ],
       ),
