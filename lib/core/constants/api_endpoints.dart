@@ -3,7 +3,7 @@ class ApiEndpoints {
   // Base URL - should be loaded from environment
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:7000',
+    defaultValue: 'http://192.168.91.145:7000',
   );
 
   // Authentication
@@ -24,13 +24,15 @@ class ApiEndpoints {
   // Profiles
   static const String profiles = '/api/v1.0/profiles/profiles/';
   static String profileDetail(int id) => '/api/v1.0/profiles/profiles/$id/';
-  static const String myProfile = '/api/v1.0/profiles/profiles/me/';
+  static const String myProfile = '/api/v1.0/profiles/me/';
   static const String discoverProfiles = '/api/v1.0/profiles/discover/';
   static const String recommendedProfiles =
       '/api/v1.0/profiles/discover/recommended/';
 
+  static const String uploadProfilePhoto =
+      '/api/v1.0/profiles/me/upload_photos/'; // Upload file, returns URL
   static const String uploadProfilePhotos =
-      '/api/v1.0/profiles/profiles/upload_photos/';
+      '/api/v1.0/profiles/me/upload_photos/'; // Send URLs
 
   // Gallery
   static const String gallery = '/api/v1.0/gallery/';

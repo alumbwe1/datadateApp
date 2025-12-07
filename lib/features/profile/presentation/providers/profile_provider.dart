@@ -129,4 +129,29 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       },
     );
   }
+
+  Future<List<String>?> uploadPhotosAndGetUrls(List<String> filePaths) async {
+    print(
+      '🔄 ProfileProvider: Starting uploadPhotosAndGetUrls with ${filePaths.length} files',
+    );
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await repository.uploadProfilePhotos(filePaths);
+
+    return result.fold(
+      (failure) {
+        print('❌ ProfileProvider: Upload failed - ${failure.message}');
+        state = state.copyWith(isLoading: false, error: failure.message);
+        return null;
+      },
+      (photoUrls) {
+        print(
+          '✅ ProfileProvider: Uploaded ${photoUrls.length} photos successfully',
+        );
+        print('📸 Photo URLs: $photoUrls');
+        state = state.copyWith(isLoading: false);
+        return photoUrls;
+      },
+    );
+  }
 }

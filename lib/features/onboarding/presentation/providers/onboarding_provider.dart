@@ -180,12 +180,13 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     try {
       CustomLogs.log('🚀 Starting onboarding completion...');
 
-      // Step 1: Upload photos FIRST (if provided)
+      // Step 1: Upload photos FIRST (if provided) and get URLs
+      List<String>? uploadedPhotoUrls;
       if (state.photos.isNotEmpty) {
         CustomLogs.log('📸 Uploading ${state.photos.length} photos...');
-        final photoUploadSuccess = await _uploadPhotos();
+        uploadedPhotoUrls = await _uploadPhotos();
 
-        if (!photoUploadSuccess) {
+        if (uploadedPhotoUrls == null || uploadedPhotoUrls.isEmpty) {
           CustomLogs.log('❌ Photo upload failed');
           state = state.copyWith(
             isLoading: false,
@@ -193,13 +194,21 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
           );
           return false;
         }
-        CustomLogs.log('✅ Photos uploaded successfully');
+        CustomLogs.log('✅ Photos uploaded successfully: $uploadedPhotoUrls');
       } else {
         CustomLogs.log('⚠️ No photos to upload');
       }
 
       // Step 2: Build profile update data (PATCH /api/v1.0/profiles/me/)
       final Map<String, dynamic> profileData = {};
+
+      // Add uploaded photo URLs if available
+      if (uploadedPhotoUrls != null && uploadedPhotoUrls.isNotEmpty) {
+        profileData['imageUrls'] = uploadedPhotoUrls;
+        CustomLogs.log(
+          '📸 Including ${uploadedPhotoUrls.length} photo URLs in profile update',
+        );
+      }
 
       // Required fields
       if (state.universityId != null) {
@@ -288,7 +297,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     }
   }
 
-  Future<bool> _uploadPhotos() async {
+  Future<List<String>?> _uploadPhotos() async {
     try {
       final profileRepo = _ref.read(profileProvider.notifier);
 
@@ -303,19 +312,20 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         CustomLogs.log('   ${i + 1}. ${photoPaths[i]}');
       }
 
-      // Upload all photos at once
-      final success = await profileRepo.uploadPhotos(photoPaths);
+      // Upload all photos at once and get the URLs
+      final uploadedUrls = await profileRepo.uploadPhotosAndGetUrls(photoPaths);
 
-      if (!success) {
-        CustomLogs.log('❌ Failed to upload photos');
-        return false;
+      if (uploadedUrls == null || uploadedUrls.isEmpty) {
+        CustomLogs.log('❌ Failed to upload photos or no URLs returned');
+        return null;
       }
 
       CustomLogs.log('✅ All photos uploaded successfully');
-      return true;
+      CustomLogs.log('📸 Uploaded URLs: $uploadedUrls');
+      return uploadedUrls;
     } catch (e) {
       CustomLogs.log('❌ Error uploading photos: $e');
-      return false;
+      return null;
     }
   }
 

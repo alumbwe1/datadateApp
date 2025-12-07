@@ -322,6 +322,9 @@ class _UniversitySelectionPageState
               padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 20.h),
               child: CustomButton(text: 'Continue', onTap: _handleContinue),
             ),
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom,
+          ), // Bottom padding
         ],
       ),
     );

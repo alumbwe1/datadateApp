@@ -39,7 +39,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<String> uploadProfilePhoto(String filePath) async {
     try {
       CustomLogs.info(
-        '📤 Uploading photo to: ${ApiEndpoints.uploadProfilePhotos}',
+        '📤 Uploading photo to: ${ApiEndpoints.uploadProfilePhoto}',
       );
       CustomLogs.info('📁 File path: $filePath');
 
@@ -50,7 +50,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       CustomLogs.info('📦 FormData created with image field');
 
       final response = await dio.post(
-        ApiEndpoints.uploadProfilePhotos,
+        ApiEndpoints.uploadProfilePhoto,
         data: formData,
       );
 
@@ -75,70 +75,101 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<List<String>> uploadProfilePhotos(List<String> filePaths) async {
     try {
-      CustomLogs.info(
-        '📤 Uploading ${filePaths.length} photos to: ${ApiEndpoints.uploadProfilePhotos}',
-      );
+      CustomLogs.info('📤 Uploading ${filePaths.length} photos one by one');
 
-      // Create FormData with multiple images
-      final formDataMap = <String, dynamic>{};
-
-      // Add all images as a list with the same field name
-      final List<MultipartFile> imageFiles = [];
-      for (int i = 0; i < filePaths.length; i++) {
-        CustomLogs.info('📁 Adding photo ${i + 1}: ${filePaths[i]}');
-        imageFiles.add(await MultipartFile.fromFile(filePaths[i]));
-      }
-
-      // Try different field names that the API might accept
-      formDataMap['photos'] = imageFiles;
-
-      final formData = FormData.fromMap(formDataMap);
-
-      CustomLogs.info('📦 FormData created with ${filePaths.length} images');
-      CustomLogs.info('📦 FormData fields: ${formData.fields}');
-      CustomLogs.info('📦 FormData files: ${formData.files.length}');
-
-      final response = await dio.post(
-        ApiEndpoints.uploadProfilePhotos,
-        data: formData,
-      );
-
-      CustomLogs.success('✅ Upload response: ${response.data}');
-
-      // Parse response to get list of URLs
       final List<String> uploadedUrls = [];
 
-      if (response.data is Map<String, dynamic>) {
-        // Check for various possible response formats
-        if (response.data.containsKey('image_urls')) {
-          final urls = response.data['image_urls'] as List;
-          uploadedUrls.addAll(urls.map((url) => url.toString()));
-        } else if (response.data.containsKey('images')) {
-          final urls = response.data['images'] as List;
-          uploadedUrls.addAll(urls.map((url) => url.toString()));
-        } else if (response.data.containsKey('urls')) {
-          final urls = response.data['urls'] as List;
-          uploadedUrls.addAll(urls.map((url) => url.toString()));
-        } else if (response.data.containsKey('imageUrls')) {
-          final urls = response.data['imageUrls'] as List;
-          uploadedUrls.addAll(urls.map((url) => url.toString()));
-        }
-      } else if (response.data is List) {
-        uploadedUrls.addAll(
-          (response.data as List).map((url) => url.toString()),
+      // Upload all photos in a single request
+      final List<MultipartFile> photoFiles = [];
+      for (int i = 0; i < filePaths.length; i++) {
+        CustomLogs.info('📁 Adding photo ${i + 1}: ${filePaths[i]}');
+        photoFiles.add(await MultipartFile.fromFile(filePaths[i]));
+      }
+
+      final formData = FormData.fromMap({'photos': photoFiles});
+
+      CustomLogs.info(
+        '📦 Uploading ${photoFiles.length} photos in one request',
+      );
+
+      try {
+        final response = await dio.post(
+          ApiEndpoints.uploadProfilePhoto,
+          data: formData,
         );
+
+        CustomLogs.success('✅ Upload response: ${response.data}');
+
+        // Extract URLs from response
+        if (response.data is Map<String, dynamic>) {
+          // Check for 'photos' array with objects containing 'url' field
+          if (response.data.containsKey('photos')) {
+            final photos = response.data['photos'] as List;
+            for (var photo in photos) {
+              if (photo is Map<String, dynamic> && photo.containsKey('url')) {
+                uploadedUrls.add(photo['url'].toString());
+              }
+            }
+          }
+          // Fallback: Check for other possible response formats
+          else if (response.data.containsKey('image_urls')) {
+            final urls = response.data['image_urls'] as List;
+            uploadedUrls.addAll(urls.map((url) => url.toString()));
+          } else if (response.data.containsKey('imageUrls')) {
+            final urls = response.data['imageUrls'] as List;
+            uploadedUrls.addAll(urls.map((url) => url.toString()));
+          } else if (response.data.containsKey('urls')) {
+            final urls = response.data['urls'] as List;
+            uploadedUrls.addAll(urls.map((url) => url.toString()));
+          }
+        } else if (response.data is List) {
+          uploadedUrls.addAll(
+            (response.data as List).map((url) => url.toString()),
+          );
+        }
+
+        CustomLogs.success('✅ Extracted ${uploadedUrls.length} URLs');
+        if (uploadedUrls.isNotEmpty) {
+          CustomLogs.info('📸 URLs: $uploadedUrls');
+        }
+      } catch (e) {
+        CustomLogs.error('❌ Error uploading photos: $e');
+        if (e is DioException) {
+          CustomLogs.error('❌ Response data: ${e.response?.data}');
+          CustomLogs.error('❌ Status code: ${e.response?.statusCode}');
+        }
+        rethrow;
+      }
+
+      if (uploadedUrls.isEmpty) {
+        throw Exception('No photos were uploaded successfully');
       }
 
       CustomLogs.success(
-        '✅ Uploaded ${uploadedUrls.length} photos successfully',
+        '✅ Step 1 complete: Uploaded ${uploadedUrls.length}/${filePaths.length} photo files',
       );
+      CustomLogs.info('📸 Uploaded URLs: $uploadedUrls');
+
+      // Step 2: Send the URLs to /photos/ endpoint
+      CustomLogs.info('📤 Step 2: Sending URLs to /photos/ endpoint');
+      try {
+        final response = await dio.post(
+          ApiEndpoints.uploadProfilePhotos, // Use photos endpoint
+          data: {'imageUrls': uploadedUrls},
+        );
+
+        CustomLogs.success('✅ Photos endpoint response: ${response.data}');
+      } catch (e) {
+        CustomLogs.error('❌ Error sending URLs to photos endpoint: $e');
+        if (e is DioException) {
+          CustomLogs.error('❌ Response data: ${e.response?.data}');
+        }
+        // Don't throw here - we already have the URLs
+      }
+
       return uploadedUrls;
     } catch (e) {
-      CustomLogs.error('❌ Error uploading photos: $e');
-      if (e is DioException) {
-        CustomLogs.error('❌ Response data: ${e.response?.data}');
-        CustomLogs.error('❌ Status code: ${e.response?.statusCode}');
-      }
+      CustomLogs.error('❌ Error in uploadProfilePhotos: $e');
       rethrow;
     }
   }
