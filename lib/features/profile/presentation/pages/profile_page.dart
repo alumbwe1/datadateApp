@@ -50,7 +50,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         title: Text(
           'Profile',
           style: appStyle(
-            24,
+            24.sp,
             textColor,
             FontWeight.w700,
           ).copyWith(letterSpacing: -0.5),

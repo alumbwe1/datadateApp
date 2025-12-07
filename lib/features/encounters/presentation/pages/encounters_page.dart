@@ -191,6 +191,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     final profiles = encountersState.profiles;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(55.h),
         child: SafeArea(

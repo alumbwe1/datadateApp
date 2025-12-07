@@ -187,9 +187,9 @@ class _ChatPageState extends ConsumerState<ChatPage>
                 child: Text(
                   'HeartLink',
                   style: appStyle(
-                    26.sp,
+                    24.sp,
                     Colors.white,
-                    FontWeight.w800,
+                    FontWeight.w900,
                   ).copyWith(letterSpacing: -0.5),
                 ),
               ),

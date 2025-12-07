@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../core/constants/app_style.dart';
 
 class ChatEmptyState extends StatelessWidget {
@@ -12,85 +14,52 @@ class ChatEmptyState extends StatelessWidget {
         padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 5.h,
           children: [
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.secondaryLight.withValues(alpha: 0.1),
-                    AppColors.secondaryLight.withValues(alpha: 0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.secondaryLight.withValues(alpha: 0.1),
-                    blurRadius: 30,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Text('💬', style: TextStyle(fontSize: 64)),
-              ),
+            Lottie.asset(
+              'assets/lottie/Chat.json',
+              width: 170.h,
+              height: 170.h,
             ),
-            const SizedBox(height: 32),
+
             Text(
               'No Messages Yet',
               style: appStyle(
-                26,
+                28.sp,
                 Colors.black,
-                FontWeight.w800,
+                FontWeight.w900,
               ).copyWith(letterSpacing: -0.5),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+
             Text(
               'Start swiping to match with people\nand begin conversations',
               style: appStyle(
-                15,
+                16.sp,
                 Colors.grey[600]!,
-                FontWeight.w500,
-              ).copyWith(height: 1.6, letterSpacing: -0.1),
+                FontWeight.w400,
+              ).copyWith(height: 1.5, letterSpacing: -0.2),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.secondaryLight,
-                    AppColors.secondaryLight.withValues(alpha: 0.8),
-                  ],
+            SizedBox(height: 10.h),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to home
+                context.go('/encounters');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
                 ),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.secondaryLight.withValues(alpha: 0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.favorite, color: Colors.white, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Start Swiping',
-                    style: appStyle(
-                      15,
-                      Colors.white,
-                      FontWeight.w700,
-                    ).copyWith(letterSpacing: -0.2),
-                  ),
-                ],
+              child: Text(
+                'Start Swiping',
+                style: appStyle(16, Colors.white, FontWeight.w700),
               ),
             ),
           ],

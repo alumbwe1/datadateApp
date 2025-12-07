@@ -44,6 +44,7 @@ class _LikesPageState extends ConsumerState<LikesPage>
     final likesState = ref.watch(likesProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -65,20 +66,12 @@ class _LikesPageState extends ConsumerState<LikesPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Tinder flame icon
-          Image.asset(
-            'assets/images/HeartLink1.png',
-            width: 34.w,
-            height: 34.h,
-            color: const Color(0xFFFE3C72),
-          ),
-          SizedBox(width: 4.w),
           Text(
             'HeartLink',
             style: appStyle(
               24.sp,
               const Color(0xFFFE3C72),
-              FontWeight.w700,
+              FontWeight.w900,
             ).copyWith(letterSpacing: -0.5),
           ),
         ],
