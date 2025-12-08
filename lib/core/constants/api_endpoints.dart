@@ -3,7 +3,7 @@ class ApiEndpoints {
   // Base URL - should be loaded from environment
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.91.145:7000',
+    defaultValue: 'https://heartlink-production.up.railway.app',
   );
 
   // Authentication
