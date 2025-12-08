@@ -153,26 +153,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       }
 
       CustomLogs.success(
-        '✅ Step 1 complete: Uploaded ${uploadedUrls.length}/${filePaths.length} photo files',
+        '✅ Photos uploaded successfully: ${uploadedUrls.length}/${filePaths.length}',
       );
       CustomLogs.info('📸 Uploaded URLs: $uploadedUrls');
 
-      // Step 2: Send the URLs to /photos/ endpoint
-      CustomLogs.info('📤 Step 2: Sending URLs to /photos/ endpoint');
-      try {
-        final response = await dio.post(
-          ApiEndpoints.uploadProfilePhotos, // Use photos endpoint
-          data: {'imageUrls': uploadedUrls},
-        );
-
-        CustomLogs.success('✅ Photos endpoint response: ${response.data}');
-      } catch (e) {
-        CustomLogs.error('❌ Error sending URLs to photos endpoint: $e');
-        if (e is DioException) {
-          CustomLogs.error('❌ Response data: ${e.response?.data}');
-        }
-        // Don't throw here - we already have the URLs
-      }
+      // Note: The backend already saved the photos to the profile
+      // No need for a second request - the first POST with FormData
+      // uploads to Cloudinary AND saves to profile in one step
 
       return uploadedUrls;
     } catch (e) {

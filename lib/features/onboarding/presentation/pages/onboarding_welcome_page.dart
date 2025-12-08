@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:math' as math;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../widgets/neon_border.dart';
+import '../widgets/welcome_painters.dart';
+import '../widgets/welcome_match_indicator.dart';
 
 class OnboardingWelcomePage extends ConsumerStatefulWidget {
   const OnboardingWelcomePage({super.key});
@@ -101,7 +103,8 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(30.r)),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -138,6 +141,7 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(30.r)),
                   gradient: RadialGradient(
                     center: Alignment.center,
                     radius: 1.2,
@@ -419,15 +423,10 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
                         left: 0,
                         right: 0,
                         child: Center(
-                          child: AnimatedBuilder(
-                            animation: _matchScaleAnimation,
-                            builder: (context, child) {
-                              return Transform.scale(
-                                scale: _matchScaleAnimation.value,
-                                child: child,
-                              );
-                            },
-                            child: _buildCircularMatchIndicator(),
+                          child: WelcomeMatchIndicator(
+                            scaleAnimation: _matchScaleAnimation,
+                            progressAnimation: _matchProgressAnimation,
+                            matchPercentage: _calculateMatchPercentage(),
                           ),
                         ),
                       ),
@@ -450,124 +449,6 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
           ),
         );
       },
-    );
-  }
-
-  Widget _buildCircularMatchIndicator() {
-    final matchPercentage = _calculateMatchPercentage();
-
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 180),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(50),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.deepPurpleAccent.withValues(alpha: 0.1),
-            blurRadius: 30,
-            spreadRadius: 5,
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // Animated circular progress indicator
-              AnimatedBuilder(
-                animation: _matchProgressAnimation,
-                builder: (context, child) {
-                  return SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: CustomPaint(
-                      painter: CircularProgressPainter(
-                        progress:
-                            (matchPercentage / 100) *
-                            _matchProgressAnimation.value,
-                        strokeWidth: 5,
-                        color: Colors.deepPurpleAccent,
-                        backgroundColor: Colors.grey.shade200,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Animated percentage text
-              AnimatedBuilder(
-                animation: _matchProgressAnimation,
-                builder: (context, child) {
-                  final displayPercentage =
-                      (matchPercentage * _matchProgressAnimation.value).toInt();
-                  return TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0.8, end: 1.0),
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.elasticOut,
-                    builder: (context, scale, child) {
-                      return Transform.scale(
-                        scale: scale,
-                        child: Text(
-                          '$displayPercentage%',
-                          style: appStyle(
-                            15.sp,
-                            Colors.black,
-                            FontWeight.w900,
-                          ).copyWith(letterSpacing: -0.5),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Match',
-                style: appStyle(
-                  17,
-                  Colors.black,
-                  FontWeight.w800,
-                ).copyWith(letterSpacing: -0.4, height: 1),
-              ),
-              const SizedBox(height: 2),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.deepPurpleAccent.withValues(alpha: 0.2),
-                      Colors.pinkAccent.withValues(alpha: 0.2),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Great!',
-                  style: appStyle(
-                    10,
-                    Colors.deepPurple,
-                    FontWeight.w700,
-                  ).copyWith(letterSpacing: 0.5),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -693,212 +574,5 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
         },
       ),
     );
-  }
-}
-
-class EnhancedParticlePainter extends CustomPainter {
-  final double animation;
-  final double glowAnimation;
-
-  EnhancedParticlePainter({
-    required this.animation,
-    required this.glowAnimation,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    // Floating hearts with varied motion
-    for (int i = 0; i < 15; i++) {
-      final progress = (animation + (i / 15)) % 1.0;
-      final drift = math.sin(progress * math.pi * 2) * 30;
-      final x = (size.width * (i % 5) / 5) + (size.width * 0.1) + drift;
-      final y = size.height - (progress * size.height * 1.3);
-      final heartSize = 5.0 + (i % 4) * 2.5;
-      final opacity = math.sin(progress * math.pi) * 0.3;
-
-      paint.color = Color.lerp(
-        const Color(0xFFE91E63),
-        const Color(0xFFFF6B9D),
-        (i % 12) / 12,
-      )!.withValues(alpha: opacity);
-
-      _drawHeart(canvas, Offset(x, y), heartSize, paint);
-    }
-
-    // Spiral particles
-    for (int i = 0; i < 30; i++) {
-      final progress = (animation * 0.4 + (i / 30)) % 1.0;
-      final angle = (i / 30) * math.pi * 4 + (progress * math.pi * 2);
-      final radius = progress * size.width * 0.5;
-      final x = (size.width / 2) + (math.cos(angle) * radius);
-      final y = (size.height / 2) + (math.sin(angle) * radius);
-      final particleSize = (1 - progress) * (2.0 + (i % 3) * 0.5);
-      final opacity = (1 - progress) * 0.35;
-
-      paint.color = Color.lerp(
-        const Color(0xFFFF4081),
-        const Color(0xFFFF6B9D),
-        glowAnimation,
-      )!.withValues(alpha: opacity);
-
-      canvas.drawCircle(Offset(x, y), particleSize, paint);
-    }
-
-    // Ambient glow particles
-    for (int i = 0; i < 20; i++) {
-      final progress = (animation * 0.6 + (i / 20)) % 1.0;
-      final x = (size.width * (i % 4) / 4) + (size.width * 0.15);
-      final y = (size.height * (i / 5) / 4) + (progress * 50);
-      final glowSize = 3.0 + math.sin(progress * math.pi) * 2.0;
-      final opacity = math.sin(progress * math.pi) * 0.2;
-
-      paint.color = Colors.white.withValues(alpha: opacity);
-      paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-      canvas.drawCircle(Offset(x, y), glowSize, paint);
-      paint.maskFilter = null;
-    }
-  }
-
-  void _drawHeart(Canvas canvas, Offset center, double size, Paint paint) {
-    final path = Path();
-    path.moveTo(center.dx, center.dy + size * 0.3);
-    path.cubicTo(
-      center.dx - size * 0.6,
-      center.dy - size * 0.2,
-      center.dx - size * 0.6,
-      center.dy - size * 0.8,
-      center.dx,
-      center.dy - size * 0.4,
-    );
-    path.cubicTo(
-      center.dx + size * 0.6,
-      center.dy - size * 0.8,
-      center.dx + size * 0.6,
-      center.dy - size * 0.2,
-      center.dx,
-      center.dy + size * 0.3,
-    );
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(EnhancedParticlePainter oldDelegate) => true;
-}
-
-class EnhancedGridLinesPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-
-  EnhancedGridLinesPainter({required this.progress, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final centerX = size.width / 2;
-    final centerY = size.height / 2;
-
-    // Draw lines with gradient effect
-    final lines = [
-      [centerX, centerY, centerX, 36.0], // top
-      [centerX, centerY, size.width - 36, centerY], // right
-      [centerX, centerY, centerX, size.height - 36], // bottom
-      [centerX, centerY, 36.0, centerY], // left
-    ];
-
-    for (var i = 0; i < lines.length; i++) {
-      final line = lines[i];
-      final gradient = LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [
-          color.withValues(alpha: 0.05),
-          color.withValues(alpha: 0.2 * (0.6 + progress * 0.4)),
-          color.withValues(alpha: 0.05),
-        ],
-      );
-
-      paint.shader = gradient.createShader(
-        Rect.fromPoints(Offset(line[0], line[1]), Offset(line[2], line[3])),
-      );
-
-      canvas.drawLine(
-        Offset(line[0], line[1]),
-        Offset(line[2], line[3]),
-        paint,
-      );
-    }
-
-    // Add glowing dots at connection points
-    paint.shader = null;
-    paint.style = PaintingStyle.fill;
-    paint.color = color.withValues(alpha: 0.3 * (0.5 + progress * 0.5));
-    paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-
-    for (var line in lines) {
-      canvas.drawCircle(Offset(line[2], line[3]), 3, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(EnhancedGridLinesPainter oldDelegate) => true;
-}
-
-// Custom painter for circular progress indicator
-class CircularProgressPainter extends CustomPainter {
-  final double progress;
-  final double strokeWidth;
-  final Color color;
-  final Color backgroundColor;
-
-  CircularProgressPainter({
-    required this.progress,
-    required this.strokeWidth,
-    required this.color,
-    required this.backgroundColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - strokeWidth) / 2;
-
-    // Draw background circle
-    final backgroundPaint = Paint()
-      ..color = backgroundColor
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, backgroundPaint);
-
-    // Draw progress arc
-    final progressPaint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    const startAngle = -math.pi / 2; // Start from top
-    final sweepAngle = 2 * math.pi * progress;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(CircularProgressPainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.color != color ||
-        oldDelegate.backgroundColor != backgroundColor;
   }
 }
