@@ -26,7 +26,7 @@ class LikesShimmerLoading extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(10.r),
               ),
             ),
           );
