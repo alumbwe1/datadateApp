@@ -99,6 +99,7 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

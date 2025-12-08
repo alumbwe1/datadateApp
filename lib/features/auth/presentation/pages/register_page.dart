@@ -203,10 +203,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 SizedBox(height: 40.h),
 
                 CustomTextField(
-                  label: 'Full Name',
-                  hintText: 'Enter your full name',
+                  label: 'User Name',
+                  hintText: 'Enter your user name',
                   controller: _nameController,
-                  validator: (value) => Validators.required(value, 'Name'),
+                  validator: (value) => Validators.required(value, 'User Name'),
                   prefixIcon: const Icon(Iconsax.user_copy),
                 ),
 
