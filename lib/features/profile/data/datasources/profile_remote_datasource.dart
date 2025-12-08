@@ -44,7 +44,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       CustomLogs.info('📁 File path: $filePath');
 
       final formData = FormData.fromMap({
-        'image': await MultipartFile.fromFile(filePath),
+        'photos': await MultipartFile.fromFile(filePath),
       });
 
       CustomLogs.info('📦 FormData created with image field');
@@ -101,26 +101,33 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         CustomLogs.success('✅ Upload response: ${response.data}');
 
         // Extract URLs from response
+        // Backend returns: { "detail": "...", "profile": { "imageUrls": [...] } }
         if (response.data is Map<String, dynamic>) {
+          // Check for nested profile.imageUrls (actual backend response)
+          if (response.data.containsKey('profile')) {
+            final profile = response.data['profile'];
+            if (profile is Map<String, dynamic> &&
+                profile.containsKey('imageUrls')) {
+              final urls = profile['imageUrls'] as List;
+              uploadedUrls.addAll(urls.map((url) => url.toString()));
+              CustomLogs.success(
+                '✅ Extracted ${uploadedUrls.length} URLs from profile.imageUrls',
+              );
+            }
+          }
+          // Fallback: Check for direct imageUrls
+          else if (response.data.containsKey('imageUrls')) {
+            final urls = response.data['imageUrls'] as List;
+            uploadedUrls.addAll(urls.map((url) => url.toString()));
+          }
           // Check for 'photos' array with objects containing 'url' field
-          if (response.data.containsKey('photos')) {
+          else if (response.data.containsKey('photos')) {
             final photos = response.data['photos'] as List;
             for (var photo in photos) {
               if (photo is Map<String, dynamic> && photo.containsKey('url')) {
                 uploadedUrls.add(photo['url'].toString());
               }
             }
-          }
-          // Fallback: Check for other possible response formats
-          else if (response.data.containsKey('image_urls')) {
-            final urls = response.data['image_urls'] as List;
-            uploadedUrls.addAll(urls.map((url) => url.toString()));
-          } else if (response.data.containsKey('imageUrls')) {
-            final urls = response.data['imageUrls'] as List;
-            uploadedUrls.addAll(urls.map((url) => url.toString()));
-          } else if (response.data.containsKey('urls')) {
-            final urls = response.data['urls'] as List;
-            uploadedUrls.addAll(urls.map((url) => url.toString()));
           }
         } else if (response.data is List) {
           uploadedUrls.addAll(

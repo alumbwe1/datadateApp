@@ -30,9 +30,9 @@ class ApiEndpoints {
       '/api/v1.0/profiles/discover/recommended/';
 
   static const String uploadProfilePhoto =
-      '/api/v1.0/profiles/me/upload_photos/'; // Upload file, returns URL
+      '/api/v1.0/profiles/me/photos/'; // Upload file, returns URL
   static const String uploadProfilePhotos =
-      '/api/v1.0/profiles/me/upload_photos/'; // Send URLs
+      '/api/v1.0/profiles/me/photos/'; // Send URLs
 
   // Gallery
   static const String gallery = '/api/v1.0/gallery/';

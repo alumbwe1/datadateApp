@@ -66,7 +66,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ],
       ),
       body: profileState.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.black))
+          ? const Center(child: LottieLoadingIndicator())
           : profileState.error != null
           ? CustomErrorWidget(
               message: profileState.error!,
