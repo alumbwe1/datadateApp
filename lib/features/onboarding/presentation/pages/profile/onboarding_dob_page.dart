@@ -1,3 +1,4 @@
+import 'package:datadate/core/widgets/close_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,7 +165,7 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
                   padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10.r),
                     border: Border.all(
                       color: _selectedDate != null
                           ? Colors.black
@@ -426,12 +427,13 @@ class _CustomDatePickerBottomSheetState
               children: [
                 Text(
                   'Select Birthday',
-                  style: appStyle(20, Colors.black, FontWeight.w700),
+                  style: appStyle(
+                    20.sp,
+                    Colors.black,
+                    FontWeight.w700,
+                  ).copyWith(letterSpacing: -0.3),
                 ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Icon(Icons.close, color: Colors.grey[600]),
-                ),
+                CloseIcon(),
               ],
             ),
           ),
@@ -517,6 +519,7 @@ class _CustomDatePickerBottomSheetState
               },
             ),
           ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),
     );

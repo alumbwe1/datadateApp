@@ -165,13 +165,62 @@ class _UniversitySelectionPageState
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'Try adjusting your search',
+                          _searchQuery.isEmpty
+                              ? 'Unable to load universities'
+                              : 'Try adjusting your search',
                           style: appStyle(
                             14,
                             Colors.grey[600]!,
                             FontWeight.w400,
                           ),
                         ),
+                        if (_searchQuery.isEmpty) ...[
+                          SizedBox(height: 24.h),
+                          GestureDetector(
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              ref
+                                  .read(universitiesProvider.notifier)
+                                  .loadUniversities();
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 32.w,
+                                vertical: 16.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.refresh_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    'Refresh',
+                                    style: appStyle(
+                                      16,
+                                      Colors.white,
+                                      FontWeight.w600,
+                                    ).copyWith(letterSpacing: -0.2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   )
