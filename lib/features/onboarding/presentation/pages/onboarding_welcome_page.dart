@@ -104,7 +104,6 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
       backgroundColor: Colors.black,
       body: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(30.r)),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -141,7 +140,6 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(30.r)),
                   gradient: RadialGradient(
                     center: Alignment.center,
                     radius: 1.2,
