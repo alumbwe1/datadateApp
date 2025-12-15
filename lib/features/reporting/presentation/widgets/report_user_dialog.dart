@@ -102,11 +102,11 @@ class _ReportUserDialogState extends ConsumerState<ReportUserDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              const Row(
                 children: [
-                  const Icon(Icons.flag, color: Colors.orange, size: 32),
-                  const SizedBox(width: 12),
-                  const Text(
+                  Icon(Icons.flag, color: Colors.orange, size: 32),
+                  SizedBox(width: 12),
+                  Text(
                     'Report User',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
@@ -180,7 +180,7 @@ class _ReportUserDialogState extends ConsumerState<ReportUserDialog> {
                 controller: _descriptionController,
                 label: 'Description',
                 maxLines: 4,
-                prefixIcon: Icon(Icons.description),
+                prefixIcon: const Icon(Icons.description),
               ),
               const SizedBox(height: 24),
               Row(
@@ -197,7 +197,7 @@ class _ReportUserDialogState extends ConsumerState<ReportUserDialog> {
                         ? Container(
                             height: 58.h,
                             alignment: Alignment.center,
-                            child: LottieLoadingIndicator(),
+                            child: const LottieLoadingIndicator(),
                           )
                         : CustomButton(
                             text: 'Submit',

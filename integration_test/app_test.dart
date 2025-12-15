@@ -166,8 +166,38 @@ void main() {
 
 /// Helper function to skip splash and login screens
 Future<void> _skipToMainApp(WidgetTester tester) async {
-  await IntegrationTestHelpers.getToMainApp(tester);
+  // Wait for splash screen to complete
   await tester.pump(const Duration(seconds: 2));
+
+  // If login screen is shown, simulate login
+  if (find.text('Login').evaluate().isNotEmpty) {
+    final textFields = find.byType(TextField);
+    if (textFields.evaluate().length >= 2) {
+      await tester.enterText(textFields.first, 'test@example.com');
+      await tester.enterText(textFields.last, 'password123');
+      await tester.tap(find.text('Login'));
+      await tester.pumpAndSettle();
+    }
+  }
+
+  // If onboarding is shown, skip it
+  final onboardingButtons = [
+    'Next',
+    'Continue',
+    'Get Started',
+    'Complete',
+    'Finish',
+  ];
+  for (final buttonText in onboardingButtons) {
+    while (find.text(buttonText).evaluate().isNotEmpty) {
+      await tester.tap(find.text(buttonText).first);
+      await tester.pumpAndSettle();
+    }
+  }
+
+  // Final wait for navigation to complete
+  await tester.pumpAndSettle();
+}
 
 /// Helper function to simulate network errors
 Future<void> _simulateNetworkError(WidgetTester tester) async {
