@@ -96,7 +96,7 @@ class _MainNavigationState extends State<MainNavigation>
           color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -166,8 +166,8 @@ class _MainNavigationState extends State<MainNavigation>
       child: InkWell(
         onTap: () => _onItemTapped(index),
         borderRadius: BorderRadius.circular(16),
-        splashColor: activeColor.withOpacity(0.1),
-        highlightColor: activeColor.withOpacity(0.05),
+        splashColor: activeColor.withValues(alpha: 0.1),
+        highlightColor: activeColor.withValues(alpha: 0.05),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

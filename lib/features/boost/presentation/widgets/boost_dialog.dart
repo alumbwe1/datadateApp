@@ -84,15 +84,15 @@ class _BoostDialogState extends ConsumerState<BoostDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.rocket_launch,
                   color: AppColors.primaryLight,
                   size: 32,
                 ),
-                const SizedBox(width: 12),
-                const Text(
+                SizedBox(width: 12),
+                Text(
                   'Boost Your Profile',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
@@ -121,21 +121,21 @@ class _BoostDialogState extends ConsumerState<BoostDialog> {
               controller: _amountController,
               label: 'Amount (ZMW)',
               keyboardType: TextInputType.number,
-              prefixIcon: Icon(Icons.attach_money),
+              prefixIcon: const Icon(Icons.attach_money),
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _targetViewsController,
               label: 'Target Views',
               keyboardType: TextInputType.number,
-              prefixIcon: Icon(Icons.visibility),
+              prefixIcon: const Icon(Icons.visibility),
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _durationController,
               label: 'Duration (hours)',
               keyboardType: TextInputType.number,
-              prefixIcon: Icon(Icons.timer),
+              prefixIcon: const Icon(Icons.timer),
             ),
             const SizedBox(height: 24),
             Row(
@@ -152,7 +152,7 @@ class _BoostDialogState extends ConsumerState<BoostDialog> {
                       ? Container(
                           height: 58.h,
                           alignment: Alignment.center,
-                          child: LottieLoadingIndicator(),
+                          child: const LottieLoadingIndicator(),
                         )
                       : CustomButton(text: 'Create Boost', onTap: _createBoost),
                 ),

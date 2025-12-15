@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/constants/app_style.dart';
+
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_style.dart';
 
 class EnhancedFilterBottomSheet extends StatefulWidget {
   final Map<String, dynamic> initialFilters;
@@ -297,7 +298,7 @@ class _EnhancedFilterBottomSheetState extends State<EnhancedFilterBottomSheet>
           controller: _cityController,
           decoration: InputDecoration(
             hintText: 'City (e.g., Lusaka)',
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               Icons.location_city,
               color: AppColors.primaryLight,
             ),
@@ -307,7 +308,10 @@ class _EnhancedFilterBottomSheetState extends State<EnhancedFilterBottomSheet>
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.primaryLight, width: 2),
+              borderSide: const BorderSide(
+                color: AppColors.primaryLight,
+                width: 2,
+              ),
             ),
           ),
         ),
@@ -316,14 +320,17 @@ class _EnhancedFilterBottomSheetState extends State<EnhancedFilterBottomSheet>
           controller: _compoundController,
           decoration: InputDecoration(
             hintText: 'Compound (e.g., Meanwood)',
-            prefixIcon: Icon(Icons.home, color: AppColors.primaryLight),
+            prefixIcon: const Icon(Icons.home, color: AppColors.primaryLight),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: Colors.grey[300]!),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.primaryLight, width: 2),
+              borderSide: const BorderSide(
+                color: AppColors.primaryLight,
+                width: 2,
+              ),
             ),
           ),
         ),
@@ -344,14 +351,17 @@ class _EnhancedFilterBottomSheetState extends State<EnhancedFilterBottomSheet>
           controller: _courseController,
           decoration: InputDecoration(
             hintText: 'e.g., Computer Science',
-            prefixIcon: Icon(Icons.school, color: AppColors.primaryLight),
+            prefixIcon: const Icon(Icons.school, color: AppColors.primaryLight),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: Colors.grey[300]!),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.primaryLight, width: 2),
+              borderSide: const BorderSide(
+                color: AppColors.primaryLight,
+                width: 2,
+              ),
             ),
           ),
         ),
@@ -413,7 +423,7 @@ class _EnhancedFilterBottomSheetState extends State<EnhancedFilterBottomSheet>
           subtitle,
           style: appStyle(13, Colors.grey[600]!, FontWeight.w400),
         ),
-        activeColor: AppColors.primaryLight,
+        activeThumbColor: AppColors.primaryLight,
       ),
     );
   }

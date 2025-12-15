@@ -104,7 +104,7 @@ class _PremiumMessageInputState extends State<PremiumMessageInput>
           borderRadius: BorderRadius.circular(40.r),
           borderSide: BorderSide(color: Colors.grey.shade300, width: 0.7.w),
         ),
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         isDense: true,
       ),
       style: appStyle(15, Colors.black, FontWeight.w400).copyWith(height: 1.4),

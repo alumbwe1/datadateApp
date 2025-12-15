@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/datasources/chat_remote_datasource.dart';
+import '../../data/models/chat_room_model.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/repositories/chat_repository.dart';
-import '../../data/models/chat_room_model.dart';
 
 // Repository provider
 final chatRepositoryProvider = Provider<ChatRepository>((ref) {

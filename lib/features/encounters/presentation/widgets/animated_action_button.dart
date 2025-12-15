@@ -63,13 +63,13 @@ class _AnimatedActionButtonState extends State<AnimatedActionButton>
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.20),
+              color: Colors.black.withValues(alpha: 0.20),
               blurRadius: 18,
               spreadRadius: 2,
               offset: const Offset(0, 6),
             ),
             BoxShadow(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withValues(alpha: 0.12),
               blurRadius: 4,
               spreadRadius: -2,
               offset: const Offset(-2, -2),
@@ -81,8 +81,8 @@ class _AnimatedActionButtonState extends State<AnimatedActionButton>
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),
-            splashColor: widget.iconColor.withOpacity(0.25),
-            highlightColor: widget.iconColor.withOpacity(0.10),
+            splashColor: widget.iconColor.withValues(alpha: 0.25),
+            highlightColor: widget.iconColor.withValues(alpha: 0.10),
             onTap: _handleTap,
             child: Center(
               child: Icon(

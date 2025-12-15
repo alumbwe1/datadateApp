@@ -79,11 +79,11 @@ class _BlockUserDialogState extends ConsumerState<BlockUserDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
-                const Icon(Icons.block, color: Colors.red, size: 32),
-                const SizedBox(width: 12),
-                const Text(
+                Icon(Icons.block, color: Colors.red, size: 32),
+                SizedBox(width: 12),
+                Text(
                   'Block User',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
@@ -104,7 +104,7 @@ class _BlockUserDialogState extends ConsumerState<BlockUserDialog> {
               controller: _reasonController,
               label: 'Reason (optional)',
               maxLines: 3,
-              prefixIcon: Icon(Icons.notes),
+              prefixIcon: const Icon(Icons.notes),
             ),
             const SizedBox(height: 24),
             Row(
@@ -121,7 +121,7 @@ class _BlockUserDialogState extends ConsumerState<BlockUserDialog> {
                       ? Container(
                           height: 58.h,
                           alignment: Alignment.center,
-                          child: LottieLoadingIndicator(),
+                          child: const LottieLoadingIndicator(),
                         )
                       : CustomButton(
                           text: 'Block',

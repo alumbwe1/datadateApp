@@ -56,7 +56,7 @@ class _OnboardingPhotoPageState extends ConsumerState<OnboardingPhotoPage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => SafeArea(
@@ -66,7 +66,7 @@ class _OnboardingPhotoPageState extends ConsumerState<OnboardingPhotoPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.camera_alt, color: Colors.black),
+                leading: const Icon(Icons.camera_alt, color: Colors.black),
                 title: Text(
                   'Take Photo',
                   style: appStyle(16, Colors.black, FontWeight.w600),
@@ -77,7 +77,7 @@ class _OnboardingPhotoPageState extends ConsumerState<OnboardingPhotoPage> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.photo_library, color: Colors.black),
+                leading: const Icon(Icons.photo_library, color: Colors.black),
                 title: Text(
                   'Choose from Gallery',
                   style: appStyle(16, Colors.black, FontWeight.w600),
@@ -267,11 +267,11 @@ class _OnboardingPhotoPageState extends ConsumerState<OnboardingPhotoPage> {
             },
             child: Container(
               padding: EdgeInsets.all(6.w),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.red,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.close, color: Colors.white, size: 16),
+              child: const Icon(Icons.close, color: Colors.white, size: 16),
             ),
           ),
         ),

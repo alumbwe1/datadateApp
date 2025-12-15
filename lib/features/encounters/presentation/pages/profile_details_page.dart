@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:datadate/core/constants/app_style.dart';
 import 'package:flutter/material.dart';
@@ -5,13 +7,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/custom_logs.dart';
 import '../../../../core/utils/interest_emoji_mapper.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../domain/entities/profile.dart';
 import '../providers/encounters_provider.dart';
 import 'match_page.dart';
-import 'dart:math' as math;
 
 extension StringExtension on String {
   String capitalize() {
@@ -39,28 +42,28 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
   bool _isLiking = false;
 
   void _nextImage() {
-    print(
+    CustomLogs.info(
       '_nextImage called - Current: $_currentPhotoIndex, Total: ${widget.profile.photos.length}',
     );
     if (_currentPhotoIndex < widget.profile.photos.length - 1) {
       setState(() {
         _currentPhotoIndex++;
-        print('Updated to: $_currentPhotoIndex');
+        CustomLogs.info('Updated to: $_currentPhotoIndex');
       });
     } else {
-      print('Already at last image');
+      CustomLogs.info('Already at last image');
     }
   }
 
   void _previousImage() {
-    print('_previousImage called - Current: $_currentPhotoIndex');
+    CustomLogs.info('_previousImage called - Current: $_currentPhotoIndex');
     if (_currentPhotoIndex > 0) {
       setState(() {
         _currentPhotoIndex--;
-        print('Updated to: $_currentPhotoIndex');
+        CustomLogs.info('Updated to: $_currentPhotoIndex');
       });
     } else {
-      print('Already at first image');
+      CustomLogs.info('Already at first image');
     }
   }
 
@@ -323,12 +326,12 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                           child: GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onTap: () {
-                              print(
+                              CustomLogs.info(
                                 'Left tap detected - Current: $_currentPhotoIndex',
                               );
                               HapticFeedback.lightImpact();
                               _previousImage();
-                              print(
+                              CustomLogs.info(
                                 'After previous - New index: $_currentPhotoIndex',
                               );
                             },
@@ -340,12 +343,12 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                           child: GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onTap: () {
-                              print(
+                              CustomLogs.info(
                                 'Right tap detected - Current: $_currentPhotoIndex',
                               );
                               HapticFeedback.lightImpact();
                               _nextImage();
-                              print(
+                              CustomLogs.info(
                                 'After next - New index: $_currentPhotoIndex',
                               );
                             },
@@ -656,7 +659,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                   children: [
                                     Row(
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.favorite,
                                           color: Colors.pink,
                                           size: 20,

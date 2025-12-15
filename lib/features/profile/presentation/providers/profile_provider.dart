@@ -1,9 +1,11 @@
+import 'package:datadate/core/utils/custom_logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/api_providers.dart';
+import '../../data/datasources/profile_remote_datasource.dart';
+import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/profile_repository.dart';
-import '../../data/repositories/profile_repository_impl.dart';
-import '../../data/datasources/profile_remote_datasource.dart';
-import '../../../../core/providers/api_providers.dart';
 
 final profileRemoteDataSourceProvider = Provider<ProfileRemoteDataSource>((
   ref,
@@ -66,19 +68,21 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {
-    print('🔄 ProfileProvider: Starting updateProfile');
+    CustomLogs.info('🔄 ProfileProvider: Starting updateProfile');
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await repository.updateMyProfile(data);
 
     return result.fold(
       (failure) {
-        print('❌ ProfileProvider: Update failed - ${failure.message}');
+        CustomLogs.info(
+          '❌ ProfileProvider: Update failed - ${failure.message}',
+        );
         state = state.copyWith(isLoading: false, error: failure.message);
         return false;
       },
       (profile) {
-        print(
+        CustomLogs.info(
           '✅ ProfileProvider: Update successful - Profile: ${profile.displayName}',
         );
         state = state.copyWith(isLoading: false, profile: profile, error: null);
@@ -106,7 +110,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   Future<bool> uploadPhotos(List<String> filePaths) async {
-    print(
+    CustomLogs.info(
       '🔄 ProfileProvider: Starting uploadPhotos with ${filePaths.length} files',
     );
     state = state.copyWith(isLoading: true, error: null);
@@ -115,12 +119,14 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
     return result.fold(
       (failure) {
-        print('❌ ProfileProvider: Upload failed - ${failure.message}');
+        CustomLogs.info(
+          '❌ ProfileProvider: Upload failed - ${failure.message}',
+        );
         state = state.copyWith(isLoading: false, error: failure.message);
         return false;
       },
       (photoUrls) {
-        print(
+        CustomLogs.info(
           '✅ ProfileProvider: Uploaded ${photoUrls.length} photos successfully',
         );
         // Reload profile to get updated data
@@ -131,7 +137,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   Future<List<String>?> uploadPhotosAndGetUrls(List<String> filePaths) async {
-    print(
+    CustomLogs.info(
       '🔄 ProfileProvider: Starting uploadPhotosAndGetUrls with ${filePaths.length} files',
     );
     state = state.copyWith(isLoading: true, error: null);
@@ -140,15 +146,17 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
     return result.fold(
       (failure) {
-        print('❌ ProfileProvider: Upload failed - ${failure.message}');
+        CustomLogs.info(
+          '❌ ProfileProvider: Upload failed - ${failure.message}',
+        );
         state = state.copyWith(isLoading: false, error: failure.message);
         return null;
       },
       (photoUrls) {
-        print(
+        CustomLogs.info(
           '✅ ProfileProvider: Uploaded ${photoUrls.length} photos successfully',
         );
-        print('📸 Photo URLs: $photoUrls');
+        CustomLogs.info('📸 Photo URLs: $photoUrls');
         state = state.copyWith(isLoading: false);
         return photoUrls;
       },

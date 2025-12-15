@@ -119,7 +119,7 @@ class _OnboardingCompletePageState
                   ? Container(
                       height: 58.h,
                       alignment: Alignment.center,
-                      child: LottieLoadingIndicator(),
+                      child: const LottieLoadingIndicator(),
                     )
                   : CustomButton(
                       text: 'Start Exploring',

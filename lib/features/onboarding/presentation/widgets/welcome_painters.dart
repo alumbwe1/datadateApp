@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
 
 /// Custom painter for enhanced particle effects with hearts and spirals
 class EnhancedParticlePainter extends CustomPainter {

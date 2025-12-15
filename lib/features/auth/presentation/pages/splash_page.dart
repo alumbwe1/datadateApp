@@ -1,12 +1,14 @@
+import 'dart:math' as math;
+
 import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../providers/auth_provider.dart';
-import 'dart:math' as math;
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -36,7 +38,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
     )..repeat();
 
     _glowController = AnimationController(
-      duration: Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 2500),
       vsync: this,
     )..repeat(reverse: true);
 
@@ -272,18 +274,18 @@ class _SplashPageState extends ConsumerState<SplashPage>
                               Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
+                                  gradient: const LinearGradient(
                                     colors: [
                                       AppColors.accentLight,
-                                      const Color(0xFFFF6B9D),
+                                      Color(0xFFFF6B9D),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.bolt_rounded,
                                   size: 16,
-                                  color: const Color(0xFFE91E63),
+                                  color: Color(0xFFE91E63),
                                 ),
                               ),
                               const SizedBox(width: 10),

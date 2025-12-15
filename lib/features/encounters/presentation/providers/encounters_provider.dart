@@ -81,12 +81,13 @@ class EncountersNotifier extends StateNotifier<EncountersState> {
       if (value != null) {
         if (value is bool && value == true) {
           count++;
-        } else if (value is String && value.isNotEmpty)
+        } else if (value is String && value.isNotEmpty) {
           count++;
-        else if (value is int)
+        } else if (value is int) {
           count++;
-        else if (value is List && value.isNotEmpty)
+        } else if (value is List && value.isNotEmpty) {
           count++;
+        }
       }
     });
     return count;

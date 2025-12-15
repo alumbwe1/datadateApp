@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/system_remote_datasource.dart';
 import '../../data/models/system_status_model.dart';
-import '../../../../core/providers/api_providers.dart';
 
 final systemDataSourceProvider = Provider<SystemRemoteDataSource>((ref) {
   return SystemRemoteDataSourceImpl(apiClient: ref.watch(apiClientProvider));

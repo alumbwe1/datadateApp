@@ -1,3 +1,5 @@
+import 'package:datadate/core/utils/custom_logs.dart';
+
 class LikeModel {
   final int id;
   final UserInfo? liker;
@@ -30,8 +32,8 @@ class LikeModel {
         createdAt: json['created_at'] as String?,
       );
     } catch (e) {
-      print('Error parsing LikeModel: $e');
-      print('JSON: $json');
+      CustomLogs.info('Error parsing LikeModel: $e');
+      CustomLogs.info('JSON: $json');
       rethrow;
     }
   }

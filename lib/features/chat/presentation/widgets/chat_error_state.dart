@@ -65,7 +65,10 @@ class ChatErrorState extends StatelessWidget {
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
-                  side: BorderSide(color: AppColors.secondaryLight, width: 2),
+                  side: const BorderSide(
+                    color: AppColors.secondaryLight,
+                    width: 2,
+                  ),
                 ),
               ),
               child: Row(

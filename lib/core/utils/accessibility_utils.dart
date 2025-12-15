@@ -119,7 +119,7 @@ class AccessibilityUtils {
     bool enabled = true,
   }) {
     final label = profileName != null
-        ? '$action ${profileName}\'s profile'
+        ? '$action $profileName\'s profile'
         : action;
     final hint = enabled ? 'Double tap to $action' : 'Button disabled';
 

@@ -18,7 +18,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on DioException catch (e) {
       return Left(ServerFailure(_handleDioError(e)));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred'));
+      return const Left(ServerFailure('An unexpected error occurred'));
     }
   }
 
@@ -32,7 +32,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on DioException catch (e) {
       return Left(ServerFailure(_handleDioError(e)));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred'));
+      return const Left(ServerFailure('An unexpected error occurred'));
     }
   }
 
@@ -44,7 +44,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on DioException catch (e) {
       return Left(ServerFailure(_handleDioError(e)));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred'));
+      return const Left(ServerFailure('An unexpected error occurred'));
     }
   }
 
@@ -58,7 +58,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on DioException catch (e) {
       return Left(ServerFailure(_handleDioError(e)));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred'));
+      return const Left(ServerFailure('An unexpected error occurred'));
     }
   }
 

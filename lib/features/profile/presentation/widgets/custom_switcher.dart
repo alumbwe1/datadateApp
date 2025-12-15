@@ -75,8 +75,8 @@ class CustomSwitchState extends State<CustomSwitch>
               boxShadow: [
                 BoxShadow(
                   color: widget.value
-                      ? Colors.black.withOpacity(0.3)
-                      : Colors.black.withOpacity(0.1),
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.black.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -96,8 +96,8 @@ class CustomSwitchState extends State<CustomSwitch>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: widget.value
-                          ? Colors.white.withOpacity(0.2)
-                          : Colors.white.withOpacity(0.3),
+                          ? Colors.white.withValues(alpha: 0.2)
+                          : Colors.white.withValues(alpha: 0.3),
                     ),
                   ),
                 ),
@@ -117,7 +117,7 @@ class CustomSwitchState extends State<CustomSwitch>
                         color: Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -130,7 +130,7 @@ class CustomSwitchState extends State<CustomSwitch>
                           height: widget.value ? 8.h : 0,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                           ),
                         ),
                       ),

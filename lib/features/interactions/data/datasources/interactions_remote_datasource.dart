@@ -1,7 +1,7 @@
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
-import '../models/match_model.dart';
 import '../models/like_model.dart';
+import '../models/match_model.dart';
 import '../models/profile_view_model.dart';
 
 abstract class InteractionsRemoteDataSource {

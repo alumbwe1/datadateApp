@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/reporting_remote_datasource.dart';
 import '../../data/models/report_model.dart';
-import '../../../../core/providers/api_providers.dart';
 
 final reportingDataSourceProvider = Provider<ReportingRemoteDataSource>((ref) {
   return ReportingRemoteDataSourceImpl(apiClient: ref.watch(apiClientProvider));

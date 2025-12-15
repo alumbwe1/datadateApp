@@ -516,7 +516,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   void _showSettingsBottomSheet(BuildContext context) {
     final isDarkMode = ref.read(themeProvider.notifier).isDarkMode;
     final bgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final handleColor = isDarkMode ? Colors.grey[700] : Colors.grey[300];
     final textColor = isDarkMode ? Colors.white : Kolors.jetBlack;
 
     showModalBottomSheet(
@@ -557,7 +556,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           borderRadius: BorderRadius.circular(22.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 20,
                               offset: const Offset(0, 2),
                             ),
@@ -667,7 +666,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           borderRadius: BorderRadius.circular(22.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 20,
                               offset: const Offset(0, 2),
                             ),
@@ -712,7 +711,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(Icons.lock_reset, color: Colors.blue, size: 24),
@@ -881,7 +880,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ? SizedBox(
                       width: 20.w,
                       height: 20.h,
-                      child: LottieLoadingIndicator(),
+                      child: const LottieLoadingIndicator(),
                     )
                   : Text(
                       'Delete',
@@ -907,7 +906,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ? Colors.white
         : Colors.grey[700]!;
     final bgColor = isDestructive
-        ? Colors.red.withOpacity(0.1)
+        ? Colors.red.withValues(alpha: 0.1)
         : isDarkMode
         ? Colors.grey[800]!
         : Colors.grey[100]!;
@@ -931,7 +930,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       trailing: Icon(
         Icons.chevron_right,
         color: isDestructive
-            ? Colors.red.withOpacity(0.5)
+            ? Colors.red.withValues(alpha: 0.5)
             : isDarkMode
             ? Colors.grey[600]
             : Colors.grey[400],

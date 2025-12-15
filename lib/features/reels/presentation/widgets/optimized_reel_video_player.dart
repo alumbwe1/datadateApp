@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'dart:ui';
 import 'package:video_player/video_player.dart';
-import '../../../encounters/domain/entities/profile.dart';
+
 import '../../../../core/constants/app_style.dart';
+import '../../../encounters/domain/entities/profile.dart';
 import '../controllers/reels_video_controller.dart';
 
 /// 🎬 PRODUCTION-READY TikTok-Style Video Player

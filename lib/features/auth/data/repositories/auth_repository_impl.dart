@@ -106,7 +106,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final user = await remoteDataSource.getCurrentUser().timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          throw AuthFailure('Request timeout - please check your connection');
+          throw const AuthFailure(
+            'Request timeout - please check your connection',
+          );
         },
       );
       return Right(user);

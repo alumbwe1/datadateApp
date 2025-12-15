@@ -26,13 +26,13 @@ class LikesTabBar extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 AppColors.secondaryLight,
-                AppColors.secondaryLight.withOpacity(0.8),
+                AppColors.secondaryLight.withValues(alpha: 0.8),
               ],
             ),
             borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: AppColors.secondaryLight.withOpacity(0.3),
+                color: AppColors.secondaryLight.withValues(alpha: 0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

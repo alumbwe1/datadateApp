@@ -5,16 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import '../../../profile/presentation/providers/profile_provider.dart';
-import '../../../../core/widgets/loading_shimmer.dart';
-import '../../../../core/widgets/custom_snackbar.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/loading_shimmer.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/encounters_provider.dart';
-import '../widgets/profile_card.dart';
-import '../widgets/swipe_overlay.dart';
 import '../widgets/animated_action_button.dart';
 import '../widgets/filter_bottom_sheet.dart';
+import '../widgets/profile_card.dart';
+import '../widgets/swipe_overlay.dart';
 import 'match_page.dart';
 
 class EncountersPage extends ConsumerStatefulWidget {
@@ -467,7 +468,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                       SnackBar(
                         content: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.refresh_rounded,
                               color: AppColors.primaryLight,
                               size: 20,
@@ -674,7 +675,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               SnackBar(
                 content: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.check_circle_rounded,
                       color: AppColors.primaryLight,
                       size: 20,

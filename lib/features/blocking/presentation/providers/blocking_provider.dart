@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/blocking_remote_datasource.dart';
 import '../../data/models/block_model.dart';
-import '../../../../core/providers/api_providers.dart';
 
 final blockingDataSourceProvider = Provider<BlockingRemoteDataSource>((ref) {
   return BlockingRemoteDataSourceImpl(apiClient: ref.watch(apiClientProvider));

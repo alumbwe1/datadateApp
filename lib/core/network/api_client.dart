@@ -361,7 +361,7 @@ class ApiClient {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return NetworkFailure(
+        return const NetworkFailure(
           'Connection timeout. Please check your internet.',
         );
 
@@ -385,13 +385,15 @@ class ApiClient {
                 errorData['detail'] ?? 'Invalid input. Please check your data.',
               );
             }
-            return ValidationFailure('Invalid input. Please check your data.');
+            return const ValidationFailure(
+              'Invalid input. Please check your data.',
+            );
           case 401:
             // Check for specific 401 errors
             if (data is Map) {
               final errorData = Map<String, dynamic>.from(data);
               if (errorData['code'] == 'user_not_found') {
-                return AuthFailure(
+                return const AuthFailure(
                   'Your account was not found. Please register again.',
                 );
               }
@@ -399,11 +401,11 @@ class ApiClient {
                 return AuthFailure(errorData['detail'].toString());
               }
             }
-            return AuthFailure('Session expired. Please login again.');
+            return const AuthFailure('Session expired. Please login again.');
           case 403:
-            return AuthFailure('Access denied.');
+            return const AuthFailure('Access denied.');
           case 404:
-            return ServerFailure('Resource not found.');
+            return const ServerFailure('Resource not found.');
           case 429:
             return ServerFailure(
               data is Map
@@ -414,22 +416,24 @@ class ApiClient {
           case 500:
           case 502:
           case 503:
-            return ServerFailure('Server error. Please try again later.');
+            return const ServerFailure('Server error. Please try again later.');
           default:
-            return ServerFailure('Something went wrong. Please try again.');
+            return const ServerFailure(
+              'Something went wrong. Please try again.',
+            );
         }
 
       case DioExceptionType.cancel:
-        return NetworkFailure('Request cancelled.');
+        return const NetworkFailure('Request cancelled.');
 
       case DioExceptionType.unknown:
         if (error.error.toString().contains('SocketException')) {
-          return NetworkFailure('No internet connection.');
+          return const NetworkFailure('No internet connection.');
         }
-        return NetworkFailure('Network error occurred.');
+        return const NetworkFailure('Network error occurred.');
 
       default:
-        return ServerFailure('Unexpected error occurred.');
+        return const ServerFailure('Unexpected error occurred.');
     }
   }
 

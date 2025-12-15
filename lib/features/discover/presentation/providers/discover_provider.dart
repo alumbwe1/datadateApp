@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/api_providers.dart';
 import '../../../encounters/data/datasources/profile_remote_datasource.dart';
 import '../../../encounters/data/repositories/profile_repository_impl.dart';
 import '../../../encounters/domain/entities/profile.dart';
 import '../../../encounters/domain/repositories/profile_repository.dart';
-import '../../../../core/providers/api_providers.dart';
 
 // Discover-specific state
 class DiscoverState {

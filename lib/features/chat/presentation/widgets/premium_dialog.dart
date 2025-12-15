@@ -296,7 +296,7 @@ class _PremiumDialogState extends State<PremiumDialog>
                   Container(
                     width: 80,
                     height: 80,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.red,
                     ),
@@ -470,7 +470,11 @@ class _PremiumDialogState extends State<PremiumDialog>
       color: widget.confirmColor,
       isLoading: _isConfirming,
       child: _isConfirming
-          ? SizedBox(width: 20, height: 20, child: LottieLoadingIndicator())
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: LottieLoadingIndicator(),
+            )
           : Text(
               widget.confirmText,
               style: appStyle(16, Colors.white, FontWeight.w700),

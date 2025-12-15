@@ -1,9 +1,11 @@
 import 'dart:async';
+
 import 'package:datadate/core/utils/custom_logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/network/websocket_service.dart';
-import '../../data/models/message_model.dart';
 import '../../data/models/chat_room_model.dart';
+import '../../data/models/message_model.dart';
 import '../../domain/repositories/chat_repository.dart';
 import 'chat_provider.dart';
 

@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/interactions_remote_datasource.dart';
 import '../../data/models/match_model.dart';
-import '../../../../core/providers/api_providers.dart';
 
 final matchesDataSourceProvider = Provider<InteractionsRemoteDataSource>((ref) {
   final apiClient = ref.watch(apiClientProvider);

@@ -35,7 +35,7 @@ class CrushBottomSheet extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withValues(alpha: 0.15),
                 blurRadius: 30,
                 offset: const Offset(0, -10),
               ),
@@ -102,8 +102,8 @@ class CrushBottomSheet extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  Colors.pink.withOpacity(0.3),
-                  Colors.red.withOpacity(0.2),
+                  Colors.pink.withValues(alpha: 0.3),
+                  Colors.red.withValues(alpha: 0.2),
                 ],
               ),
             ),
@@ -114,7 +114,7 @@ class CrushBottomSheet extends StatelessWidget {
               border: Border.all(color: Colors.white, width: 4),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -150,7 +150,7 @@ class CrushBottomSheet extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.pink.withOpacity(0.5),
+                      color: Colors.pink.withValues(alpha: 0.5),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -183,8 +183,8 @@ class CrushBottomSheet extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.pink.withOpacity(0.15),
-                Colors.purple.withOpacity(0.15),
+                Colors.pink.withValues(alpha: 0.15),
+                Colors.purple.withValues(alpha: 0.15),
               ],
             ),
             borderRadius: BorderRadius.circular(20),
@@ -300,12 +300,15 @@ class CrushBottomSheet extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.amber.withOpacity(0.1),
-            Colors.orange.withOpacity(0.05),
+            Colors.amber.withValues(alpha: 0.1),
+            Colors.orange.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.amber.withOpacity(0.3), width: 1.5),
+        border: Border.all(
+          color: Colors.amber.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
       ),
       child: Row(
         children: [
@@ -318,7 +321,7 @@ class CrushBottomSheet extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.amber.withOpacity(0.4),
+                  color: Colors.amber.withValues(alpha: 0.4),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),

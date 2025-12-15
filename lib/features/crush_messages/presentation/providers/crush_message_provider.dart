@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/crush_message_remote_datasource.dart';
 import '../../data/models/crush_message_model.dart';
-import '../../../../core/providers/api_providers.dart';
 
 final crushMessageDataSourceProvider = Provider<CrushMessageRemoteDataSource>((
   ref,

@@ -1,8 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
+
 import '../../../../core/constants/app_style.dart';
 import '../pages/chat_detail_page.dart';
 
@@ -60,18 +61,20 @@ class _MatchCardState extends State<MatchCard>
         onTapUp: (_) {
           _scaleController.reverse();
           Future.delayed(const Duration(milliseconds: 100), () {
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    ChatDetailPage(roomId: widget.match.id),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                transitionDuration: const Duration(milliseconds: 250),
-              ),
-            );
+            if (context.mounted) {
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      ChatDetailPage(roomId: widget.match.id),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                  transitionDuration: const Duration(milliseconds: 250),
+                ),
+              );
+            }
           });
         },
         onTapCancel: () => _scaleController.reverse(),
@@ -91,7 +94,7 @@ class _MatchCardState extends State<MatchCard>
                       height: 154.h,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(14.r),
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
@@ -103,10 +106,12 @@ class _MatchCardState extends State<MatchCard>
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xFFFF6B9D).withOpacity(0.4),
+                            color: const Color(
+                              0xFFFF6B9D,
+                            ).withValues(alpha: 0.4),
                             blurRadius: 16,
                             spreadRadius: 1,
-                            offset: Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -122,9 +127,9 @@ class _MatchCardState extends State<MatchCard>
                       boxShadow: !isNew
                           ? [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 10,
-                                offset: Offset(0, 3),
+                                offset: const Offset(0, 3),
                               ),
                             ]
                           : null,
@@ -159,7 +164,7 @@ class _MatchCardState extends State<MatchCard>
                                   end: Alignment.bottomCenter,
                                   colors: [
                                     Colors.transparent,
-                                    Colors.black.withOpacity(0.75),
+                                    Colors.black.withValues(alpha: 0.75),
                                   ],
                                 ),
                               ),
@@ -182,9 +187,11 @@ class _MatchCardState extends State<MatchCard>
                                     letterSpacing: -0.3,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black.withOpacity(0.3),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.3,
+                                        ),
                                         blurRadius: 4,
-                                        offset: Offset(0, 1),
+                                        offset: const Offset(0, 1),
                                       ),
                                     ],
                                   ),
@@ -204,7 +211,7 @@ class _MatchCardState extends State<MatchCard>
                                   vertical: 4.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
+                                  gradient: const LinearGradient(
                                     colors: [
                                       Color(0xFFFF6B9D),
                                       Color(0xFFFF8FB3),
@@ -213,9 +220,11 @@ class _MatchCardState extends State<MatchCard>
                                   borderRadius: BorderRadius.circular(12.r),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Color(0xFFFF6B9D).withOpacity(0.5),
+                                      color: const Color(
+                                        0xFFFF6B9D,
+                                      ).withValues(alpha: 0.5),
                                       blurRadius: 8,
-                                      offset: Offset(0, 2),
+                                      offset: const Offset(0, 2),
                                     ),
                                   ],
                                 ),
@@ -254,11 +263,11 @@ class _MatchCardState extends State<MatchCard>
   Widget _buildAvatarPlaceholder(String name) {
     // Enhanced gradient colors
     final colors = [
-      [Color(0xFFFF6B9D), Color(0xFFFFC3A0)], // Pink to Peach
-      [Color(0xFF4ECDC4), Color(0xFF44A08D)], // Teal
-      [Color(0xFF667EEA), Color(0xFF764BA2)], // Purple
-      [Color(0xFFFF9A56), Color(0xFFFF6B9D)], // Orange to Pink
-      [Color(0xFF56CCF2), Color(0xFF2F80ED)], // Blue
+      [const Color(0xFFFF6B9D), const Color(0xFFFFC3A0)], // Pink to Peach
+      [const Color(0xFF4ECDC4), const Color(0xFF44A08D)], // Teal
+      [const Color(0xFF667EEA), const Color(0xFF764BA2)], // Purple
+      [const Color(0xFFFF9A56), const Color(0xFFFF6B9D)], // Orange to Pink
+      [const Color(0xFF56CCF2), const Color(0xFF2F80ED)], // Blue
     ];
 
     final index = name.isNotEmpty ? name.codeUnitAt(0) % colors.length : 0;
@@ -280,9 +289,9 @@ class _MatchCardState extends State<MatchCard>
             color: Colors.white,
             shadows: [
               Shadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 8,
-                offset: Offset(0, 2),
+                offset: const Offset(0, 2),
               ),
             ],
           ),

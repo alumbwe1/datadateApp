@@ -72,7 +72,7 @@ class _AdaptiveLoadingStateState extends State<AdaptiveLoadingState>
         widget.color ??
         (isDark ? AppColors.primaryDark : AppColors.primaryLight);
 
-    Widget loadingWidget = _buildLoadingWidget(loadingColor, isDark);
+    final Widget loadingWidget = _buildLoadingWidget(loadingColor, isDark);
 
     return Padding(
       padding: widget.padding ?? EdgeInsets.all(16.w),
@@ -117,7 +117,7 @@ class _AdaptiveLoadingStateState extends State<AdaptiveLoadingState>
           width: size * 3,
           child: LinearProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(color),
-            backgroundColor: color.withOpacity(0.2),
+            backgroundColor: color.withValues(alpha: 0.2),
           ),
         );
 
@@ -141,7 +141,7 @@ class _AdaptiveLoadingStateState extends State<AdaptiveLoadingState>
                 height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: color.withOpacity(0.6),
+                  color: color.withValues(alpha: 0.6),
                 ),
               ),
             );

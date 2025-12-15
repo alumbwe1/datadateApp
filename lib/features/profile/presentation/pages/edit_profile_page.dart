@@ -1,11 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/utils/custom_logs.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/loading_indicator.dart';
@@ -171,7 +173,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.delete_outline, color: Colors.red, size: 32.sp),
@@ -317,7 +319,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -525,7 +527,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                               boxShadow: isSelected
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.15),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.15,
+                                        ),
                                         blurRadius: 8,
                                         offset: const Offset(0, 2),
                                       ),
@@ -572,7 +576,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 15,
                         offset: const Offset(0, -5),
                       ),
@@ -716,9 +720,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final photos = profile?.imageUrls ?? [];
 
     // Debug logging
-    print('📸 Edit Profile - Photos count: ${photos.length}');
+    CustomLogs.info('📸 Edit Profile - Photos count: ${photos.length}');
     if (photos.isNotEmpty) {
-      print('📸 Edit Profile - Photos: $photos');
+      CustomLogs.info('📸 Edit Profile - Photos: $photos');
     }
 
     return Column(
@@ -822,10 +826,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     height: double.infinity,
                     fit: BoxFit.cover,
                     placeholder: (context, url) {
-                      print('🔄 Loading image: $url');
+                      CustomLogs.info('🔄 Loading image: $url');
                       return Container(
                         color: Colors.grey[200],
-                        child: Center(
+                        child: const Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.black,
@@ -834,8 +838,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                       );
                     },
                     errorWidget: (context, url, error) {
-                      print('❌ Failed to load image: $url');
-                      print('❌ Error: $error');
+                      CustomLogs.info('❌ Failed to load image: $url');
+                      CustomLogs.info('❌ Error: $error');
                       return Container(
                         color: Colors.grey[300],
                         child: Column(
@@ -871,7 +875,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                     child: Container(
                       padding: EdgeInsets.all(6.w),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
+                        color: Colors.black.withValues(alpha: 0.7),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -893,7 +897,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                         vertical: 4.h,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
+                        color: Colors.black.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
@@ -1066,7 +1070,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                       borderRadius: BorderRadius.circular(25.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -1365,8 +1369,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           gradient: LinearGradient(
             colors: value
                 ? [
-                    Colors.black.withOpacity(0.08),
-                    Colors.black.withOpacity(0.03),
+                    Colors.black.withValues(alpha: 0.08),
+                    Colors.black.withValues(alpha: 0.03),
                   ]
                 : [Colors.grey[50]!, Colors.white],
             begin: Alignment.topLeft,
@@ -1374,20 +1378,22 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           ),
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: value ? Colors.black.withOpacity(0.15) : Colors.grey[300]!,
+            color: value
+                ? Colors.black.withValues(alpha: 0.15)
+                : Colors.grey[300]!,
             width: 1.0,
           ),
           boxShadow: value
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),

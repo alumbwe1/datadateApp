@@ -89,7 +89,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                   width: 36.w,
                   height: 5.h,
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(100.r),
                   ),
                 ),
@@ -110,7 +110,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                           FontWeight.w700,
                         ).copyWith(letterSpacing: -0.3),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       GestureDetector(
                         onTap: _handleReset,
                         child: Container(
@@ -124,7 +124,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 20,
                                 offset: const Offset(0, 2), // subtle iOS shadow
                               ),
@@ -138,7 +138,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                         ),
                       ),
 
-                      CloseIcon(),
+                      const CloseIcon(),
                     ],
                   ),
                 ),
@@ -162,7 +162,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                           'Age Range',
                           style: appStyle(
                             17,
-                            Colors.black.withOpacity(0.6),
+                            Colors.black.withValues(alpha: 0.6),
                             FontWeight.w500,
                           ),
                         ),
@@ -193,7 +193,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                                   '—',
                                   style: appStyle(
                                     32.sp,
-                                    Colors.black.withOpacity(0.3),
+                                    Colors.black.withValues(alpha: 0.3),
                                     FontWeight.w400,
                                   ),
                                 ),
@@ -211,7 +211,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                                 'years',
                                 style: appStyle(
                                   17,
-                                  Colors.black.withOpacity(0.4),
+                                  Colors.black.withValues(alpha: 0.4),
                                   FontWeight.w500,
                                 ),
                               ),
@@ -226,9 +226,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                           data: SliderThemeData(
                             trackHeight: 4.h,
                             activeTrackColor: Colors.black,
-                            inactiveTrackColor: Colors.black.withOpacity(0.08),
+                            inactiveTrackColor: Colors.black.withValues(
+                              alpha: 0.08,
+                            ),
                             thumbColor: Colors.black,
-                            overlayColor: Colors.black.withOpacity(0.08),
+                            overlayColor: Colors.black.withValues(alpha: 0.08),
                             thumbShape: RoundSliderThumbShape(
                               enabledThumbRadius: 10.r,
                               elevation: 0,
@@ -280,7 +282,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                               '18',
                               style: appStyle(
                                 13,
-                                Colors.black.withOpacity(0.4),
+                                Colors.black.withValues(alpha: 0.4),
                                 FontWeight.w500,
                               ),
                             ),
@@ -288,7 +290,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                               '60',
                               style: appStyle(
                                 13,
-                                Colors.black.withOpacity(0.4),
+                                Colors.black.withValues(alpha: 0.4),
                                 FontWeight.w500,
                               ),
                             ),

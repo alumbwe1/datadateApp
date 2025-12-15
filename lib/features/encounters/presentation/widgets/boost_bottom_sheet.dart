@@ -1,9 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'dart:math' as math;
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 
@@ -32,7 +34,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
       'views': '50+',
       'amount': 5.0,
       'popular': false,
-      'color': Color(0xFF00D4FF),
+      'color': const Color(0xFF00D4FF),
       'description': 'Perfect starter',
     },
     {
@@ -41,7 +43,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
       'views': '150+',
       'amount': 10.0,
       'popular': true,
-      'color': Color(0xFFFF6B9D),
+      'color': const Color(0xFFFF6B9D),
       'description': 'Most popular',
     },
     {
@@ -50,7 +52,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
       'views': '500+',
       'amount': 25.0,
       'popular': false,
-      'color': Color(0xFFFFD700),
+      'color': const Color(0xFFFFD700),
       'description': 'Maximum visibility',
     },
   ];
@@ -210,7 +212,7 @@ class _BoostBottomSheetState extends ConsumerState<BoostBottomSheet>
                                 child: SvgPicture.asset(
                                   'assets/svgs/star2.svg',
                                   fit: BoxFit.none,
-                                  colorFilter: ColorFilter.mode(
+                                  colorFilter: const ColorFilter.mode(
                                     Colors.black,
                                     BlendMode.srcIn,
                                   ),

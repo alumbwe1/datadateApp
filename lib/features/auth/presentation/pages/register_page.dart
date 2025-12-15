@@ -4,13 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/custom_button.dart';
-import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
+import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../core/widgets/password_error_bottom_sheet.dart';
-import '../../../../core/utils/validators.dart';
 import '../../../onboarding/presentation/providers/onboarding_provider.dart';
 import '../providers/auth_provider.dart';
 
@@ -291,7 +292,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ? Container(
                         height: 58.h,
                         alignment: Alignment.center,
-                        child: LottieLoadingIndicator(),
+                        child: const LottieLoadingIndicator(),
                       )
                     : CustomButton(
                         text: _isLoading ? 'Creating Account...' : 'Continue',

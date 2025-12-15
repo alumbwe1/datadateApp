@@ -287,13 +287,14 @@ class _MatchPageState extends ConsumerState<MatchPage>
                                           ? SizedBox(
                                               width: 20.w,
                                               height: 20.w,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                      Color
-                                                    >(Colors.white),
-                                              ),
+                                              child:
+                                                  const CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                          Color
+                                                        >(Colors.white),
+                                                  ),
                                             )
                                           : Icon(
                                               Icons.send_rounded,
@@ -364,7 +365,7 @@ class _MatchPageState extends ConsumerState<MatchPage>
                                 ? SizedBox(
                                     height: 20.h,
                                     width: 20.w,
-                                    child: CircularProgressIndicator(
+                                    child: const CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                         Colors.white,

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:datadate/core/utils/custom_logs.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
 import '../constants/api_endpoints.dart';
 import '../constants/app_constants.dart';
 
@@ -25,7 +27,7 @@ class WebSocketService {
         throw Exception('No authentication token found');
       }
 
-      String base = 'wss://heartlink-production.up.railway.app';
+      final String base = 'wss://heartlink-production.up.railway.app';
 
       final uri = Uri.parse(
         '$base${ApiEndpoints.chatWebSocket(roomId)}?token=$token',

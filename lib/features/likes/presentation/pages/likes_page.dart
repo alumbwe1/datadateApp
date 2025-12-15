@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/constants/app_style.dart';
+
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_style.dart';
 import '../providers/likes_provider.dart';
-import '../widgets/likes_grid_view.dart';
 import '../widgets/likes_error_state.dart';
+import '../widgets/likes_grid_view.dart';
 import '../widgets/likes_shimmer_loading.dart';
 
 class LikesPage extends ConsumerStatefulWidget {

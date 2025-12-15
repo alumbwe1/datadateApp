@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../interactions/data/models/like_model.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../encounters/domain/entities/profile.dart';
 import '../../../encounters/presentation/pages/profile_details_page.dart';
+import '../../../interactions/data/models/like_model.dart';
 import '../providers/likes_provider.dart';
 import 'likes_empty_state.dart';
 import 'received_like_card.dart';
 import 'sent_like_card.dart';
-import '../../../../core/constants/app_colors.dart';
 
 class LikesGridView extends ConsumerWidget {
   final List<LikeModel> likes;

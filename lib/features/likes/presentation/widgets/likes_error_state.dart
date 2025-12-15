@@ -24,7 +24,10 @@ class LikesErrorState extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.red[50]!, Colors.red[100]!.withOpacity(0.3)],
+                  colors: [
+                    Colors.red[50]!,
+                    Colors.red[100]!.withValues(alpha: 0.3),
+                  ],
                 ),
                 shape: BoxShape.circle,
               ),
@@ -56,7 +59,7 @@ class LikesErrorState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
                 elevation: 4,
-                shadowColor: AppColors.secondaryLight.withOpacity(0.4),
+                shadowColor: AppColors.secondaryLight.withValues(alpha: 0.4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

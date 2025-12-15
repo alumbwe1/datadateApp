@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../interactions/presentation/providers/matches_provider.dart';
 import '../providers/chat_provider.dart';
-import '../widgets/chat_page_shimmer.dart';
-import '../widgets/chat_search_bar.dart';
-import '../widgets/matches_section.dart';
-import '../widgets/conversation_tile.dart';
 import '../widgets/chat_empty_state.dart';
 import '../widgets/chat_error_state.dart';
+import '../widgets/chat_page_shimmer.dart';
+import '../widgets/chat_search_bar.dart';
+import '../widgets/conversation_tile.dart';
+import '../widgets/matches_section.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   const ChatPage({super.key});

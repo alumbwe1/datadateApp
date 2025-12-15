@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_style.dart';
+import '../../../../../core/utils/custom_logs.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../../../../../core/widgets/onboarding_progress.dart';
 import '../../providers/onboarding_provider.dart';
@@ -300,7 +301,9 @@ class _OnboardingDobPageState extends ConsumerState<OnboardingDobPage> {
                         if (age >= 18) {
                           context.push('/onboarding/interests');
                         } else {
-                          print('❌ Age validation failed: $age years old');
+                          CustomLogs.info(
+                            '❌ Age validation failed: $age years old',
+                          );
                           setState(() {
                             _errorMessage =
                                 'You must be at least 18 years old to use this platform.';
@@ -402,7 +405,7 @@ class _CustomDatePickerBottomSheetState
 
     return Container(
       height: 420.h,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -433,7 +436,7 @@ class _CustomDatePickerBottomSheetState
                     FontWeight.w700,
                   ).copyWith(letterSpacing: -0.3),
                 ),
-                CloseIcon(),
+                const CloseIcon(),
               ],
             ),
           ),

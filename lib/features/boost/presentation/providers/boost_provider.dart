@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/providers/api_providers.dart';
 import '../../data/datasources/boost_remote_datasource.dart';
 import '../../data/models/boost_model.dart';
-import '../../../../core/providers/api_providers.dart';
 
 final boostDataSourceProvider = Provider<BoostRemoteDataSource>((ref) {
   return BoostRemoteDataSourceImpl(apiClient: ref.watch(apiClientProvider));

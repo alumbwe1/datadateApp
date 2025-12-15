@@ -21,7 +21,7 @@ class UniversitySelectionPage extends ConsumerStatefulWidget {
 
 class _UniversitySelectionPageState
     extends ConsumerState<UniversitySelectionPage> {
-  String _searchQuery = '';
+  final String _searchQuery = '';
 
   @override
   void initState() {

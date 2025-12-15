@@ -2,14 +2,14 @@
 
 import 'dart:io';
 
-import 'package:datadate/core/utils/custom_logs.dart';
+import 'package:datadate/core/utils/custom_logs.dart' show CustomLogs;
 
 /// Script to optimize Flutter app bundle size
 void main(List<String> args) async {
   CustomLogs.info('🚀 Starting bundle optimization...\n');
 
   // Check if we're in a Flutter project
-  if (!await File('pubspec.yaml').exists()) {
+  if (!File('pubspec.yaml').existsSync()) {
     CustomLogs.info('❌ Error: Not in a Flutter project directory');
     exit(1);
   }
@@ -52,7 +52,7 @@ void main(List<String> args) async {
 
     // 6. Analyze bundle size
     CustomLogs.info('📊 Analyzing bundle size...');
-    await _analyzeBundleSize();
+    _analyzeBundleSize();
 
     CustomLogs.info('\n✅ Bundle optimization complete!');
     CustomLogs.info('📁 Check build/app/outputs/ for optimized builds');
@@ -85,18 +85,18 @@ Future<void> _analyzeUnusedDependencies() async {
   }
 }
 
-Future<void> _analyzeBundleSize() async {
+void _analyzeBundleSize() {
   try {
     final apkFile = File('build/app/outputs/flutter-apk/app-release.apk');
     final bundleFile = File('build/app/outputs/bundle/release/app-release.aab');
 
-    if (await apkFile.exists()) {
-      final apkSize = await apkFile.length();
+    if (apkFile.existsSync()) {
+      final apkSize = apkFile.lengthSync();
       CustomLogs.info('📱 APK size: ${_formatBytes(apkSize)}');
     }
 
-    if (await bundleFile.exists()) {
-      final bundleSize = await bundleFile.length();
+    if (bundleFile.existsSync()) {
+      final bundleSize = bundleFile.lengthSync();
       CustomLogs.info('📦 App Bundle size: ${_formatBytes(bundleSize)}');
     }
 
@@ -113,7 +113,8 @@ Future<void> _analyzeBundleSize() async {
 String _formatBytes(int bytes) {
   if (bytes < 1024) return '$bytes B';
   if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-  if (bytes < 1024 * 1024 * 1024)
+  if (bytes < 1024 * 1024 * 1024) {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
   return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
 }

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
-import '../widgets/welcome_painters.dart';
 import '../widgets/welcome_match_indicator.dart';
+import '../widgets/welcome_painters.dart';
 
 class OnboardingWelcomePage extends ConsumerStatefulWidget {
   const OnboardingWelcomePage({super.key});
@@ -102,7 +103,7 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -174,12 +175,12 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
                                 height: 60.h,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  gradient: LinearGradient(
+                                  gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [
                                       AppColors.accentLight,
-                                      const Color(0xFFFF6B9D),
+                                      Color(0xFFFF6B9D),
                                     ],
                                   ),
                                   boxShadow: [
@@ -207,7 +208,7 @@ class _OnboardingWelcomePageState extends ConsumerState<OnboardingWelcomePage>
                                 ),
                                 child: Container(
                                   margin: EdgeInsets.all(3.w),
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.white,
                                   ),

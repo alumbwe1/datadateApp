@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -170,7 +168,7 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                             decoration: BoxDecoration(
                               color: isActive
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.3),
+                                  : Colors.white.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -304,8 +302,8 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                                             Icon(
                                               Icons.school_rounded,
                                               size: 22.sp,
-                                              color: Colors.white.withOpacity(
-                                                0.8,
+                                              color: Colors.white.withValues(
+                                                alpha: 0.8,
                                               ),
                                             ),
                                       ),
@@ -321,10 +319,10 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                               child: Container(
                                 padding: EdgeInsets.all(10.w),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
+                                  color: Colors.white.withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Colors.white.withValues(alpha: 0.3),
                                     width: 1,
                                   ),
                                 ),
@@ -380,14 +378,16 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
                                         color: interestData['isShared']
-                                            ? Colors.pink.withOpacity(0.6)
-                                            : Colors.white.withOpacity(0.3),
+                                            ? Colors.pink.withValues(alpha: 0.6)
+                                            : Colors.white.withValues(
+                                                alpha: 0.3,
+                                              ),
                                         width: interestData['isShared']
                                             ? 1.2.w
                                             : 0.7.w,
                                       ),
                                       color: interestData['isShared']
-                                          ? Colors.pink.withOpacity(0.15)
+                                          ? Colors.pink.withValues(alpha: 0.15)
                                           : null,
                                     ),
                                     child: Row(
@@ -433,12 +433,15 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.25), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.25),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white.withOpacity(0.95), size: 14.sp),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.95), size: 14.sp),
           SizedBox(width: 5.w),
           Flexible(
             child: Text(

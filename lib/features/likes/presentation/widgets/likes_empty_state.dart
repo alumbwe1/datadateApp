@@ -81,8 +81,8 @@ class _LikesEmptyStateState extends State<LikesEmptyState>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.secondaryLight.withOpacity(0.6),
-                        AppColors.secondaryLight.withOpacity(0.2),
+                        AppColors.secondaryLight.withValues(alpha: 0.6),
+                        AppColors.secondaryLight.withValues(alpha: 0.2),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(2),

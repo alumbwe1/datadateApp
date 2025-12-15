@@ -41,7 +41,7 @@ class MatchesSection extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.secondaryLight.withOpacity(0.12),
+                  color: AppColors.secondaryLight.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(

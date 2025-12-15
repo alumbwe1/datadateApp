@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
 
 class NeonBorderContainer extends StatefulWidget {
   final Widget child;
@@ -9,13 +10,13 @@ class NeonBorderContainer extends StatefulWidget {
   final double glowIntensity;
 
   const NeonBorderContainer({
-    Key? key,
+    super.key,
     required this.child,
     this.borderRadius = 30.0,
     this.borderWidth = 3.0,
     this.neonColor = const Color(0xFF00D9FF),
     this.glowIntensity = 20.0,
-  }) : super(key: key);
+  });
 
   @override
   State<NeonBorderContainer> createState() => _NeonBorderContainerState();
@@ -81,16 +82,16 @@ class SpaceBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Deep space gradient
-    final gradient = LinearGradient(
+    final gradient = const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        const Color(0xFF000814),
-        const Color(0xFF001D3D),
-        const Color(0xFF003566),
-        const Color(0xFF001233),
+        Color(0xFF000814),
+        Color(0xFF001D3D),
+        Color(0xFF003566),
+        Color(0xFF001233),
       ],
-      stops: const [0.0, 0.3, 0.6, 1.0],
+      stops: [0.0, 0.3, 0.6, 1.0],
     );
 
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
@@ -105,7 +106,7 @@ class SpaceBackgroundPainter extends CustomPainter {
       final radius = _random.nextDouble() * 1.5 + 0.5;
       final opacity = _random.nextDouble() * 0.5 + 0.3;
 
-      starPaint.color = Colors.white.withOpacity(opacity);
+      starPaint.color = Colors.white.withValues(alpha: opacity);
       canvas.drawCircle(Offset(x, y), radius, starPaint);
     }
 
@@ -113,14 +114,14 @@ class SpaceBackgroundPainter extends CustomPainter {
     final nebulaPaint = Paint()
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 50);
 
-    nebulaPaint.color = const Color(0xFF6B4FBB).withOpacity(0.15);
+    nebulaPaint.color = const Color(0xFF6B4FBB).withValues(alpha: 0.15);
     canvas.drawCircle(
       Offset(size.width * 0.3, size.height * 0.2),
       100,
       nebulaPaint,
     );
 
-    nebulaPaint.color = const Color(0xFF00D9FF).withOpacity(0.1);
+    nebulaPaint.color = const Color(0xFF00D9FF).withValues(alpha: 0.1);
     canvas.drawCircle(
       Offset(size.width * 0.7, size.height * 0.8),
       120,
@@ -159,11 +160,11 @@ class NeonBorderPainter extends CustomPainter {
 
     // Create moving gradient
     final colors = [
-      neonColor.withOpacity(0.3),
+      neonColor.withValues(alpha: 0.3),
       neonColor,
-      neonColor.withOpacity(1.0),
+      neonColor.withValues(alpha: 1.0),
       neonColor,
-      neonColor.withOpacity(0.3),
+      neonColor.withValues(alpha: 0.3),
     ];
 
     final stops = [
@@ -209,7 +210,7 @@ class NeonBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = borderWidth * 0.5
       ..shader = SweepGradient(
-        colors: colors.map((c) => c.withOpacity(c.opacity * 0.5)).toList(),
+        colors: colors.map((c) => c.withValues(alpha: c.a * 0.5)).toList(),
         stops: stops,
         transform: GradientRotation(gradientOffset),
       ).createShader(rect.outerRect)

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Environment {
-  static var apiBaseUrl;
+  static String? apiBaseUrl;
 
   static String get fileName {
     if (kReleaseMode) {

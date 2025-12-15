@@ -100,13 +100,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ServerFailure catch (e) {
       // Check if it's an "already liked" error
       if (e.message.toLowerCase().contains('already liked')) {
-        return Left(ValidationFailure('You have already liked this profile'));
+        return const Left(
+          ValidationFailure('You have already liked this profile'),
+        );
       }
       return Left(e);
     } catch (e) {
       final errorMsg = e.toString().toLowerCase();
       if (errorMsg.contains('already liked')) {
-        return Left(ValidationFailure('You have already liked this profile'));
+        return const Left(
+          ValidationFailure('You have already liked this profile'),
+        );
       }
       return Left(ServerFailure('Failed to like profile: ${e.toString()}'));
     }

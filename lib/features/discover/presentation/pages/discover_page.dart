@@ -1,9 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../encounters/domain/entities/profile.dart';
@@ -385,7 +386,11 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Iconsax.heart, size: 17, color: Colors.black),
+                            const Icon(
+                              Iconsax.heart,
+                              size: 17,
+                              color: Colors.black,
+                            ),
                             Text(
                               'Here for ${profile.intent}',
                               style: appStyle(

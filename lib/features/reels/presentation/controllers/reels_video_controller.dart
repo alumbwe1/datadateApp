@@ -1,8 +1,8 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'dart:developer' as developer;
+import 'package:video_player/video_player.dart';
 
 /// 🎬 PRODUCTION-READY TikTok-Style Video Controller
 /// Manages intelligent preloading, instant playback, and memory-efficient recycling

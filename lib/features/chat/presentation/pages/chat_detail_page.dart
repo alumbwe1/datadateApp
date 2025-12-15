@@ -2,18 +2,19 @@ import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/chat_detail_provider.dart';
-import '../widgets/premium_app_bar.dart';
-import '../widgets/premium_message_input.dart';
-import '../widgets/premium_message_bubble.dart';
-import '../widgets/premium_typing_indicator.dart';
-import '../widgets/premium_empty_state.dart';
-import '../widgets/premium_dialog.dart';
 import '../widgets/chat_options_sheet.dart';
 import '../widgets/message_options_sheet.dart';
+import '../widgets/premium_app_bar.dart';
+import '../widgets/premium_dialog.dart';
+import '../widgets/premium_empty_state.dart';
+import '../widgets/premium_message_bubble.dart';
+import '../widgets/premium_message_input.dart';
+import '../widgets/premium_typing_indicator.dart';
 
 class ChatDetailPage extends ConsumerStatefulWidget {
   final int roomId;
@@ -161,7 +162,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
               .read(chatDetailProvider(widget.roomId).notifier)
               .deleteMessage(message.id);
 
-          if (mounted) {
+          if (context.mounted) {
             CustomSnackbar.show(
               scaffoldContext,
               message: 'Message deleted successfully',
@@ -170,7 +171,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
             );
           }
         } catch (e) {
-          if (mounted) {
+          if (context.mounted) {
             CustomSnackbar.show(
               scaffoldContext,
               message: 'Failed to delete message',
@@ -307,9 +308,9 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     final currentUser = ref.watch(authProvider).user;
 
     if (chatState.isLoading && room == null) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Colors.white,
-        body: const Center(child: LottieLoadingIndicator()),
+        body: Center(child: LottieLoadingIndicator()),
       );
     }
 

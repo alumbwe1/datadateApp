@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-import 'package:datadate/core/utils/custom_logs.dart';
+import 'package:datadate/core/utils/custom_logs.dart' show CustomLogs;
 
 /// Script to run all tests in the correct order
 void main(List<String> args) async {
@@ -32,7 +32,7 @@ void main(List<String> args) async {
 
     // 4. Generate coverage report
     CustomLogs.info('📊 Generating coverage report...');
-    if (await File('coverage/lcov.info').exists()) {
+    if (File('coverage/lcov.info').existsSync()) {
       // You can add coverage report generation here
       CustomLogs.info('✅ Coverage report available at coverage/lcov.info\n');
     }

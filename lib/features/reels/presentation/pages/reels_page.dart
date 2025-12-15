@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'dart:ui';
+
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
-import '../../../encounters/presentation/providers/encounters_provider.dart';
-import '../../../encounters/presentation/pages/profile_details_page.dart';
 import '../../../encounters/presentation/pages/match_page.dart';
+import '../../../encounters/presentation/pages/profile_details_page.dart';
+import '../../../encounters/presentation/providers/encounters_provider.dart';
+import '../controllers/reels_video_controller.dart';
 import '../providers/reels_provider.dart';
 import '../widgets/optimized_reel_video_player.dart';
-import '../controllers/reels_video_controller.dart';
 
 /// 🎬 PRODUCTION-READY TikTok-Style Reels Page
 /// Features: Instant autoplay, full-screen immersion, intelligent preloading
@@ -330,7 +330,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
                 SizedBox(
                   width: 60.w,
                   height: 60.h,
-                  child: LottieLoadingIndicator(),
+                  child: const LottieLoadingIndicator(),
                 ),
               ],
             ),
@@ -369,7 +369,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
                           width: 2,
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Icon(
                           Icons.play_circle,
                           size: 70,
