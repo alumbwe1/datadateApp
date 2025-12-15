@@ -218,7 +218,8 @@ class AccessibilityUtils {
 
   /// Announce to screen reader
   static void announce(String message) {
-    SemanticsService.announce(message, TextDirection.ltr);
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    SemanticsService.sendAnnouncement(view, message, TextDirection.ltr);
   }
 
   /// Check if accessibility is enabled
