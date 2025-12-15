@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../providers/likes_provider.dart';
 import '../widgets/likes_grid_view.dart';
 import '../widgets/likes_error_state.dart';
@@ -21,11 +22,6 @@ class _LikesPageState extends ConsumerState<LikesPage>
 
   @override
   bool get wantKeepAlive => true;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void didChangeDependencies() {
@@ -85,49 +81,28 @@ class _LikesPageState extends ConsumerState<LikesPage>
       child: Row(
         children: [
           Expanded(
-            child: _buildTinderTab(
-              '${likesState.receivedLikes.length} Likes',
-              0,
+            child: _TinderTab(
+              label: '${likesState.receivedLikes.length} Likes',
+              index: 0,
+              isSelected: _selectedIndex == 0,
+              onTap: (index) {
+                if (_selectedIndex != index) {
+                  setState(() => _selectedIndex = index);
+                }
+              },
             ),
           ),
-          SizedBox(width: 1),
+          const SizedBox(width: 1),
           Expanded(
-            child: _buildTinderTab('${likesState.sentLikes.length} Sent', 1),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTinderTab(String label, int index) {
-    final isSelected = _selectedIndex == index;
-
-    return GestureDetector(
-      onTap: () {
-        if (_selectedIndex != index) {
-          setState(() => _selectedIndex = index);
-        }
-      },
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 12.h),
-            child: Text(
-              label,
-              style: appStyle(
-                17.sp,
-                isSelected ? Colors.black : Colors.grey.shade500,
-                isSelected ? FontWeight.w500 : FontWeight.w500,
-              ).copyWith(letterSpacing: -0.3),
-            ),
-          ),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
-            height: 3.h,
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.black : Colors.transparent,
-              borderRadius: BorderRadius.circular(2.r),
+            child: _TinderTab(
+              label: '${likesState.sentLikes.length} Sent',
+              index: 1,
+              isSelected: _selectedIndex == 1,
+              onTap: (index) {
+                if (_selectedIndex != index) {
+                  setState(() => _selectedIndex = index);
+                }
+              },
             ),
           ),
         ],
@@ -159,6 +134,51 @@ class _LikesPageState extends ConsumerState<LikesPage>
           child: LikesGridView(likes: likes, isReceived: _selectedIndex == 0),
         ),
       ],
+    );
+  }
+}
+
+class _TinderTab extends StatelessWidget {
+  final String label;
+  final int index;
+  final bool isSelected;
+  final ValueChanged<int> onTap;
+
+  const _TinderTab({
+    required this.label,
+    required this.index,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onTap(index),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Text(
+              label,
+              style: appStyle(
+                17.sp,
+                isSelected ? Colors.black : AppColors.greyShade500,
+                FontWeight.w500,
+              ).copyWith(letterSpacing: -0.3),
+            ),
+          ),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            height: 3.h,
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.black : Colors.transparent,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

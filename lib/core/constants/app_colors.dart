@@ -16,6 +16,9 @@ class AppColors {
   static const Color cardLight = Color(0xFFFFFFFF);
   static const Color textPrimaryLight = Color(0xFF2D2D2D);
   static const Color textSecondaryLight = Color(0xFF757575);
+  static const Color greyShade500 = Color(0xFF9E9E9E);
+  static const Color greyShade400 = Color(0xFFBDBDBD);
+  static const Color greyShade600 = Color(0xFF757575);
 
   // Navigation Colors - Light
   static const Color navEncountersLight = Color(

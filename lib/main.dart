@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,12 +9,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'
     show FlutterSecureStorage;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'core/constants/app_constants.dart';
 import 'core/network/api_client.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
+import 'core/services/analytics_service.dart';
+import 'core/services/performance_service.dart';
+import 'core/services/state_persistence_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/custom_logs.dart';
+import 'core/widgets/error_boundary.dart';
 import 'device_updator.dart';
 import 'notification_initializer.dart';
 
@@ -32,6 +38,37 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
+  // Global error handling setup
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    CustomLogs.error(
+      'Flutter Error: ${details.exception}',
+      tag: 'GLOBAL_ERROR',
+      error: details.exception,
+      stackTrace: details.stack,
+    );
+
+    // Send to Crashlytics in production
+    if (kReleaseMode) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    }
+  };
+
+  // Handle errors outside of Flutter framework
+  PlatformDispatcher.instance.onError = (error, stack) {
+    CustomLogs.error(
+      'Platform Error: $error',
+      tag: 'PLATFORM_ERROR',
+      error: error,
+      stackTrace: stack,
+    );
+
+    if (kReleaseMode) {
+      // FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    }
+    return true;
+  };
+
   WidgetsFlutterBinding.ensureInitialized();
   final secureStorage = const FlutterSecureStorage();
   final String? token = await secureStorage.read(
@@ -46,17 +83,29 @@ void main() async {
   // Configure logging system
   _configureLogging();
 
-  // Initialize Firebase
-  // Initialize Firebase
+  // Initialize Firebase and services
   try {
     await Firebase.initializeApp();
     CustomLogs.success('Firebase initialized', tag: 'MAIN');
 
+    // Initialize all services
+    await Future.wait([
+      PerformanceService.initialize(),
+      AnalyticsService.initialize(),
+      StatePersistenceService.initialize(),
+    ]);
+
     // Set up background message handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     CustomLogs.info('Background message handler registered', tag: 'MAIN');
+
+    // Start app performance trace
+    await PerformanceService.startTrace(PerformanceService.appStartTrace);
   } catch (e) {
-    CustomLogs.error('Firebase initialization failed: $e', tag: 'MAIN');
+    CustomLogs.error(
+      'Firebase/Services initialization failed: $e',
+      tag: 'MAIN',
+    );
   }
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
@@ -100,14 +149,20 @@ void main() async {
     },
   );
 
+  // Track app start
+  await AnalyticsService.trackSessionStart();
+
   runApp(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
-      child: const MyApp(),
+      child: const ErrorBoundary(child: MyApp()),
     ),
   );
+
+  // Stop app start trace
+  await PerformanceService.stopTrace(PerformanceService.appStartTrace);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -160,12 +215,11 @@ void _configureLogging() {
           ? (entry) {
               // In production, only log errors to external service
               if (entry.level == LogLevel.error) {
-                // TODO: Send to Firebase Crashlytics or Sentry
-                // FirebaseCrashlytics.instance.recordError(
-                //   entry.error,
-                //   entry.stackTrace,
-                //   reason: entry.message,
-                // );
+                FirebaseCrashlytics.instance.recordError(
+                  entry.error,
+                  entry.stackTrace,
+                  reason: entry.message,
+                );
               }
             }
           : null,
@@ -202,6 +256,7 @@ class MyApp extends ConsumerWidget {
           darkTheme: AppTheme.darkTheme(),
           themeMode: themeMode,
           routerConfig: AppRouter.router,
+          navigatorObservers: [AnalyticsService.observer],
         );
       },
     );

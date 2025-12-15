@@ -24,25 +24,25 @@ class _MainNavigationState extends State<MainNavigation>
   // Track which pages have been visited
   final Set<int> _visitedPages = {0}; // Start with encounters page
 
-  // Build pages lazily
+  // Build pages lazily with proper widget keys
   Widget _buildPage(int index) {
     if (!_visitedPages.contains(index)) {
-      return const SizedBox.shrink(); // Empty widget for unvisited pages
+      return Container(key: ValueKey('empty_$index')); // Keyed empty container
     }
 
     switch (index) {
       case 0:
-        return const EncountersPage();
+        return const EncountersPage(key: ValueKey('encounters'));
       case 1:
-        return const DiscoverPage();
+        return const DiscoverPage(key: ValueKey('discover'));
       case 2:
-        return const LikesPage();
+        return const LikesPage(key: ValueKey('likes'));
       case 3:
-        return const ChatPage();
+        return const ChatPage(key: ValueKey('chat'));
       case 4:
-        return const ProfilePage();
+        return const ProfilePage(key: ValueKey('profile'));
       default:
-        return const SizedBox.shrink();
+        return Container(key: ValueKey('default_$index'));
     }
   }
 
@@ -54,6 +54,7 @@ class _MainNavigationState extends State<MainNavigation>
       (index) => AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 200),
+        debugLabel: 'NavAnimation_$index', // Add debug labels
       ),
     );
     _animationControllers[0].value = 1.0;
@@ -94,7 +95,7 @@ class _MainNavigationState extends State<MainNavigation>
           color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -164,8 +165,8 @@ class _MainNavigationState extends State<MainNavigation>
       child: InkWell(
         onTap: () => _onItemTapped(index),
         borderRadius: BorderRadius.circular(16),
-        splashColor: activeColor.withValues(alpha: 0.1),
-        highlightColor: activeColor.withValues(alpha: 0.05),
+        splashColor: activeColor.withOpacity(0.1),
+        highlightColor: activeColor.withOpacity(0.05),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
