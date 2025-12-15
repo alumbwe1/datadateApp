@@ -52,16 +52,16 @@ class ProfileCardShimmer extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
+          const Padding(
+            padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const LoadingShimmer(width: 150, height: 24),
-                const SizedBox(height: 8),
-                const LoadingShimmer(width: 100, height: 16),
-                const SizedBox(height: 8),
-                const LoadingShimmer(width: 200, height: 16),
+                LoadingShimmer(width: 150, height: 24),
+                SizedBox(height: 8),
+                LoadingShimmer(width: 100, height: 16),
+                SizedBox(height: 8),
+                LoadingShimmer(width: 200, height: 16),
               ],
             ),
           ),

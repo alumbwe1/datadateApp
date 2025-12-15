@@ -17,7 +17,7 @@ class AnalyticsService {
     try {
       await _analytics.setUserId(id: userId);
     } catch (e) {
-      debugPrint("Failed to set user ID: $e");
+      debugPrint('Failed to set user ID: $e');
     }
   }
 

@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
-import '../widgets/neon_border.dart';
 import '../widgets/welcome_painters.dart';
 import '../widgets/welcome_match_indicator.dart';
 

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import '../../features/encounters/presentation/pages/encounters_page.dart';
-import '../../features/profile/presentation/pages/profile_page.dart';
-import '../../features/discover/presentation/pages/discover_page.dart';
-import '../../features/likes/presentation/pages/likes_page.dart';
+
 import '../../features/chat/presentation/pages/chat_page.dart';
+import '../../features/discover/presentation/pages/discover_page.dart';
+import '../../features/encounters/presentation/pages/encounters_page.dart';
+import '../../features/likes/presentation/pages/likes_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import '../constants/app_colors.dart';
 
 class MainNavigation extends StatefulWidget {

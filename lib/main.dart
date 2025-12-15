@@ -256,7 +256,6 @@ class MyApp extends ConsumerWidget {
           darkTheme: AppTheme.darkTheme(),
           themeMode: themeMode,
           routerConfig: AppRouter.router,
-          navigatorObservers: [AnalyticsService.observer],
         );
       },
     );

@@ -276,8 +276,8 @@ class AnalyticsService {
     }
   }
 
-  static Map<String, dynamic> _sanitizeParameters(Map<String, dynamic> params) {
-    final sanitized = <String, dynamic>{};
+  static Map<String, Object> _sanitizeParameters(Map<String, dynamic> params) {
+    final sanitized = <String, Object>{};
 
     for (final entry in params.entries) {
       final key = entry.key.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
