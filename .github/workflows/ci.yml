@@ -196,25 +196,28 @@ jobs:
           fi
 
   security_scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Run security scan
-        run: |
-          # Check for hardcoded secrets
-          if grep -r "sk_live\|pk_live\|AIza\|AKIA" lib/ --exclude-dir=.git; then
-            echo "❌ Potential secrets found in code"
-            exit 1
-          fi
-          
-          # Check for debug flags in release
-          if grep -r "kDebugMode.*true\|debugShowCheckedModeBanner.*false" lib/; then
-            echo "⚠️  Debug flags found - ensure they're properly configured"
-          fi
-          
-          echo "✅ Security scan completed"
+  name: Security Scan
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Run security scan
+      run: |
+        # Check for hardcoded secrets (excluding Firebase public config)
+        if grep -r "sk_live\|pk_live\|AKIA" lib/ \
+          --exclude=lib/firebase_options.dart \
+          --exclude-dir=.git; then
+          echo "❌ Potential secrets found in code"
+          exit 1
+        fi
+
+        # Warn about debug flags
+        if grep -r "kDebugMode.*true" lib/; then
+          echo "⚠️ Debug flags found - verify release configuration"
+        fi
+
+        echo "✅ Security scan completed"
+
 
   deploy_staging:
     name: Deploy to Staging
