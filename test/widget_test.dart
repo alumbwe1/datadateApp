@@ -5,14 +5,14 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:datadate/core/network/api_client.dart';
+import 'package:datadate/core/providers/api_providers.dart';
+import 'package:datadate/core/widgets/main_navigation.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:datadate/core/providers/api_providers.dart';
-import 'package:datadate/core/network/api_client.dart';
-import 'package:datadate/core/widgets/main_navigation.dart';
-import 'package:dio/dio.dart';
 
 // Mock API Client for testing
 class MockApiClient extends ApiClient {

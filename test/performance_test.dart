@@ -203,7 +203,7 @@ void main() {
         itemBuilder: (context, index) => Container(
           height: 60,
           margin: const EdgeInsets.all(4),
-          color: Colors.blue.withOpacity(0.1),
+          color: Colors.blue.withValues(alpha: 0.1),
           child: Center(child: Text('Item $index')),
         ),
       );
