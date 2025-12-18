@@ -87,7 +87,7 @@ jobs:
         run: flutter test integration_test/app_test.dart
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: integration-test-results
@@ -130,13 +130,13 @@ jobs:
             --split-debug-info=build/debug-info
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload App Bundle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-bundle
           path: build/app/outputs/bundle/release/app-release.aab
@@ -229,7 +229,7 @@ jobs:
       - name: Deploy to Firebase App Distribution
         run: |
           echo "🚀 Deploying to staging environment"
-          # Add your deployment commands here
+          # Add your staging deployment commands here
 
   deploy_production:
     name: Deploy to Production
