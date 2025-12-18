@@ -13,6 +13,8 @@ class MatchesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (matches.isEmpty) return const SizedBox.shrink();
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -28,7 +30,7 @@ class MatchesSection extends StatelessWidget {
                       'New Matches',
                       style: appStyle(
                         12.sp,
-                        Colors.grey.shade500,
+                        isDarkMode ? Colors.grey[400]! : Colors.grey.shade500,
                         FontWeight.w700,
                       ).copyWith(letterSpacing: -0.3, height: 1.2),
                     ),

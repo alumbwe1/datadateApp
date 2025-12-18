@@ -110,7 +110,7 @@ void main() async {
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
 
-  // Create API client for initializationprofil
+  // Create API client for initialization
   final apiClient = ApiClient();
 
   // Initialize notifications (FCM)

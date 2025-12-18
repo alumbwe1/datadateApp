@@ -11,6 +11,8 @@ class ChatErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -21,7 +23,9 @@ class ChatErrorState extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.red[50],
+                color: isDarkMode
+                    ? Colors.red[900]!.withValues(alpha: 0.3)
+                    : Colors.red[50],
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -35,7 +39,7 @@ class ChatErrorState extends StatelessWidget {
               'Oops!',
               style: appStyle(
                 26,
-                Colors.black,
+                isDarkMode ? Colors.white : Colors.black,
                 FontWeight.w800,
               ).copyWith(letterSpacing: -0.5),
             ),
@@ -44,7 +48,7 @@ class ChatErrorState extends StatelessWidget {
               error,
               style: appStyle(
                 15,
-                Colors.grey[600]!,
+                isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
                 FontWeight.w500,
               ).copyWith(height: 1.5),
               textAlign: TextAlign.center,

@@ -14,6 +14,8 @@ class LikesErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -24,10 +26,15 @@ class LikesErrorState extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.red[50]!,
-                    Colors.red[100]!.withValues(alpha: 0.3),
-                  ],
+                  colors: isDarkMode
+                      ? [
+                          Colors.red[900]!.withValues(alpha: 0.3),
+                          Colors.red[800]!.withValues(alpha: 0.2),
+                        ]
+                      : [
+                          Colors.red[50]!,
+                          Colors.red[100]!.withValues(alpha: 0.3),
+                        ],
                 ),
                 shape: BoxShape.circle,
               ),
@@ -38,11 +45,22 @@ class LikesErrorState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            Text('Oops!', style: appStyle(26, Colors.black, FontWeight.w800)),
+            Text(
+              'Oops!',
+              style: appStyle(
+                26,
+                isDarkMode ? Colors.white : Colors.black,
+                FontWeight.w800,
+              ),
+            ),
             const SizedBox(height: 12),
             Text(
               error,
-              style: appStyle(15, Colors.grey[600]!, FontWeight.w500),
+              style: appStyle(
+                15,
+                isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
+                FontWeight.w500,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),

@@ -10,28 +10,30 @@ class ChatPageShimmer extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Search bar shimmer
-        _buildSearchShimmer(),
+        _buildSearchShimmer(context),
         // New matches section shimmer
-        _buildMatchesSectionShimmer(),
+        _buildMatchesSectionShimmer(context),
         // Messages title shimmer
-        _buildMessagesTitleShimmer(),
+        _buildMessagesTitleShimmer(context),
         // Conversations shimmer
-        Expanded(child: _buildConversationsShimmer()),
+        Expanded(child: _buildConversationsShimmer(context)),
       ],
     );
   }
 
-  Widget _buildSearchShimmer() {
+  Widget _buildSearchShimmer(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
+      color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+        highlightColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
         child: Container(
           height: 44,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDarkMode ? Colors.grey[900] : Colors.white,
             borderRadius: BorderRadius.circular(12),
           ),
         ),
@@ -39,37 +41,43 @@ class ChatPageShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildMatchesSectionShimmer() {
+  Widget _buildMatchesSectionShimmer(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section title
         Container(
-          color: Colors.white,
+          color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
           child: Row(
             children: [
               Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+                baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                highlightColor: isDarkMode
+                    ? Colors.grey[700]!
+                    : Colors.grey[100]!,
                 child: Container(
                   height: 16,
                   width: 100,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.grey[900] : Colors.white,
                     borderRadius: BorderRadius.circular(6),
                   ),
                 ),
               ),
               const Spacer(),
               Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+                baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                highlightColor: isDarkMode
+                    ? Colors.grey[700]!
+                    : Colors.grey[100]!,
                 child: Container(
                   height: 24,
                   width: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.grey[900] : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
@@ -79,7 +87,7 @@ class ChatPageShimmer extends StatelessWidget {
         ),
         // Matches horizontal list
         Container(
-          color: Colors.white,
+          color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
           height: 135,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -93,26 +101,34 @@ class ChatPageShimmer extends StatelessWidget {
                 child: Column(
                   children: [
                     Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
+                      baseColor: isDarkMode
+                          ? Colors.grey[800]!
+                          : Colors.grey[300]!,
+                      highlightColor: isDarkMode
+                          ? Colors.grey[700]!
+                          : Colors.grey[100]!,
                       child: Container(
                         width: 109,
                         height: 109,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.grey[900] : Colors.white,
                           borderRadius: BorderRadius.circular(24),
                         ),
                       ),
                     ),
                     const SizedBox(height: 10),
                     Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
+                      baseColor: isDarkMode
+                          ? Colors.grey[800]!
+                          : Colors.grey[300]!,
+                      highlightColor: isDarkMode
+                          ? Colors.grey[700]!
+                          : Colors.grey[100]!,
                       child: Container(
                         height: 14,
                         width: 60,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.grey[900] : Colors.white,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -128,18 +144,20 @@ class ChatPageShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildMessagesTitleShimmer() {
+  Widget _buildMessagesTitleShimmer(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
+      color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+        highlightColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
         child: Container(
           height: 16,
           width: 80,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDarkMode ? Colors.grey[900] : Colors.white,
             borderRadius: BorderRadius.circular(6),
           ),
         ),
@@ -147,9 +165,11 @@ class ChatPageShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildConversationsShimmer() {
+  Widget _buildConversationsShimmer(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
+      color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       child: ListView.builder(
         physics: const NeverScrollableScrollPhysics(),
         itemCount: 8,
@@ -160,13 +180,15 @@ class ChatPageShimmer extends StatelessWidget {
               children: [
                 // Avatar shimmer
                 Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                  highlightColor: isDarkMode
+                      ? Colors.grey[700]!
+                      : Colors.grey[100]!,
                   child: Container(
                     width: 62,
                     height: 62,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey[900] : Colors.white,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -181,12 +203,18 @@ class ChatPageShimmer extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Shimmer.fromColors(
-                              baseColor: Colors.grey[300]!,
-                              highlightColor: Colors.grey[100]!,
+                              baseColor: isDarkMode
+                                  ? Colors.grey[800]!
+                                  : Colors.grey[300]!,
+                              highlightColor: isDarkMode
+                                  ? Colors.grey[700]!
+                                  : Colors.grey[100]!,
                               child: Container(
                                 height: 16,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: isDarkMode
+                                      ? Colors.grey[900]
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -194,13 +222,19 @@ class ChatPageShimmer extends StatelessWidget {
                           ),
                           const SizedBox(width: 12),
                           Shimmer.fromColors(
-                            baseColor: Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
+                            baseColor: isDarkMode
+                                ? Colors.grey[800]!
+                                : Colors.grey[300]!,
+                            highlightColor: isDarkMode
+                                ? Colors.grey[700]!
+                                : Colors.grey[100]!,
                             child: Container(
                               height: 24,
                               width: 50,
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: isDarkMode
+                                    ? Colors.grey[900]
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
@@ -209,13 +243,17 @@ class ChatPageShimmer extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
+                        baseColor: isDarkMode
+                            ? Colors.grey[800]!
+                            : Colors.grey[300]!,
+                        highlightColor: isDarkMode
+                            ? Colors.grey[700]!
+                            : Colors.grey[100]!,
                         child: Container(
                           height: 14,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.grey[900] : Colors.white,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),

@@ -307,16 +307,18 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     final room = chatState.room;
     final currentUser = ref.watch(authProvider).user;
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     if (chatState.isLoading && room == null) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: LottieLoadingIndicator()),
+      return Scaffold(
+        backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
+        body: const Center(child: LottieLoadingIndicator()),
       );
     }
 
     if (chatState.error != null && room == null) {
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
         body: Center(
           child: Text(
             chatState.error!,
@@ -331,7 +333,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
         : null;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       appBar: PremiumChatAppBar(
         room: room,
         onBackPressed: () => Navigator.pop(context),

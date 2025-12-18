@@ -123,13 +123,25 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF1A1A2E), Color(0xFF0F0F1E), Color(0xFF16213E)],
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF1A1A2E),
+                    const Color(0xFF0F0F1E),
+                    const Color(0xFF16213E),
+                  ]
+                : [
+                    const Color(0xFFE91E63),
+                    const Color(0xFFF06292),
+                    const Color(0xFFFF4081),
+                  ],
           ),
         ),
         child: Stack(

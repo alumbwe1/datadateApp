@@ -19,7 +19,7 @@ class LikesPage extends ConsumerStatefulWidget {
 class _LikesPageState extends ConsumerState<LikesPage>
     with AutomaticKeepAliveClientMixin {
   int _selectedIndex = 0;
-  bool _hasLoaded = false;
+  bool _hasInitialized = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -27,10 +27,13 @@ class _LikesPageState extends ConsumerState<LikesPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_hasLoaded) {
-      _hasLoaded = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(likesProvider.notifier).loadAllLikes();
+    if (!_hasInitialized && mounted) {
+      _hasInitialized = true;
+      // Use microtask instead of postFrameCallback for immediate execution
+      Future.microtask(() {
+        if (mounted) {
+          ref.read(likesProvider.notifier).loadAllLikes();
+        }
       });
     }
   }
@@ -39,16 +42,17 @@ class _LikesPageState extends ConsumerState<LikesPage>
   Widget build(BuildContext context) {
     super.build(context);
     final likesState = ref.watch(likesProvider);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       body: SafeArea(
         child: Column(
           children: [
             SizedBox(height: 12.h),
             _buildHeader(),
             SizedBox(height: 20.h),
-            _buildTinderTabBar(likesState),
+            _buildTinderTabBar(likesState, isDarkMode),
             SizedBox(height: 10.h),
             Expanded(child: _buildContent(likesState)),
           ],
@@ -76,7 +80,7 @@ class _LikesPageState extends ConsumerState<LikesPage>
     );
   }
 
-  Widget _buildTinderTabBar(likesState) {
+  Widget _buildTinderTabBar(likesState, isDarkMode) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Row(
@@ -86,6 +90,7 @@ class _LikesPageState extends ConsumerState<LikesPage>
               label: '${likesState.receivedLikes.length} Likes',
               index: 0,
               isSelected: _selectedIndex == 0,
+              isDarkMode: isDarkMode,
               onTap: (index) {
                 if (_selectedIndex != index) {
                   setState(() => _selectedIndex = index);
@@ -99,6 +104,7 @@ class _LikesPageState extends ConsumerState<LikesPage>
               label: '${likesState.sentLikes.length} Sent',
               index: 1,
               isSelected: _selectedIndex == 1,
+              isDarkMode: isDarkMode,
               onTap: (index) {
                 if (_selectedIndex != index) {
                   setState(() => _selectedIndex = index);
@@ -143,12 +149,14 @@ class _TinderTab extends StatelessWidget {
   final String label;
   final int index;
   final bool isSelected;
+  final bool isDarkMode;
   final ValueChanged<int> onTap;
 
   const _TinderTab({
     required this.label,
     required this.index,
     required this.isSelected,
+    required this.isDarkMode,
     required this.onTap,
   });
 
@@ -164,7 +172,9 @@ class _TinderTab extends StatelessWidget {
               label,
               style: appStyle(
                 17.sp,
-                isSelected ? Colors.black : AppColors.greyShade500,
+                isSelected
+                    ? (isDarkMode ? Colors.white : Colors.black)
+                    : AppColors.greyShade500,
                 FontWeight.w500,
               ).copyWith(letterSpacing: -0.3),
             ),
@@ -174,7 +184,9 @@ class _TinderTab extends StatelessWidget {
             curve: Curves.easeInOut,
             height: 3.h,
             decoration: BoxDecoration(
-              color: isSelected ? Colors.black : Colors.transparent,
+              color: isSelected
+                  ? (isDarkMode ? Colors.white : Colors.black)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),

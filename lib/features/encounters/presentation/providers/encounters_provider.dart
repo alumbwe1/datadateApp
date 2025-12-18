@@ -66,6 +66,24 @@ class EncountersNotifier extends StateNotifier<EncountersState> {
     _loadSavedFilters();
   }
 
+  Future<void> initializeWithUserPreference() async {
+    if (state.isLoading) return; // Prevent duplicate calls
+
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      // For now, use a default gender preference
+      // This should be enhanced to get actual user preferences
+      const defaultGender = 'female';
+      await loadProfiles(defaultGender);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load profiles: $e',
+      );
+    }
+  }
+
   Future<void> _loadSavedFilters() async {
     final savedFilters = await _filterService.loadFilters();
     final filterCount = _countActiveFilters(savedFilters);

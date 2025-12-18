@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../core/constants/app_style.dart';
 
@@ -26,7 +25,9 @@ class ChatEmptyState extends StatelessWidget {
               'No Messages Yet',
               style: appStyle(
                 28.sp,
-                Colors.black,
+                Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
                 FontWeight.w900,
               ).copyWith(letterSpacing: -0.5),
               textAlign: TextAlign.center,
@@ -36,7 +37,9 @@ class ChatEmptyState extends StatelessWidget {
               'Start swiping to match with people\nand begin conversations',
               style: appStyle(
                 16.sp,
-                Colors.grey[600]!,
+                Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[400]!
+                    : Colors.grey[600]!,
                 FontWeight.w400,
               ).copyWith(height: 1.5, letterSpacing: -0.2),
               textAlign: TextAlign.center,
@@ -44,11 +47,13 @@ class ChatEmptyState extends StatelessWidget {
             SizedBox(height: 10.h),
             ElevatedButton(
               onPressed: () {
-                // Navigate to home
-                context.go('/encounters');
+                // Send a notification to switch to encounters tab
+                const NavigationNotification(0).dispatch(context);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,
@@ -59,7 +64,13 @@ class ChatEmptyState extends StatelessWidget {
               ),
               child: Text(
                 'Start Swiping',
-                style: appStyle(16, Colors.white, FontWeight.w700),
+                style: appStyle(
+                  16,
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black
+                      : Colors.white,
+                  FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -67,4 +78,11 @@ class ChatEmptyState extends StatelessWidget {
       ),
     );
   }
+}
+
+// Custom notification for navigation
+class NavigationNotification extends Notification {
+  final int tabIndex;
+
+  const NavigationNotification(this.tabIndex);
 }

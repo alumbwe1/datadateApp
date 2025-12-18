@@ -55,9 +55,16 @@ class ConversationTile extends ConsumerWidget {
         decoration: BoxDecoration(
           color: hasUnread
               ? AppColors.secondaryLight.withValues(alpha: 0.02)
-              : Colors.white,
+              : (Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1A1625)
+                    : Colors.white),
           border: Border(
-            bottom: BorderSide(color: Colors.grey.shade100, width: 0.5),
+            bottom: BorderSide(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade800
+                  : Colors.grey.shade100,
+              width: 0.5,
+            ),
           ),
         ),
         child: Row(
@@ -158,7 +165,9 @@ class ConversationTile extends ConsumerWidget {
                 room.otherParticipant.displayName,
                 style: appStyle(
                   16.5,
-                  Colors.black,
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
                   hasUnread ? FontWeight.w700 : FontWeight.w600,
                 ).copyWith(letterSpacing: -0.4, height: 1.2),
                 maxLines: 1,
@@ -176,7 +185,13 @@ class ConversationTile extends ConsumerWidget {
                 messagePreview,
                 style: appStyle(
                   14,
-                  hasUnread ? Colors.black87 : Colors.grey.shade500,
+                  hasUnread
+                      ? (Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white70
+                            : Colors.black87)
+                      : (Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade500),
                   hasUnread ? FontWeight.w500 : FontWeight.w400,
                 ).copyWith(letterSpacing: -0.3, height: 1.3),
                 maxLines: 2,

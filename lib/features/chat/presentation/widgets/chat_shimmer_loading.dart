@@ -10,9 +10,9 @@ class ChatShimmerLoading extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Search bar shimmer
-        _buildSearchShimmer(),
+        _buildSearchShimmer(context),
         // New matches section shimmer
-        _buildMatchesSectionShimmer(),
+        _buildMatchesSectionShimmer(context),
         // Messages title shimmer
         _buildMessagesTitleShimmer(),
         // Conversations list shimmer
@@ -21,17 +21,19 @@ class ChatShimmerLoading extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchShimmer() {
+  Widget _buildSearchShimmer(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
+      color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+        highlightColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
         child: Container(
           height: 44,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDarkMode ? Colors.grey[900] : Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
         ),
@@ -39,9 +41,11 @@ class ChatShimmerLoading extends StatelessWidget {
     );
   }
 
-  Widget _buildMatchesSectionShimmer() {
+  Widget _buildMatchesSectionShimmer(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
+      color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -51,13 +55,15 @@ class ChatShimmerLoading extends StatelessWidget {
             child: Row(
               children: [
                 Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                  highlightColor: isDarkMode
+                      ? Colors.grey[700]!
+                      : Colors.grey[100]!,
                   child: Container(
                     height: 16,
                     width: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDarkMode ? Colors.grey[900] : Colors.white,
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),

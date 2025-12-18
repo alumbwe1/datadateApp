@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -49,6 +50,29 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
     );
   }
 
+  Future<void> _handleSwipeOnCard(bool isLike) async {
+    // Call the API based on swipe direction
+    if (isLike) {
+      try {
+        final matchInfo = await ref
+            .read(encountersProvider.notifier)
+            .likeProfile(widget.profile.id.toString());
+
+        if (mounted && matchInfo != null && matchInfo['matched'] == true) {
+          // Handle match if needed
+          debugPrint('🎉 Match detected from card swipe!');
+        }
+      } catch (e) {
+        debugPrint('❌ Error liking from card swipe: $e');
+      }
+    } else {
+      // Skip/Pass
+      ref
+          .read(encountersProvider.notifier)
+          .skipProfile(widget.profile.id.toString());
+    }
+  }
+
   Future<void> _navigateToDetails() async {
     // Record profile view before navigating
     await ref
@@ -82,6 +106,21 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
 
     return GestureDetector(
       onDoubleTap: () => _showCrushBottomSheet(context),
+      onPanEnd: (details) {
+        // Handle swipe gestures on the card itself
+        final velocity = details.velocity.pixelsPerSecond;
+        const threshold = 500.0;
+
+        if (velocity.dx.abs() > threshold) {
+          if (velocity.dx > 0) {
+            // Swipe right - Like
+            _handleSwipeOnCard(true);
+          } else {
+            // Swipe left - Pass
+            _handleSwipeOnCard(false);
+          }
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.r),
@@ -313,26 +352,7 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                               ),
                             ),
                             SizedBox(width: 12.w),
-                            GestureDetector(
-                              onTap: _navigateToDetails,
-                              behavior: HitTestBehavior.opaque,
-                              child: Container(
-                                padding: EdgeInsets.all(10.w),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_upward,
-                                  color: Colors.white,
-                                  size: 16.sp,
-                                ),
-                              ),
-                            ),
+                            _buildProfileDetailsButton(),
                           ],
                         ),
 
@@ -468,6 +488,47 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
     } else {
       return [const Color(0xFF9E9E9E), const Color(0xFFBDBDBD)]; // Grey
     }
+  }
+
+  Widget _buildProfileDetailsButton() {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        _navigateToDetails();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0.25),
+              Colors.white.withValues(alpha: 0.15),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.4),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          Icons.info_outline_rounded,
+          color: Colors.white,
+          size: 20.sp,
+        ),
+      ),
+    );
   }
 
   List<Map<String, dynamic>> _getDisplayInterests() {

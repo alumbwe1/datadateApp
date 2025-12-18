@@ -26,7 +26,7 @@ class EncountersPage extends ConsumerStatefulWidget {
 }
 
 class _EncountersPageState extends ConsumerState<EncountersPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final CardSwiperController _controller = CardSwiperController();
 
   late AnimationController _swipeAnimationController;
@@ -34,6 +34,10 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   bool _showLikeOverlay = false;
   bool _showNopeOverlay = false;
   double _overlayOpacity = 0.0;
+  bool _isInitialized = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -47,45 +51,19 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadProfilesWithPreference();
-    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Debug: Log profiles when they change
-    final profiles = ref.watch(encountersProvider).profiles;
-    if (profiles.isNotEmpty) {
-      debugPrint('📋 Loaded ${profiles.length} profiles:');
-      for (var i = 0; i < profiles.length; i++) {
-        debugPrint(
-          '  ${i + 1}. ${profiles[i].displayName}, ${profiles[i].age}',
-        );
-      }
-    }
-  }
-
-  Future<void> _loadProfilesWithPreference() async {
-    debugPrint('🔄 Loading profiles with preference...');
-
-    // Load user profile to get gender preference
-    await ref.read(profileProvider.notifier).loadProfile();
-
-    final profile = ref.read(profileProvider).profile;
-    if (profile != null && profile.preferredGenders.isNotEmpty) {
-      // Use the first preferred gender (or you can modify to support multiple)
-      final preferredGender = profile.preferredGenders.first;
-      debugPrint('👤 User prefers: $preferredGender');
-
-      await ref.read(encountersProvider.notifier).loadProfiles(preferredGender);
-
-      final loadedProfiles = ref.read(encountersProvider).profiles;
-      debugPrint('✅ Successfully loaded ${loadedProfiles.length} profiles');
-    } else {
-      debugPrint('⚠️ No gender preference found');
+    if (!_isInitialized && mounted) {
+      _isInitialized = true;
+      // Move async logic to provider initialization
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(encountersProvider.notifier).initializeWithUserPreference();
+        }
+      });
     }
   }
 
@@ -188,11 +166,14 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+
     final encountersState = ref.watch(encountersProvider);
     final profiles = encountersState.profiles;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(55.h),
         child: SafeArea(
@@ -325,7 +306,11 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      _loadProfilesWithPreference();
+                      if (mounted) {
+                        ref
+                            .read(encountersProvider.notifier)
+                            .initializeWithUserPreference();
+                      }
                     },
                     child: const Text('Retry'),
                   ),
@@ -513,7 +498,11 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             else
               ElevatedButton(
                 onPressed: () {
-                  _loadProfilesWithPreference();
+                  if (mounted) {
+                    ref
+                        .read(encountersProvider.notifier)
+                        .initializeWithUserPreference();
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,

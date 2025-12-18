@@ -69,7 +69,9 @@ class _LikesEmptyStateState extends State<LikesEmptyState>
                   widget.isReceived ? 'No Likes Yet' : 'No Likes Sent',
                   style: appStyle(
                     28.sp,
-                    Colors.black,
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
                     FontWeight.w800,
                   ).copyWith(letterSpacing: -0.5),
                   textAlign: TextAlign.center,
@@ -97,7 +99,9 @@ class _LikesEmptyStateState extends State<LikesEmptyState>
                         : 'Start swiping right on profiles you like.\nYour likes will appear here.',
                     style: appStyle(
                       16.sp,
-                      Colors.grey[600]!,
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[400]!
+                          : Colors.grey[600]!,
                       FontWeight.w400,
                     ).copyWith(height: 1.5, letterSpacing: -0.2),
                     textAlign: TextAlign.center,

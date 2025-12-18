@@ -23,24 +23,30 @@ class ChatSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
+      color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       padding: const EdgeInsets.all(16),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
+          color: isDarkMode ? const Color(0xFF2A1F35) : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(16.r),
         ),
         child: TextField(
           controller: controller,
           onTap: onTap,
           onChanged: onChanged,
-          style: appStyle(15, Colors.black87, FontWeight.w500),
+          style: appStyle(
+            15,
+            isDarkMode ? Colors.white : Colors.black87,
+            FontWeight.w500,
+          ),
           decoration: InputDecoration(
             hintText: 'Search conversations...',
             hintStyle: appStyle(
               15,
-              Colors.grey[600]!,
+              isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
               FontWeight.w400,
             ).copyWith(letterSpacing: -0.3),
             prefixIcon: Icon(
@@ -50,7 +56,11 @@ class ChatSearchBar extends StatelessWidget {
             ),
             suffixIcon: controller.text.isNotEmpty
                 ? IconButton(
-                    icon: Icon(Icons.close, color: Colors.grey[600], size: 20),
+                    icon: Icon(
+                      Icons.close,
+                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      size: 20,
+                    ),
                     onPressed: () {
                       controller.clear();
                       onClear();

@@ -7,6 +7,8 @@ class LikesShimmerLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       child: GridView.count(
@@ -16,11 +18,11 @@ class LikesShimmerLoading extends StatelessWidget {
         mainAxisSpacing: 12,
         children: List.generate(6, (index) {
           return Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+            highlightColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDarkMode ? Colors.grey[900] : Colors.white,
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),

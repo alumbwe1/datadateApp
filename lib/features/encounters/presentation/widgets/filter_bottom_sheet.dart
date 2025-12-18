@@ -67,13 +67,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode ? const Color(0xFF2A1F35) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
+    final cardColor = isDarkMode ? const Color(0xFF352844) : Colors.white;
+    final subtitleColor = isDarkMode
+        ? Colors.grey[400]
+        : Colors.black.withValues(alpha: 0.6);
+    final sliderActiveColor = isDarkMode
+        ? const Color(0xFFFF6B9D)
+        : Colors.black;
+    final sliderInactiveColor = isDarkMode
+        ? Colors.grey[700]!.withValues(alpha: 0.3)
+        : Colors.black.withValues(alpha: 0.08);
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: SlideTransition(
         position: _slideAnimation,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: backgroundColor,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(32.r),
               topRight: Radius.circular(32.r),
@@ -89,7 +103,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                   width: 36.w,
                   height: 5.h,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.15),
+                    color: isDarkMode
+                        ? Colors.white.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(100.r),
                   ),
                 ),
@@ -106,7 +122,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                         'Filters',
                         style: appStyle(
                           28.sp,
-                          Colors.black,
+                          textColor,
                           FontWeight.w700,
                         ).copyWith(letterSpacing: -0.3),
                       ),
@@ -119,21 +135,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                             vertical: 8.h,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDarkMode
+                                ? const Color(0xFF352844)
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(22.r),
-
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 20,
-                                offset: const Offset(0, 2), // subtle iOS shadow
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
                           child: Icon(
                             Icons.refresh,
                             size: 20.w,
-                            color: Kolors.jetBlack,
+                            color: isDarkMode ? Colors.white : Kolors.jetBlack,
                           ),
                         ),
                       ),
@@ -151,8 +168,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                   child: Container(
                     padding: EdgeInsets.all(24.w),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(24.r),
+                      border: isDarkMode
+                          ? Border.all(color: Colors.grey[700]!, width: 1)
+                          : null,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,11 +180,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                         // Section Label
                         Text(
                           'Age Range',
-                          style: appStyle(
-                            17,
-                            Colors.black.withValues(alpha: 0.6),
-                            FontWeight.w500,
-                          ),
+                          style: appStyle(17, subtitleColor!, FontWeight.w500),
                         ),
 
                         SizedBox(height: 16.h),
@@ -183,7 +199,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                                 '${_ageRange.start.round()}',
                                 style: appStyle(
                                   48,
-                                  Colors.black,
+                                  textColor,
                                   FontWeight.w700,
                                 ).copyWith(letterSpacing: -0.3.sp, height: 1.0),
                               ),
@@ -193,7 +209,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                                   '—',
                                   style: appStyle(
                                     32.sp,
-                                    Colors.black.withValues(alpha: 0.3),
+                                    isDarkMode
+                                        ? Colors.white.withValues(alpha: 0.4)
+                                        : Colors.black.withValues(alpha: 0.3),
                                     FontWeight.w400,
                                   ),
                                 ),
@@ -202,7 +220,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                                 '${_ageRange.end.round()}',
                                 style: appStyle(
                                   48.sp,
-                                  Colors.black,
+                                  textColor,
                                   FontWeight.w700,
                                 ).copyWith(letterSpacing: -0.3.sp, height: 1.0),
                               ),
@@ -211,7 +229,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                                 'years',
                                 style: appStyle(
                                   17,
-                                  Colors.black.withValues(alpha: 0.4),
+                                  isDarkMode
+                                      ? Colors.white.withValues(alpha: 0.5)
+                                      : Colors.black.withValues(alpha: 0.4),
                                   FontWeight.w500,
                                 ),
                               ),
@@ -225,12 +245,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                         SliderTheme(
                           data: SliderThemeData(
                             trackHeight: 4.h,
-                            activeTrackColor: Colors.black,
-                            inactiveTrackColor: Colors.black.withValues(
+                            activeTrackColor: sliderActiveColor,
+                            inactiveTrackColor: sliderInactiveColor,
+                            thumbColor: sliderActiveColor,
+                            overlayColor: sliderActiveColor.withValues(
                               alpha: 0.08,
                             ),
-                            thumbColor: Colors.black,
-                            overlayColor: Colors.black.withValues(alpha: 0.08),
                             thumbShape: RoundSliderThumbShape(
                               enabledThumbRadius: 10.r,
                               elevation: 0,
@@ -246,7 +266,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                                 const RoundedRectRangeSliderTrackShape(),
                             valueIndicatorShape:
                                 const PaddleSliderValueIndicatorShape(),
-                            valueIndicatorColor: Colors.black,
+                            valueIndicatorColor: sliderActiveColor,
                             valueIndicatorTextStyle: appStyle(
                               14,
                               Colors.white,
@@ -282,7 +302,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                               '18',
                               style: appStyle(
                                 13,
-                                Colors.black.withValues(alpha: 0.4),
+                                isDarkMode
+                                    ? Colors.white.withValues(alpha: 0.5)
+                                    : Colors.black.withValues(alpha: 0.4),
                                 FontWeight.w500,
                               ),
                             ),
@@ -290,7 +312,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                               '60',
                               style: appStyle(
                                 13,
-                                Colors.black.withValues(alpha: 0.4),
+                                isDarkMode
+                                    ? Colors.white.withValues(alpha: 0.5)
+                                    : Colors.black.withValues(alpha: 0.4),
                                 FontWeight.w500,
                               ),
                             ),
@@ -315,7 +339,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: isDarkMode
+                            ? const Color(0xFFFF6B9D)
+                            : Colors.black,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40.r),

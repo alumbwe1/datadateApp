@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationNotification;
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../features/chat/presentation/pages/chat_page.dart';
+import '../../features/chat/presentation/widgets/chat_empty_state.dart';
 import '../../features/discover/presentation/pages/discover_page.dart';
 import '../../features/encounters/presentation/pages/encounters_page.dart';
 import '../../features/likes/presentation/pages/likes_page.dart';
@@ -86,63 +87,76 @@ class _MainNavigationState extends State<MainNavigation>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: List.generate(5, (index) => _buildPage(index)),
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+    return NotificationListener<NavigationNotification>(
+      onNotification: (notification) {
+        if (mounted) {
+          // Lifecycle check
+          _onItemTapped(notification.tabIndex);
+        }
+        return true;
+      },
+      child: Scaffold(
+        body: IndexedStack(
+          index: _currentIndex,
+          children: List.generate(5, (index) => _buildPage(index)),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  icon: Icons.local_fire_department,
-                  svgPath: 'assets/svgs/star5.svg',
-                  label: 'Encounters',
-                  index: 0,
-                  activeColor: isDark
-                      ? AppColors.navEncountersDark
-                      : Colors.pink,
-                ),
-                _buildNavItem(
-                  icon: Icons.grid_view_rounded,
-                  label: 'Discover',
-                  index: 1,
-                  activeColor: isDark ? AppColors.navDiscoverDark : Colors.pink,
-                ),
-                _buildNavItem(
-                  icon: Iconsax.heart,
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(
+                    icon: Icons.local_fire_department,
+                    svgPath: 'assets/svgs/star5.svg',
+                    label: 'Encounters',
+                    index: 0,
+                    activeColor: isDark
+                        ? AppColors.navEncountersDark
+                        : Colors.pink,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.grid_view_rounded,
+                    label: 'Discover',
+                    index: 1,
+                    activeColor: isDark
+                        ? AppColors.navDiscoverDark
+                        : Colors.pink,
+                  ),
+                  _buildNavItem(
+                    icon: Iconsax.heart,
 
-                  label: 'Likes',
-                  index: 2,
-                  activeColor: isDark ? AppColors.navLikesDark : Colors.pink,
-                ),
-                _buildNavItem(
-                  svgPath: 'assets/svgs/beacon.svg',
-                  label: 'Chats',
-                  index: 3,
-                  activeColor: isDark ? AppColors.navChatsDark : Colors.pink,
-                ),
-                _buildNavItem(
-                  icon: Iconsax.user,
-                  label: 'Profile',
-                  index: 4,
-                  activeColor: isDark ? AppColors.navProfileDark : Colors.pink,
-                ),
-              ],
+                    label: 'Likes',
+                    index: 2,
+                    activeColor: isDark ? AppColors.navLikesDark : Colors.pink,
+                  ),
+                  _buildNavItem(
+                    svgPath: 'assets/svgs/beacon.svg',
+                    label: 'Chats',
+                    index: 3,
+                    activeColor: isDark ? AppColors.navChatsDark : Colors.pink,
+                  ),
+                  _buildNavItem(
+                    icon: Iconsax.user,
+                    label: 'Profile',
+                    index: 4,
+                    activeColor: isDark
+                        ? AppColors.navProfileDark
+                        : Colors.pink,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

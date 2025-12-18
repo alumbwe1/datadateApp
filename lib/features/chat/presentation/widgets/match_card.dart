@@ -253,10 +253,12 @@ class _MatchCardState extends State<MatchCard>
   }
 
   Widget _buildShimmerPlaceholder() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: Container(color: Colors.white),
+      baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+      highlightColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
+      child: Container(color: isDarkMode ? Colors.grey[900] : Colors.white),
     );
   }
 

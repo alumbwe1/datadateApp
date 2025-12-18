@@ -82,8 +82,10 @@ class _ChatPageState extends ConsumerState<ChatPage>
 
     final conversations = filteredRooms;
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       appBar: _buildModernAppBar(rooms.length, matches.length),
       body: chatRoomsState.isLoading && matchesState.isLoading
           ? const ChatPageShimmer()
@@ -103,7 +105,9 @@ class _ChatPageState extends ConsumerState<ChatPage>
                 ]);
               },
               color: AppColors.secondaryLight,
-              backgroundColor: Colors.white,
+              backgroundColor: isDarkMode
+                  ? const Color(0xFF2A1F35)
+                  : Colors.white,
               strokeWidth: 2.5,
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -134,8 +138,10 @@ class _ChatPageState extends ConsumerState<ChatPage>
   }
 
   Widget _buildMessagesTitle(int count) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
+      color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       child: Row(
         children: [
@@ -143,7 +149,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
             'Messages',
             style: appStyle(
               12.sp,
-              Colors.grey.shade500,
+              isDarkMode ? Colors.grey[400]! : Colors.grey.shade500,
               FontWeight.w700,
             ).copyWith(letterSpacing: -0.3, height: 1.2),
           ),
@@ -151,14 +157,14 @@ class _ChatPageState extends ConsumerState<ChatPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: isDarkMode ? Colors.grey[800] : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               '$count',
               style: appStyle(
                 11.sp,
-                Colors.grey.shade600,
+                isDarkMode ? Colors.grey[300]! : Colors.grey.shade600,
                 FontWeight.w700,
               ).copyWith(letterSpacing: -0.3),
             ),
@@ -169,11 +175,15 @@ class _ChatPageState extends ConsumerState<ChatPage>
   }
 
   PreferredSizeWidget _buildModernAppBar(int roomsCount, int matchesCount) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return AppBar(
       elevation: 0,
-      surfaceTintColor: Colors.white,
+      surfaceTintColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       centerTitle: false,
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      systemOverlayStyle: isDarkMode
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       title: Row(
         children: [
           Column(
@@ -203,6 +213,8 @@ class _ChatPageState extends ConsumerState<ChatPage>
   }
 
   Widget _buildConversationsList(List rooms) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     if (rooms.isEmpty) {
       return SliverFillRemaining(
         child: Center(
@@ -212,12 +224,16 @@ class _ChatPageState extends ConsumerState<ChatPage>
               Icon(
                 Icons.chat_bubble_outline,
                 size: 64,
-                color: Colors.grey[300],
+                color: isDarkMode ? Colors.grey[600] : Colors.grey[300],
               ),
               const SizedBox(height: 16),
               Text(
                 'No conversations yet',
-                style: appStyle(16, Colors.grey[600]!, FontWeight.w500),
+                style: appStyle(
+                  16,
+                  isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
+                  FontWeight.w500,
+                ),
               ),
             ],
           ),

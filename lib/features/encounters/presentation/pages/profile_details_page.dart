@@ -257,6 +257,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final imageHeight = screenHeight * 0.5;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -463,9 +464,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
             right: 0,
             bottom: 0,
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: isDarkMode ? const Color(0xFF2A1F35) : Colors.white,
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
                 ),
@@ -505,7 +506,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                                 '${widget.profile.displayName}, ${widget.profile.age}',
                                                 style: appStyle(
                                                   28,
-                                                  Colors.black,
+                                                  isDarkMode
+                                                      ? Colors.white
+                                                      : Colors.black,
                                                   FontWeight.w900,
                                                 ).copyWith(letterSpacing: -0.5),
                                               ),
@@ -518,7 +521,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                             Icon(
                                               Icons.school_outlined,
                                               size: 16,
-                                              color: Colors.grey[600],
+                                              color: isDarkMode
+                                                  ? Colors.grey[400]
+                                                  : Colors.grey[600],
                                             ),
                                             const SizedBox(width: 6),
                                             Flexible(
@@ -526,7 +531,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                                 widget.profile.universityName,
                                                 style: appStyle(
                                                   14,
-                                                  Colors.grey[700]!,
+                                                  isDarkMode
+                                                      ? Colors.grey[300]!
+                                                      : Colors.grey[700]!,
                                                   FontWeight.w600,
                                                 ).copyWith(letterSpacing: -0.2),
                                                 overflow: TextOverflow.ellipsis,
@@ -541,7 +548,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                               Icon(
                                                 Icons.menu_book_rounded,
                                                 size: 16,
-                                                color: Colors.grey[600],
+                                                color: isDarkMode
+                                                    ? Colors.grey[400]
+                                                    : Colors.grey[600],
                                               ),
                                               const SizedBox(width: 6),
                                               Flexible(
@@ -550,7 +559,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                                   style:
                                                       appStyle(
                                                         14,
-                                                        Colors.grey[700]!,
+                                                        isDarkMode
+                                                            ? Colors.grey[300]!
+                                                            : Colors.grey[700]!,
                                                         FontWeight.w500,
                                                       ).copyWith(
                                                         letterSpacing: -0.2,
@@ -617,7 +628,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                     'About Me',
                                     style: appStyle(
                                       18,
-                                      Colors.black,
+                                      isDarkMode ? Colors.white : Colors.black,
                                       FontWeight.w800,
                                     ).copyWith(letterSpacing: -0.4),
                                   ),
@@ -628,7 +639,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                     style:
                                         appStyle(
                                           15,
-                                          Colors.grey[800]!,
+                                          isDarkMode
+                                              ? Colors.grey[300]!
+                                              : Colors.grey[800]!,
                                           FontWeight.w400,
                                         ).copyWith(
                                           height: 1.5,
@@ -669,7 +682,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                           'You Both Like',
                                           style: appStyle(
                                             18,
-                                            Colors.black,
+                                            isDarkMode
+                                                ? Colors.white
+                                                : Colors.black,
                                             FontWeight.w800,
                                           ).copyWith(letterSpacing: -0.4),
                                         ),
@@ -731,7 +746,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                                     'Interests',
                                     style: appStyle(
                                       18,
-                                      Colors.black,
+                                      isDarkMode ? Colors.white : Colors.black,
                                       FontWeight.w800,
                                     ).copyWith(letterSpacing: -0.4),
                                   ),
@@ -783,9 +798,14 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                               child: Container(
                                 padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
+                                  color: isDarkMode
+                                      ? const Color(0xFF352844)
+                                      : null,
                                   borderRadius: BorderRadius.circular(12.r),
                                   border: Border.all(
-                                    color: Colors.grey[200]!,
+                                    color: isDarkMode
+                                        ? Colors.grey[700]!
+                                        : Colors.grey[200]!,
                                     width: 1,
                                   ),
                                 ),
@@ -877,12 +897,21 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF000000), Color(0xFF2a2a2a)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        gradient: isDarkMode
+                            ? const LinearGradient(
+                                colors: [Color(0xFF352844), Color(0xFF2A1F35)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : const LinearGradient(
+                                colors: [Color(0xFF000000), Color(0xFF2a2a2a)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                         borderRadius: BorderRadius.circular(40),
+                        border: isDarkMode
+                            ? Border.all(color: Colors.grey[600]!, width: 1)
+                            : null,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.3),
@@ -898,7 +927,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                           // Left button (Nope)
                           _buildActionButton(
                             icon: Icons.close,
-                            color: Colors.black,
+                            color: isDarkMode ? Colors.white : Colors.black,
                             size: 50,
                             onPressed: () {
                               HapticFeedback.lightImpact();
@@ -940,13 +969,17 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
 
   Widget _buildCircularMatchIndicator() {
     final matchPercentage = _calculateMatchPercentage();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 180),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF2A1F35) : Colors.white,
         borderRadius: BorderRadius.circular(50),
+        border: isDarkMode
+            ? Border.all(color: Colors.grey[700]!, width: 1)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.15),
@@ -1004,7 +1037,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                           '$displayPercentage%',
                           style: appStyle(
                             16,
-                            Colors.black,
+                            isDarkMode ? Colors.white : Colors.black,
                             FontWeight.w900,
                           ).copyWith(letterSpacing: -0.5),
                         ),
@@ -1024,7 +1057,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
                 'Match',
                 style: appStyle(
                   17,
-                  Colors.black,
+                  isDarkMode ? Colors.white : Colors.black,
                   FontWeight.w800,
                 ).copyWith(letterSpacing: -0.4, height: 1),
               ),
@@ -1058,14 +1091,19 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
 
   Widget _buildInterestChip(String interest, {bool isShared = false}) {
     final emoji = InterestEmojiMapper.getEmoji(interest);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isShared ? Colors.pink[50] : Colors.white,
+        color: isShared
+            ? Colors.pink[50]
+            : (isDarkMode ? const Color(0xFF352844) : Colors.white),
         borderRadius: BorderRadius.circular(44),
         border: Border.all(
-          color: isShared ? Colors.pink[300]! : Colors.grey.shade300,
+          color: isShared
+              ? Colors.pink[300]!
+              : (isDarkMode ? Colors.grey[600]! : Colors.grey.shade300),
           width: isShared ? 1.5 : 0.7.w,
         ),
         boxShadow: [
@@ -1087,7 +1125,9 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
             interest,
             style: appStyle(
               14,
-              isShared ? Colors.pink[700]! : Colors.black87,
+              isShared
+                  ? Colors.pink[700]!
+                  : (isDarkMode ? Colors.white : Colors.black87),
               FontWeight.w600,
             ).copyWith(letterSpacing: -0.2),
           ),
@@ -1097,15 +1137,17 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
   }
 
   Widget _buildInfoItem(String label, String value, IconData icon) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
-        Icon(icon, size: 24, color: Colors.black87),
+        Icon(icon, size: 24, color: isDarkMode ? Colors.white : Colors.black87),
         const SizedBox(height: 8),
         Text(
           label,
           style: appStyle(
             12,
-            Colors.grey[600]!,
+            isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
             FontWeight.w500,
           ).copyWith(letterSpacing: -0.2),
         ),
@@ -1114,7 +1156,7 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
           value,
           style: appStyle(
             15,
-            Colors.black,
+            isDarkMode ? Colors.white : Colors.black,
             FontWeight.w700,
           ).copyWith(letterSpacing: -0.3),
           textAlign: TextAlign.center,
@@ -1131,6 +1173,8 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
     required double size,
     required VoidCallback? onPressed,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 400),
@@ -1142,8 +1186,11 @@ class _ProfileDetailsPageState extends ConsumerState<ProfileDetailsPage>
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDarkMode ? const Color(0xFF2A1F35) : Colors.white,
           shape: BoxShape.circle,
+          border: isDarkMode
+              ? Border.all(color: Colors.grey[600]!, width: 1)
+              : null,
           boxShadow: [
             BoxShadow(
               color: color.withValues(alpha: 0.3),

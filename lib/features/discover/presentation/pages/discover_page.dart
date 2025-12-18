@@ -47,8 +47,10 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
     final discoverState = ref.watch(discoverProvider);
     final profiles = discoverState.profiles;
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(55.h),
         child: SafeArea(
@@ -98,27 +100,25 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
       body: discoverState.isLoading
           ? const Center(child: LottieLoadingIndicator())
           : discoverState.error != null
-          ? _buildErrorState(discoverState.error!)
+          ? _buildErrorState(discoverState.error!, isDarkMode)
           : profiles.isEmpty
-          ? _buildEmptyState()
+          ? _buildEmptyState(isDarkMode)
           : Column(
               children: [
-                Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Featured profiles picked just for you',
-                        textAlign: TextAlign.center,
-                        style: appStyle(
-                          14,
-                          Colors.grey.shade600,
-                          FontWeight.w400,
-                        ).copyWith(height: 1.4),
-                      ),
-                    ],
-                  ),
+                Column(
+                  children: [
+                    Text(
+                      'Featured profiles picked just for you',
+                      textAlign: TextAlign.center,
+                      style: appStyle(
+                        14,
+                        isDarkMode
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
+                        FontWeight.w400,
+                      ).copyWith(height: 1.4),
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: GridView.builder(
@@ -141,7 +141,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(isDarkMode) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -164,7 +164,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
               'You\'re All Caught Up!',
               style: appStyle(
                 28,
-                Colors.black,
+                isDarkMode ? Colors.white : Colors.black,
                 FontWeight.w900,
               ).copyWith(letterSpacing: -0.5),
               textAlign: TextAlign.center,
@@ -174,7 +174,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
               'Check back soon for new\nrecommended profiles',
               style: appStyle(
                 16,
-                Colors.grey[600]!,
+                isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
                 FontWeight.w400,
               ).copyWith(height: 1.5, letterSpacing: -0.2),
               textAlign: TextAlign.center,
@@ -203,7 +203,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
     );
   }
 
-  Widget _buildErrorState(String error) {
+  Widget _buildErrorState(String error, isDarkMode) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -226,7 +226,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
               'Oops!',
               style: appStyle(
                 28,
-                Colors.black,
+                isDarkMode ? Colors.white : Colors.black,
                 FontWeight.w900,
               ).copyWith(letterSpacing: -0.5),
               textAlign: TextAlign.center,
@@ -236,7 +236,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
               error,
               style: appStyle(
                 16,
-                Colors.grey[600]!,
+                isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
                 FontWeight.w400,
               ).copyWith(height: 1.5, letterSpacing: -0.2),
               textAlign: TextAlign.center,
