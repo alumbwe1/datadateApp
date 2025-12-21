@@ -41,7 +41,7 @@ static final GoRouter router = GoRouter(
 - `trackUserRegistration()` - User signs up
 - `trackUserLogin()` - User logs in
 - `trackProfileCompletion()` - Profile completion percentage
-- `trackSessionStart()` - App session begins
+- `trackAppSessionStart()` - App session begins
 - `tra24r 20ecembe**: Dt Updated-
 
 **Lasices)

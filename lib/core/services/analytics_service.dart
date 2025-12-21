@@ -182,16 +182,16 @@ class AnalyticsService {
   }
 
   /// User behavior events
-  static Future<void> trackSessionStart() async {
-    await _logEvent('session_start', {
+  static Future<void> trackAppSessionStart() async {
+    await _logEvent('app_session_start', {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
   }
 
-  static Future<void> trackSessionEnd({
+  static Future<void> trackAppSessionEnd({
     required int duration, // in seconds
   }) async {
-    await _logEvent('session_end', {'duration': duration});
+    await _logEvent('app_session_end', {'duration': duration});
   }
 
   static Future<void> trackAppCrash({

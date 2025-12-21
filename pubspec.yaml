@@ -150,29 +150,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "assets/images/heartlink.png"
-  min_sdk_android: 21
-
-  # Adaptive icons for Android
-  adaptive_icon_background: "#FF6B9D"
-  adaptive_icon_foreground: "assets/images/heartlink.png"
-
-  # Remove alpha channel for iOS
-  remove_alpha_ios: true
-
-  # Web support
-  web:
-    generate: true
-    image_path: "assets/images/heartlink.png"
-    background_color: "#FFFFFF"
-    theme_color: "#FF6B9D"
-
-  # Windows support
-  windows:
-    generate: true
-    image_path: "assets/images/heartlink.png"
-    icon_size: 48

@@ -166,7 +166,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    super.build(context);
 
     final encountersState = ref.watch(encountersProvider);
     final profiles = encountersState.profiles;
@@ -202,7 +202,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                   decoration: BoxDecoration(
-                    color: Colors.white,
                     border: Border.all(
                       color: AppColors.primaryLight.withValues(alpha: 0.3),
                       width: 1.w,
@@ -374,6 +373,8 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   }
 
   Widget _buildErrorState(String errorMessage) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -384,7 +385,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
                 shape: BoxShape.circle,
               ),
               child: const Center(
@@ -400,7 +401,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               'Something went wrong',
               style: appStyle(
                 28,
-                Colors.black,
+                isDarkMode ? Colors.white : Colors.black,
                 FontWeight.w900,
               ).copyWith(letterSpacing: -0.5),
               textAlign: TextAlign.center,
@@ -410,7 +411,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               errorMessage,
               style: appStyle(
                 16,
-                Colors.grey[600]!,
+                isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
                 FontWeight.w400,
               ).copyWith(height: 1.5, letterSpacing: -0.2),
               textAlign: TextAlign.center,
@@ -446,6 +447,8 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   }
 
   Widget _buildEmptyState(bool hasActiveFilters) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40),
@@ -456,7 +459,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -471,7 +474,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               hasActiveFilters ? 'No Matches Found' : 'You\'re All Caught Up!',
               style: appStyle(
                 28,
-                Colors.black,
+                isDarkMode ? Colors.white : Colors.black,
                 FontWeight.w900,
               ).copyWith(letterSpacing: -0.5),
               textAlign: TextAlign.center,
@@ -483,7 +486,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   : 'Check back soon for new profiles\nto connect with',
               style: appStyle(
                 16,
-                Colors.grey[600]!,
+                isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
                 FontWeight.w400,
               ).copyWith(height: 1.5, letterSpacing: -0.2),
               textAlign: TextAlign.center,
@@ -531,7 +534,10 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   }
                 },
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.black, width: 2),
+                  side: BorderSide(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                    width: 2,
+                  ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 16,
@@ -542,7 +548,11 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 ),
                 child: Text(
                   'Clear Filters',
-                  style: appStyle(16, Colors.black, FontWeight.w700),
+                  style: appStyle(
+                    16,
+                    isDarkMode ? Colors.white : Colors.black,
+                    FontWeight.w700,
+                  ),
                 ),
               )
             else
@@ -555,7 +565,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: isDarkMode ? Colors.white : Colors.black,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 16,
@@ -566,7 +576,11 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 ),
                 child: Text(
                   'Refresh',
-                  style: appStyle(16, Colors.white, FontWeight.w700),
+                  style: appStyle(
+                    16,
+                    isDarkMode ? Colors.black : Colors.white,
+                    FontWeight.w700,
+                  ),
                 ),
               ),
           ],

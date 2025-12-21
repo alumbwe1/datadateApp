@@ -34,7 +34,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final profileState = ref.watch(profileProvider);
     final profile = profileState.profile;
     final isDarkMode = ref.watch(themeProvider.notifier).isDarkMode;
-    final bgColor = isDarkMode ? const Color(0xFF121212) : Colors.white;
+    final bgColor = isDarkMode ? const Color(0xFF1A1625) : Colors.white;
     final textColor = isDarkMode ? Colors.white : Colors.black;
 
     return Scaffold(

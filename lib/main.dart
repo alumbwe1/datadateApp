@@ -150,7 +150,7 @@ void main() async {
   );
 
   // Track app start
-  await AnalyticsService.trackSessionStart();
+  await AnalyticsService.trackAppSessionStart();
 
   runApp(
     ProviderScope(

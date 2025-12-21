@@ -152,7 +152,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
                 shape: BoxShape.circle,
               ),
               child: const Center(
@@ -183,7 +183,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
             ElevatedButton(
               onPressed: _loadRecommendedProfiles,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: isDarkMode ? Colors.white : Colors.black,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,
@@ -194,7 +194,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
               ),
               child: Text(
                 'Refresh',
-                style: appStyle(16, Colors.white, FontWeight.w700),
+                style: appStyle(16, isDarkMode ? Colors.black : Colors.white, FontWeight.w700),
               ),
             ),
           ],
@@ -214,16 +214,20 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
                 shape: BoxShape.circle,
               ),
               child: const Center(
-                child: Icon(Icons.error_outline, size: 60, color: Colors.grey),
+                child: Icon(
+                  Icons.error_outline_rounded,
+                  size: 60,
+                  color: Colors.grey,
+                ),
               ),
             ),
             const SizedBox(height: 32),
             Text(
-              'Oops!',
+              'Something went wrong',
               style: appStyle(
                 28,
                 isDarkMode ? Colors.white : Colors.black,
