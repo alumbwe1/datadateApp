@@ -1049,8 +1049,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           Column(
             children: [
               Wrap(
-                spacing: 10.w,
-                runSpacing: 10.h,
+                spacing: 5.w,
+                runSpacing: 5.h,
                 children: _selectedInterests.map((interest) {
                   final interestData = availableInterests.firstWhere(
                     (i) => i['name'] == interest,

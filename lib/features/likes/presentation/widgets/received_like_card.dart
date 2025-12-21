@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../interactions/data/models/like_model.dart';
 
 class ReceivedLikeCard extends StatefulWidget {
@@ -58,6 +59,7 @@ class _ReceivedLikeCardState extends State<ReceivedLikeCard>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final colors = [
       AppColors.secondaryLight,
       AppColors.warning,
@@ -67,7 +69,19 @@ class _ReceivedLikeCardState extends State<ReceivedLikeCard>
     final borderColor = colors[widget.index % colors.length];
 
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: () {
+        // Track received like card tap
+        AnalyticsService.trackFeatureUsage(
+          featureName: 'received_like_card_tap',
+          parameters: {
+            'user_id': widget.userInfo.id.toString(),
+            'user_name': widget.userInfo.displayName,
+            'has_profile_data': widget.profile != null,
+            'has_image': widget.imageUrl != null,
+          },
+        );
+        widget.onTap();
+      },
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
@@ -75,31 +89,45 @@ class _ReceivedLikeCardState extends State<ReceivedLikeCard>
         scale: _scaleAnimation,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(16.r),
             gradient: LinearGradient(
               colors: [
-                borderColor.withValues(alpha: 0.2),
-                borderColor.withValues(alpha: 0.08),
+                AppColors.primaryLight.withValues(alpha: 0.08),
+                AppColors.primaryLight.withValues(alpha: 0.02),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: borderColor.withValues(alpha: 0.25),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+                color: isDarkMode
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+                spreadRadius: 0,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: AppColors.primaryLight.withValues(alpha: 0.1),
+                blurRadius: 40,
+                spreadRadius: -10,
+                offset: const Offset(0, 20),
               ),
             ],
           ),
           child: Container(
-            margin: const EdgeInsets.all(3),
+            margin: EdgeInsets.all(2.w),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: Colors.white, width: 2),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.white.withValues(alpha: 0.8),
+                width: 1.5,
+              ),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(12.r),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -157,18 +185,18 @@ class _ReceivedLikeCardState extends State<ReceivedLikeCard>
   }
 
   Widget _buildGradientOverlay() {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: 140,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.85)],
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.transparent,
+            Colors.black.withValues(alpha: 0.1),
+            Colors.black.withValues(alpha: 0.4),
+            Colors.black.withValues(alpha: 0.85),
+          ],
+          stops: const [0.0, 0.4, 0.7, 1.0],
         ),
       ),
     );

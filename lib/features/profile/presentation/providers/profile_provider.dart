@@ -162,4 +162,33 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       },
     );
   }
+
+  Future<bool> deleteAccount({
+    required String reason,
+    String? otherReason,
+  }) async {
+    CustomLogs.info('🗑️ ProfileProvider: Starting deleteAccount');
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await repository.deleteAccount(
+      reason: reason,
+      otherReason: otherReason,
+    );
+
+    return result.fold(
+      (failure) {
+        CustomLogs.info(
+          '❌ ProfileProvider: Delete account failed - ${failure.message}',
+        );
+        state = state.copyWith(isLoading: false, error: failure.message);
+        return false;
+      },
+      (_) {
+        CustomLogs.info('✅ ProfileProvider: Account deleted successfully');
+        // Clear the profile state after successful deletion
+        state = ProfileState();
+        return true;
+      },
+    );
+  }
 }

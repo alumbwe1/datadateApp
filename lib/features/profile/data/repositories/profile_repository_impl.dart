@@ -62,6 +62,24 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> deleteAccount({
+    required String reason,
+    String? otherReason,
+  }) async {
+    try {
+      await remoteDataSource.deleteAccount(
+        reason: reason,
+        otherReason: otherReason,
+      );
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure(_handleDioError(e)));
+    } catch (e) {
+      return const Left(ServerFailure('An unexpected error occurred'));
+    }
+  }
+
   String _handleDioError(DioException e) {
     if (e.response != null) {
       final data = e.response!.data;

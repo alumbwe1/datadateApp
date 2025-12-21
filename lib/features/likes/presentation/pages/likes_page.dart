@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../providers/likes_provider.dart';
 import '../widgets/likes_error_state.dart';
 import '../widgets/likes_grid_view.dart';
@@ -29,6 +30,9 @@ class _LikesPageState extends ConsumerState<LikesPage>
     super.didChangeDependencies();
     if (!_hasInitialized && mounted) {
       _hasInitialized = true;
+      // Track screen view
+      AnalyticsService.trackScreenView('likes_page');
+
       // Use microtask instead of postFrameCallback for immediate execution
       Future.microtask(() {
         if (mounted) {
@@ -93,6 +97,14 @@ class _LikesPageState extends ConsumerState<LikesPage>
               isDarkMode: isDarkMode,
               onTap: (index) {
                 if (_selectedIndex != index) {
+                  // Track tab switch
+                  AnalyticsService.trackFeatureUsage(
+                    featureName: 'likes_tab_switch',
+                    parameters: {
+                      'from_tab': _selectedIndex == 0 ? 'received' : 'sent',
+                      'to_tab': index == 0 ? 'received' : 'sent',
+                    },
+                  );
                   setState(() => _selectedIndex = index);
                 }
               },
@@ -107,6 +119,14 @@ class _LikesPageState extends ConsumerState<LikesPage>
               isDarkMode: isDarkMode,
               onTap: (index) {
                 if (_selectedIndex != index) {
+                  // Track tab switch
+                  AnalyticsService.trackFeatureUsage(
+                    featureName: 'likes_tab_switch',
+                    parameters: {
+                      'from_tab': _selectedIndex == 0 ? 'received' : 'sent',
+                      'to_tab': index == 0 ? 'received' : 'sent',
+                    },
+                  );
                   setState(() => _selectedIndex = index);
                 }
               },

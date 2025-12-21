@@ -664,14 +664,9 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
               CustomSnackbar.show(
                 context,
                 message: 'You can only text if it\'s a match',
-                type: SnackbarType.error,
+                type: SnackbarType.info,
                 duration: const Duration(seconds: 2),
-              );
-
-              // Delay the swipe so snackbar is visible
-              Future.delayed(const Duration(milliseconds: 300), () {
-                _controller.swipe(CardSwiperDirection.left);
-              });
+              );            
             },
           ),
         ],

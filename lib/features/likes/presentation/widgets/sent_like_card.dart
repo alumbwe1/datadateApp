@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../interactions/data/models/like_model.dart';
 
 class SentLikeCard extends StatefulWidget {
@@ -57,7 +58,19 @@ class _SentLikeCardState extends State<SentLikeCard>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: () {
+        // Track sent like card tap
+        AnalyticsService.trackFeatureUsage(
+          featureName: 'sent_like_card_tap',
+          parameters: {
+            'user_id': widget.userInfo.id.toString(),
+            'user_name': widget.userInfo.displayName,
+            'has_profile_data': widget.profile != null,
+            'has_image': widget.imageUrl != null,
+          },
+        );
+        widget.onTap();
+      },
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,

@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../encounters/domain/entities/profile.dart';
 import '../../../encounters/presentation/pages/profile_details_page.dart';
 import '../providers/discover_provider.dart';
@@ -32,6 +33,9 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
     // Load only once when page becomes visible
     if (!_hasLoaded) {
       _hasLoaded = true;
+      // Track screen view
+      AnalyticsService.trackScreenView('discover_page');
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadRecommendedProfiles();
       });
@@ -39,6 +43,11 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
   }
 
   Future<void> _loadRecommendedProfiles() async {
+    // Track refresh action
+    AnalyticsService.trackFeatureUsage(
+      featureName: 'discover_refresh',
+      parameters: {'source': 'manual_refresh'},
+    );
     await ref.read(discoverProvider.notifier).loadRecommendedProfiles();
   }
 
@@ -279,6 +288,19 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
 
     return GestureDetector(
       onTap: () async {
+        // Track profile card tap
+        AnalyticsService.trackFeatureUsage(
+          featureName: 'discover_profile_card_tap',
+          parameters: {
+            'profile_id': profile.id.toString(),
+            'profile_name': profile.displayName,
+            'profile_age': profile.age,
+            'profile_university': profile.universityName,
+            'has_shared_interests': profile.sharedInterests.isNotEmpty,
+            'shared_interests_count': profile.sharedInterests.length,
+          },
+        );
+
         // Record profile view
         await ref.read(discoverProvider.notifier).recordProfileView(profile.id);
 
@@ -331,7 +353,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.r),
+            borderRadius: BorderRadius.circular(14.r),
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -387,8 +409,6 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
                     ),
                   ),
                 ),
-
-                
 
                 // Profile Information (Bottom)
                 Positioned(
@@ -509,7 +529,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
                               ),
                               SizedBox(width: 6.w),
                               Text(
-                                '${profile.intent}',
+                                profile.intent,
                                 style: appStyle(
                                   11.sp,
                                   Colors.black,
@@ -532,6 +552,12 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12.r),
                     onTap: () async {
+                      // Track profile tap from InkWell
+                      AnalyticsService.trackProfileView(
+                        profileId: profile.id.toString(),
+                        source: 'discover_card_inkwell',
+                      );
+
                       await ref
                           .read(discoverProvider.notifier)
                           .recordProfileView(profile.id);

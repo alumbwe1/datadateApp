@@ -8,6 +8,7 @@ abstract class ProfileRemoteDataSource {
   Future<UserProfileModel> updateMyProfile(Map<String, dynamic> data);
   Future<String> uploadProfilePhoto(String filePath);
   Future<List<String>> uploadProfilePhotos(List<String> filePaths);
+  Future<void> deleteAccount({required String reason, String? otherReason});
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -164,6 +165,29 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return uploadedUrls;
     } catch (e) {
       CustomLogs.error('❌ Error in uploadProfilePhotos: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deleteAccount({
+    required String reason,
+    String? otherReason,
+  }) async {
+    try {
+      CustomLogs.info('🗑️ Deleting account with reason: $reason');
+
+      final data = {
+        'reason': reason,
+        if (otherReason != null && otherReason.isNotEmpty)
+          'other_reason': otherReason,
+      };
+
+      final response = await dio.delete(ApiEndpoints.deleteAccount, data: data);
+
+      CustomLogs.success('✅ Account deleted successfully: ${response.data}');
+    } catch (e) {
+      CustomLogs.error('❌ Error deleting account: $e');
       rethrow;
     }
   }

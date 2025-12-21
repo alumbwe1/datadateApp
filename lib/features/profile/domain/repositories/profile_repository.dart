@@ -11,4 +11,8 @@ abstract class ProfileRepository {
   Future<Either<Failure, List<String>>> uploadProfilePhotos(
     List<String> filePaths,
   );
+  Future<Either<Failure, void>> deleteAccount({
+    required String reason,
+    String? otherReason,
+  });
 }
