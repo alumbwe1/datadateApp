@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
@@ -194,7 +195,11 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
               ),
               child: Text(
                 'Refresh',
-                style: appStyle(16, isDarkMode ? Colors.black : Colors.white, FontWeight.w700),
+                style: appStyle(
+                  16,
+                  isDarkMode ? Colors.black : Colors.white,
+                  FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -270,6 +275,8 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
   }
 
   Widget _buildProfileCard(BuildContext context, Profile profile) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () async {
         // Record profile view
@@ -286,133 +293,263 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage>
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16.r),
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryLight.withValues(alpha: 0.08),
+              AppColors.primaryLight.withValues(alpha: 0.02),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(20),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: isDarkMode
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: AppColors.primaryLight.withValues(alpha: 0.1),
+              blurRadius: 40,
+              spreadRadius: -10,
+              offset: const Offset(0, 20),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Image
-              CachedNetworkImage(
-                imageUrl: profile.photos.first,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Colors.black),
+        child: Container(
+          margin: EdgeInsets.all(2.w),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14.r),
+            border: Border.all(
+              color: isDarkMode
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.8),
+              width: 1.5,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Main Image with Shimmer Loading
+                CachedNetworkImage(
+                  imageUrl: profile.photos.first,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: isDarkMode
+                        ? Colors.grey[800]!
+                        : Colors.grey[300]!,
+                    highlightColor: isDarkMode
+                        ? Colors.grey[700]!
+                        : Colors.grey[100]!,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey[900] : Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Colors.grey[300]!, Colors.grey[200]!],
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.person_outline,
+                        size: 60,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ),
                 ),
-              ),
 
-              // Gradient overlay
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.1),
-                      Colors.black.withValues(alpha: 0.8),
-                    ],
-                    stops: const [0.5, 0.75, 1.0],
+                // Premium Gradient Overlay
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.1),
+                        Colors.black.withValues(alpha: 0.4),
+                        Colors.black.withValues(alpha: 0.85),
+                      ],
+                      stops: const [0.0, 0.4, 0.7, 1.0],
+                    ),
                   ),
                 ),
-              ),
 
-              // Online indicator
+                
 
-              // Profile info (bottom)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${profile.displayName}, ${profile.age}',
-                        style: appStyle(17, Colors.white, FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.school,
-                            size: 12,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              profile.universityName,
-                              style: appStyle(
-                                12,
-                                Colors.white.withValues(alpha: 0.9),
-                                FontWeight.w400,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                // Profile Information (Bottom)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: EdgeInsets.all(16.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Name and Age
+                        Row(
                           children: [
-                            const Icon(
-                              Iconsax.heart,
-                              size: 17,
-                              color: Colors.black,
-                            ),
-                            Text(
-                              'Here for ${profile.intent}',
-                              style: appStyle(
-                                10,
-                                Colors.black,
-                                FontWeight.w500,
+                            Expanded(
+                              child: Text(
+                                '${profile.displayName}, ${profile.age}',
+                                style: appStyle(
+                                  18.sp,
+                                  Colors.white,
+                                  FontWeight.w800,
+                                ).copyWith(letterSpacing: -0.3, height: 1.2),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            // Verification Badge
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(8.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.verified,
+                                color: Colors.white,
+                                size: 14.sp,
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+
+                        SizedBox(height: 8.h),
+
+                        // University Info
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(4.w),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(6.r),
+                              ),
+                              child: Icon(
+                                Icons.school_rounded,
+                                size: 14.sp,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                profile.universityName,
+                                style: appStyle(
+                                  13.sp,
+                                  Colors.white.withValues(alpha: 0.9),
+                                  FontWeight.w500,
+                                ).copyWith(letterSpacing: -0.1),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 10.h),
+
+                        // Intent Badge
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white,
+                                Colors.white.withValues(alpha: 0.95),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(20.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Iconsax.heart,
+                                size: 16.sp,
+                                color: AppColors.primaryLight,
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                '${profile.intent}',
+                                style: appStyle(
+                                  11.sp,
+                                  Colors.black,
+                                  FontWeight.w600,
+                                ).copyWith(letterSpacing: -0.1),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+
+                // Subtle Hover Effect Overlay
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12.r),
+                    onTap: () async {
+                      await ref
+                          .read(discoverProvider.notifier)
+                          .recordProfileView(profile.id);
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProfileDetailsPage(profile: profile),
+                          ),
+                        );
+                      }
+                    },
+                    child: Container(),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
@@ -15,7 +14,6 @@ import '../providers/encounters_provider.dart';
 import '../widgets/animated_action_button.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/profile_card.dart';
-import '../widgets/swipe_overlay.dart';
 import 'match_page.dart';
 
 class EncountersPage extends ConsumerStatefulWidget {
@@ -30,10 +28,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   final CardSwiperController _controller = CardSwiperController();
 
   late AnimationController _swipeAnimationController;
-  late AnimationController _breatheController;
-  bool _showLikeOverlay = false;
-  bool _showNopeOverlay = false;
-  double _overlayOpacity = 0.0;
   bool _isInitialized = false;
 
   @override
@@ -46,11 +40,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-
-    _breatheController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
   }
 
   @override
@@ -118,7 +107,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
           } else {
             CustomSnackbar.show(
               context,
-              message: 'Failed to send like',
+              message: 'Failed to send a like ',
               type: SnackbarType.error,
               duration: const Duration(seconds: 2),
             );
@@ -132,36 +121,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   }
 
   void _animateSwipeFeedback(bool isLike) {
-    debugPrint('🎬 Animating ${isLike ? "LIKE" : "NOPE"} overlay');
-
-    setState(() {
-      if (isLike) {
-        _showLikeOverlay = true;
-        _showNopeOverlay = false;
-      } else {
-        _showLikeOverlay = false;
-        _showNopeOverlay = true;
-      }
-      _overlayOpacity = 1.0;
-    });
-
-    // Quick fade out animation
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) {
-        setState(() {
-          _overlayOpacity = 0.0;
-        });
-
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (mounted) {
-            setState(() {
-              _showLikeOverlay = false;
-              _showNopeOverlay = false;
-            });
-          }
-        });
-      }
-    });
+    // Animation removed for performance - no visual feedback
   }
 
   @override
@@ -331,32 +291,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                         return true;
                       },
                       cardBuilder: (context, index, x, y) {
-                        return Stack(
-                          children: [
-                            AnimatedBuilder(
-                              animation: _breatheController,
-                              builder: (context, child) {
-                                return Transform.scale(
-                                  scale:
-                                      1.0 + (_breatheController.value * 0.005),
-                                  child: child,
-                                );
-                              },
-                              child: ProfileCard(profile: profiles[index]),
-                            ),
-                            // Overlay on the CURRENT card being swiped
-                            if (_showLikeOverlay)
-                              SwipeOverlay(
-                                isLike: true,
-                                opacity: _overlayOpacity,
-                              ),
-                            if (_showNopeOverlay)
-                              SwipeOverlay(
-                                isLike: false,
-                                opacity: _overlayOpacity,
-                              ),
-                          ],
-                        );
+                        return ProfileCard(profile: profiles[index]);
                       },
                     ),
                     Positioned(
@@ -683,7 +618,17 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             size: screenWidth * 0.13,
             iconSize: screenWidth * 0.06,
             onPressed: () {
-              _controller.swipe(CardSwiperDirection.left);
+              CustomSnackbar.show(
+                context,
+                message: 'You can only text if it\'s a match',
+                type: SnackbarType.error,
+                duration: const Duration(seconds: 2),
+              );
+
+              // Delay the swipe so snackbar is visible
+              Future.delayed(const Duration(milliseconds: 300), () {
+                _controller.swipe(CardSwiperDirection.left);
+              });
             },
           ),
         ],
@@ -786,7 +731,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
   void dispose() {
     _controller.dispose();
     _swipeAnimationController.dispose();
-    _breatheController.dispose();
     super.dispose();
   }
 }

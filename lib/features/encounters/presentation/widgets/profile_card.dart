@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/utils/interest_emoji_mapper.dart';
 import '../../domain/entities/profile.dart';
@@ -161,40 +160,27 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                     // Add haptic feedback for better UX
                     HapticFeedback.lightImpact();
                   },
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 150),
-                    transitionBuilder:
-                        (Widget child, Animation<double> animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          );
-                        },
-                    child: CachedNetworkImage(
-                      key: ValueKey(_currentImageIndex),
-                      imageUrl: widget.profile.photos[_currentImageIndex],
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      placeholder: (context, url) => Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(color: Colors.grey[300]),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Colors.grey[300]!, Colors.grey[200]!],
-                          ),
+                  child: CachedNetworkImage(
+                    key: ValueKey(_currentImageIndex),
+                    imageUrl: widget.profile.photos[_currentImageIndex],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    placeholder: (context, url) =>
+                        Container(color: Colors.grey[300]),
+                    errorWidget: (context, url, error) => Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Colors.grey[300]!, Colors.grey[200]!],
                         ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.person_outline,
-                            size: 120,
-                            color: Colors.grey,
-                          ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.person_outline,
+                          size: 120,
+                          color: Colors.grey,
                         ),
                       ),
                     ),
@@ -213,8 +199,7 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                       ) {
                         final isActive = index == _currentImageIndex;
                         return Expanded(
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
+                          child: Container(
                             height: 3,
                             margin: EdgeInsets.only(
                               right: index < widget.profile.photos.length - 1
@@ -514,8 +499,7 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
         _navigateToDetails();
       },
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+      child: Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           gradient: LinearGradient(
