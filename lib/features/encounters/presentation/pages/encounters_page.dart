@@ -7,6 +7,7 @@ import 'package:iconly/iconly.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
@@ -47,6 +48,10 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     super.didChangeDependencies();
     if (!_isInitialized && mounted) {
       _isInitialized = true;
+
+      // Track screen view
+      AnalyticsService.trackScreenView('encounters_page');
+
       // Move async logic to provider initialization
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -66,6 +71,12 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
       '👆 Swiped ${direction == CardSwiperDirection.right ? "RIGHT ❤️" : "LEFT ❌"} on $profileName (ID: $profileId)',
     );
 
+    // Track swipe action
+    AnalyticsService.trackSwipeAction(
+      action: direction == CardSwiperDirection.right ? 'like' : 'pass',
+      profileId: profileId,
+    );
+
     // Instant API call based on direction
     if (direction == CardSwiperDirection.right) {
       try {
@@ -80,6 +91,12 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             debugPrint('🎉 IT\'S A MATCH with $profileName!');
             // Extract room_id from match info
             final roomId = matchInfo['room_id'] as int?;
+
+            // Track match event
+            AnalyticsService.trackMatch(
+              matchId: roomId?.toString() ?? 'unknown',
+              profileId: profileId,
+            );
 
             if (roomId != null) {
               Future.delayed(const Duration(milliseconds: 400), () {
@@ -173,6 +190,13 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                     color: AppColors.primaryLight,
                     onPressed: () {
                       HapticFeedback.lightImpact();
+
+                      // Track filter usage
+                      AnalyticsService.trackFeatureUsage(
+                        featureName: 'filter_button',
+                        parameters: {'source': 'encounters_page'},
+                      );
+
                       _showFilterBottomSheet();
                     },
                     splashRadius: 24,
@@ -540,6 +564,13 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             iconSize: screenWidth * 0.06,
             onPressed: () {
               _controller.undo();
+
+              // Track undo action
+              AnalyticsService.trackFeatureUsage(
+                featureName: 'undo_swipe',
+                parameters: {'source': 'encounters_page'},
+              );
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -563,6 +594,12 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             size: screenWidth * 0.18,
             iconSize: screenWidth * 0.10,
             onPressed: () {
+              // Track button usage
+              AnalyticsService.trackFeatureUsage(
+                featureName: 'pass_button',
+                parameters: {'source': 'encounters_page'},
+              );
+
               _controller.swipe(CardSwiperDirection.left);
             },
           ),
@@ -607,6 +644,12 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
             size: screenWidth * 0.18,
             iconSize: screenWidth * 0.10,
             onPressed: () {
+              // Track button usage
+              AnalyticsService.trackFeatureUsage(
+                featureName: 'like_button',
+                parameters: {'source': 'encounters_page'},
+              );
+
               _controller.swipe(CardSwiperDirection.right);
             },
           ),
@@ -654,6 +697,15 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
         initialMinAge: currentMinAge,
         initialMaxAge: currentMaxAge,
         onApply: (minAge, maxAge) {
+          // Track filter application
+          AnalyticsService.trackFilterUsage(
+            filters: {
+              'min_age': minAge.round(),
+              'max_age': maxAge.round(),
+              'source': 'encounters_page',
+            },
+          );
+
           if (profile != null && profile.preferredGenders.isNotEmpty) {
             final preferredGender = profile.preferredGenders.first;
 

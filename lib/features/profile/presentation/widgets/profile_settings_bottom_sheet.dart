@@ -86,7 +86,7 @@ class ProfileSettingsBottomSheet extends ConsumerWidget {
               IconlyLight.lock,
               () {
                 Navigator.pop(context);
-                _launchUrl(context, 'https://your-privacy-policy-url.com');
+                _launchUrl(context, 'https://heartlink-app.vercel.app/privacy');
               },
             ),
             _buildBottomSheetOption(
@@ -96,16 +96,10 @@ class ProfileSettingsBottomSheet extends ConsumerWidget {
               Iconsax.document_text_copy,
               () {
                 Navigator.pop(context);
-                _launchUrl(context, 'https://your-terms-url.com');
+                _launchUrl(context, 'https://heartlink-app.vercel.app/terms');
               },
             ),
-            _buildBottomSheetOption(
-              context,
-              ref,
-              'Notifications',
-              IconlyLight.notification,
-              () => Navigator.pop(context),
-            ),
+         
             _buildThemeToggleOption(ref),
             _buildBottomSheetOption(
               context,

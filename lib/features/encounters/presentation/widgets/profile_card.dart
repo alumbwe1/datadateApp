@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../../core/utils/interest_emoji_mapper.dart';
 import '../../domain/entities/profile.dart';
 import '../pages/profile_details_page.dart';
@@ -26,6 +27,16 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
   void _nextImage() {
     if (widget.profile.photos.length <= 1) return;
 
+    // Track image navigation
+    AnalyticsService.trackFeatureUsage(
+      featureName: 'profile_image_navigation',
+      parameters: {
+        'direction': 'next',
+        'profile_id': widget.profile.id.toString(),
+        'total_images': widget.profile.photos.length,
+      },
+    );
+
     setState(() {
       _currentImageIndex =
           (_currentImageIndex + 1) % widget.profile.photos.length;
@@ -35,6 +46,16 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
   void _previousImage() {
     if (widget.profile.photos.length <= 1) return;
 
+    // Track image navigation
+    AnalyticsService.trackFeatureUsage(
+      featureName: 'profile_image_navigation',
+      parameters: {
+        'direction': 'previous',
+        'profile_id': widget.profile.id.toString(),
+        'total_images': widget.profile.photos.length,
+      },
+    );
+
     setState(() {
       _currentImageIndex = _currentImageIndex > 0
           ? _currentImageIndex - 1
@@ -43,6 +64,15 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
   }
 
   void _showCrushBottomSheet(BuildContext context) {
+    // Track crush feature usage
+    AnalyticsService.trackFeatureUsage(
+      featureName: 'crush_bottom_sheet',
+      parameters: {
+        'profile_id': widget.profile.id.toString(),
+        'profile_name': widget.profile.displayName,
+      },
+    );
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -80,6 +110,12 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
   }
 
   Future<void> _navigateToDetails() async {
+    // Track profile view
+    AnalyticsService.trackProfileView(
+      profileId: widget.profile.id.toString(),
+      source: 'encounters',
+    );
+
     // Record profile view before navigating
     await ref
         .read(encountersProvider.notifier)

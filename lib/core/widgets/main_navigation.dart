@@ -10,6 +10,7 @@ import '../../features/encounters/presentation/pages/encounters_page.dart';
 import '../../features/likes/presentation/pages/likes_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../constants/app_colors.dart';
+import '../services/analytics_service.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -73,6 +74,19 @@ class _MainNavigationState extends State<MainNavigation>
   void _onItemTapped(int index) {
     if (_currentIndex != index) {
       HapticFeedback.lightImpact();
+
+      // Track navigation events
+      final pageNames = ['encounters', 'discover', 'likes', 'chat', 'profile'];
+      AnalyticsService.trackScreenView('${pageNames[index]}_page');
+      AnalyticsService.trackFeatureUsage(
+        featureName: 'navigation_tab',
+        parameters: {
+          'from_tab': pageNames[_currentIndex],
+          'to_tab': pageNames[index],
+          'tab_index': index,
+        },
+      );
+
       setState(() {
         _animationControllers[_currentIndex].reverse();
         _currentIndex = index;
