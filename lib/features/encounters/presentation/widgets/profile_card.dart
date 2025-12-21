@@ -25,15 +25,22 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
   int _currentImageIndex = 0;
 
   void _nextImage() {
-    if (_currentImageIndex < widget.profile.photos.length - 1) {
-      setState(() => _currentImageIndex++);
-    }
+    if (widget.profile.photos.length <= 1) return;
+
+    setState(() {
+      _currentImageIndex =
+          (_currentImageIndex + 1) % widget.profile.photos.length;
+    });
   }
 
   void _previousImage() {
-    if (_currentImageIndex > 0) {
-      setState(() => _currentImageIndex--);
-    }
+    if (widget.profile.photos.length <= 1) return;
+
+    setState(() {
+      _currentImageIndex = _currentImageIndex > 0
+          ? _currentImageIndex - 1
+          : widget.profile.photos.length - 1;
+    });
   }
 
   void _showCrushBottomSheet(BuildContext context) {
@@ -150,9 +157,19 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                     } else {
                       _nextImage();
                     }
+
+                    // Add haptic feedback for better UX
+                    HapticFeedback.lightImpact();
                   },
                   child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 150),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
                     child: CachedNetworkImage(
                       key: ValueKey(_currentImageIndex),
                       imageUrl: widget.profile.photos[_currentImageIndex],
@@ -197,7 +214,7 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                         final isActive = index == _currentImageIndex;
                         return Expanded(
                           child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
+                            duration: const Duration(milliseconds: 200),
                             height: 3,
                             margin: EdgeInsets.only(
                               right: index < widget.profile.photos.length - 1
@@ -325,7 +342,7 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
                                     // Verification badge
                                     Icon(
                                       Icons.verified,
-                                      color: Colors.blue[400],
+                                      color: Colors.blue,
                                       size: 22.sp,
                                     ),
                                     SizedBox(width: 8.w),
@@ -522,11 +539,7 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
             ),
           ],
         ),
-        child: Icon(
-          Icons.info_outline_rounded,
-          color: Colors.white,
-          size: 20.sp,
-        ),
+        child: Icon(Icons.arrow_upward, color: Colors.white, size: 20.sp),
       ),
     );
   }

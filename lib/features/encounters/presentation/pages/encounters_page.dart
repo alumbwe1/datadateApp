@@ -202,6 +202,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                   decoration: BoxDecoration(
+                    color: Colors.white,
                     border: Border.all(
                       color: AppColors.primaryLight.withValues(alpha: 0.3),
                       width: 1.w,
@@ -293,30 +294,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
       body: encountersState.isLoading
           ? const Center(child: ProfileCardShimmer())
           : encountersState.error != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(
-                    encountersState.error!,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (mounted) {
-                        ref
-                            .read(encountersProvider.notifier)
-                            .initializeWithUserPreference();
-                      }
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            )
+          ? _buildErrorState(encountersState.error!)
           : profiles.isEmpty
           ? _buildEmptyState(encountersState.activeFilterCount > 0)
           : SafeArea(
@@ -392,6 +370,78 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildErrorState(String errorMessage) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.error_outline_rounded,
+                  size: 60,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Something went wrong',
+              style: appStyle(
+                28,
+                Colors.black,
+                FontWeight.w900,
+              ).copyWith(letterSpacing: -0.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              errorMessage,
+              style: appStyle(
+                16,
+                Colors.grey[600]!,
+                FontWeight.w400,
+              ).copyWith(height: 1.5, letterSpacing: -0.2),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                if (mounted) {
+                  ref
+                      .read(encountersProvider.notifier)
+                      .initializeWithUserPreference();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Text(
+                'Try Again',
+                style: appStyle(16, Colors.white, FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
