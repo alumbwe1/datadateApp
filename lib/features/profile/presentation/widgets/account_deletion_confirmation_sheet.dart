@@ -80,27 +80,43 @@ class _AccountDeletionConfirmationSheetState
       child: SafeArea(
         child: Column(
           children: [
+            SizedBox(height: 5.h,),
+            //Drag Handle
+                          Container(
+                margin: EdgeInsets.only(top: 8.h),
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+            
             // Header
             Padding(
-              padding: EdgeInsets.all(20.w),
+              padding: EdgeInsets.all(10.w),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                    },
+                  const Spacer(),
+                GestureDetector(
+                    onTap: () => Navigator.pop(context),
                     child: Container(
-                      padding: EdgeInsets.all(8.w),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 8.h,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12.r),
+                        color: isDarkMode ? Colors.grey[800] : Colors.white,
+                        borderRadius: BorderRadius.circular(22.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: Icon(
-                        Icons.arrow_back,
-                        size: 20.w,
-                        color: textColor,
-                      ),
+                      child: Icon(Icons.close, size: 20.w, color: textColor),
                     ),
                   ),
                 ],
@@ -119,7 +135,7 @@ class _AccountDeletionConfirmationSheetState
                       24.sp,
                       textColor,
                       FontWeight.w800,
-                    ).copyWith(letterSpacing: -0.5, height: 1.2),
+                    ).copyWith(letterSpacing: -0.3, height: 1.2),
                   ),
                   SizedBox(height: 12.h),
                   Text(
@@ -288,7 +304,9 @@ class _AccountDeletionConfirmationSheetState
   }
 
   Future<void> _handleContinue() async {
-    if (selectedOption == null || isDeleting) return;
+    if (selectedOption == null || isDeleting) {
+      return;
+    }
 
     setState(() {
       isDeleting = true;
@@ -320,10 +338,15 @@ class _AccountDeletionConfirmationSheetState
           await ref.read(authProvider.notifier).logout();
 
           // Close all bottom sheets and navigate to login
-          Navigator.of(context).popUntil((route) => route.isFirst);
-
-          // Show success message
-          CustomSnackbar.show(context, message: 'Account deleted successfully');
+          if(mounted){
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            CustomSnackbar.show(context,
+             type: SnackbarType.success,
+             message: 'Account deleted successfully');
+          }
+              
+          
+        
         }
       } else {
         // Handle other options (hide account, clear activity, etc.)
@@ -334,6 +357,7 @@ class _AccountDeletionConfirmationSheetState
 
           CustomSnackbar.show(
             context,
+            type: SnackbarType.success,
             message: _getSuccessMessage(selectedOption!),
           );
         }
@@ -342,6 +366,7 @@ class _AccountDeletionConfirmationSheetState
       if (mounted) {
         CustomSnackbar.show(
           context,
+          type: SnackbarType.error,
           message: 'Something went wrong. Please try again.',
         );
       }

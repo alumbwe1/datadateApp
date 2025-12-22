@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/providers/theme_provider.dart';
+import 'account_deletion_feedback_sheet.dart';
 import 'profile_dialogs.dart';
 
 class ProfileAccountSettingsBottomSheet extends ConsumerWidget {
@@ -80,14 +81,24 @@ class ProfileAccountSettingsBottomSheet extends ConsumerWidget {
               'Delete Account',
               Icons.delete_forever_outlined,
               () {
-                Navigator.pop(context);
-                ProfileDialogs.showDeleteAccountDialog(context, ref);
+                 Navigator.pop(context);
+               _showDeleteAccountFeedbackSheet(context);
               },
               isDestructive: true,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  
+  void _showDeleteAccountFeedbackSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => const AccountDeletionFeedbackSheet(),
     );
   }
 

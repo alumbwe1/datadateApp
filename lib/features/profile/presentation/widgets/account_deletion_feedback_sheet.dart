@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/providers/theme_provider.dart';
@@ -67,110 +67,56 @@ class _AccountDeletionFeedbackSheetState
               padding: EdgeInsets.all(20.w),
               child: Column(
                 children: [
+
+                  ///Drag handle
+                         Container(
+                margin: EdgeInsets.only(top: 8.h),
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(8.w),
-                          decoration: BoxDecoration(
-                            color: isDarkMode
-                                ? Colors.grey[800]
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back,
-                            size: 20.w,
-                            color: textColor,
-                          ),
-                        ),
+                    
+                         
+                 
+             const Spacer(),
+              GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 8.h,
                       ),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey[800] : Colors.white,
+                        borderRadius: BorderRadius.circular(22.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.close, size: 20.w, color: textColor),
+                    ),
+                  ),
                     ],
                   ),
-                  SizedBox(height: 30.h),
+                  SizedBox(height: 10.h),
                   // Illustration
-                  Container(
-                    width: 200.w,
-                    height: 150.h,
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.grey[800] : Colors.grey[50],
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Background shapes
-                        Positioned(
-                          left: 40.w,
-                          top: 30.h,
-                          child: Container(
-                            width: 40.w,
-                            height: 40.w,
-                            decoration: BoxDecoration(
-                              color: Colors.amber,
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Icon(
-                              Icons.trending_up,
-                              color: Colors.white,
-                              size: 20.w,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: 40.w,
-                          top: 30.h,
-                          child: Container(
-                            width: 40.w,
-                            height: 40.w,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 20.w,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 40.h,
-                          child: Container(
-                            width: 60.w,
-                            height: 40.h,
-                            decoration: BoxDecoration(
-                              color: Colors.purple[300],
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20.r),
-                                topRight: Radius.circular(20.r),
-                              ),
-                            ),
-                            child: Icon(
-                              Iconsax.heart,
-                              color: Colors.white,
-                              size: 20.w,
-                            ),
-                          ),
-                        ),
-                        // Hands
-                        Positioned(
-                          left: 20.w,
-                          bottom: 20.h,
-                          child: Text('👋', style: TextStyle(fontSize: 30.sp)),
-                        ),
-                        Positioned(
-                          right: 20.w,
-                          bottom: 20.h,
-                          child: Text('👋', style: TextStyle(fontSize: 30.sp)),
-                        ),
-                      ],
-                    ),
-                  ),
+                 Lottie.asset(
+        'assets/lottie/sorry.json',
+        width: 100.w,
+        height: 100.h,
+        fit: BoxFit.contain,
+      ),
                   SizedBox(height: 30.h),
                   Text(
                     "We're sorry you're leaving!\nTell us why.",

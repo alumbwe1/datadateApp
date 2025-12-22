@@ -10,7 +10,6 @@ import '../../../../core/constants/app_style.dart';
 import '../../../../core/constants/kolors.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
-import 'account_deletion_feedback_sheet.dart';
 import 'profile_account_settings_bottom_sheet.dart';
 
 class ProfileSettingsBottomSheet extends ConsumerWidget {
@@ -109,17 +108,17 @@ class ProfileSettingsBottomSheet extends ConsumerWidget {
               Icons.help_outline,
               () => Navigator.pop(context),
             ),
-            _buildBottomSheetOption(
-              context,
-              ref,
-              'Delete Account',
-              Icons.delete_outline,
-              () {
-                Navigator.pop(context);
-                _showDeleteAccountFeedbackSheet(context);
-              },
-              isDestructive: true,
-            ),
+            // _buildBottomSheetOption(
+            //   context,
+            //   ref,
+            //   'Delete Account',
+            //   Icons.delete_outline,
+            //   () {
+            //     Navigator.pop(context);
+            //     _showDeleteAccountFeedbackSheet(context);
+            //   },
+            //   isDestructive: true,
+            // ),
           ],
         ),
       ),
@@ -227,14 +226,7 @@ class ProfileSettingsBottomSheet extends ConsumerWidget {
     );
   }
 
-  void _showDeleteAccountFeedbackSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => const AccountDeletionFeedbackSheet(),
-    );
-  }
+ 
 
   Future<void> _launchUrl(BuildContext context, String urlString) async {
     final url = Uri.parse(urlString);
