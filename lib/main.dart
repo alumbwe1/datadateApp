@@ -13,8 +13,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/constants/app_constants.dart';
 import 'core/network/api_client.dart';
 import 'core/providers/theme_provider.dart';
+import 'core/providers/connectivity_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/services/analytics_service.dart';
+import 'core/services/connectivity_service.dart';
 import 'core/services/performance_service.dart';
 import 'core/services/state_persistence_service.dart';
 import 'core/theme/app_theme.dart';
@@ -94,6 +96,11 @@ void main() async {
       AnalyticsService.initialize(),
       StatePersistenceService.initialize(),
     ]);
+
+    // Initialize connectivity service
+    final connectivityService = ConnectivityService();
+    await connectivityService.initialize();
+    CustomLogs.success('Connectivity service initialized', tag: 'MAIN');
 
     // Set up background message handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

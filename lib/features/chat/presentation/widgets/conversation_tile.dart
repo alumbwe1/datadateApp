@@ -42,13 +42,19 @@ class ConversationTile extends ConsumerWidget {
     return InkWell(
       onTap: () async {
         HapticFeedback.mediumImpact();
+
+        // Store the notifier reference before navigation to avoid disposal issues
+        final chatRoomsNotifier = ref.read(chatRoomsProvider.notifier);
+
         await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ChatDetailPage(roomId: room.id),
           ),
         );
-        ref.read(chatRoomsProvider.notifier).loadChatRooms();
+
+        // Use the stored reference after navigation
+        chatRoomsNotifier.loadChatRooms();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

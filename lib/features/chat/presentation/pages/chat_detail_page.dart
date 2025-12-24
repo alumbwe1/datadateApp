@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/widgets/connectivity_app_bar.dart';
+import '../../../../core/widgets/connectivity_status_banner.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/chat_detail_provider.dart';
@@ -344,6 +346,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
       ),
       body: Column(
         children: [
+          const ConnectivityStatusBanner(showOnlyWhenPoor: true),
           if (chatState.isTyping) const PremiumTypingIndicator(),
           Expanded(
             child: GestureDetector(

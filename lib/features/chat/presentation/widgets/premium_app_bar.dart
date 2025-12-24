@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/widgets/connectivity_indicator.dart';
 
-class PremiumChatAppBar extends StatelessWidget implements PreferredSizeWidget {
+class PremiumChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final dynamic room;
   final VoidCallback onBackPressed;
   final VoidCallback onOptionsPressed;
@@ -22,7 +24,7 @@ class PremiumChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final otherUser = room?.otherParticipant;
     final imageUrl = otherUser?.profilePhoto;
     final isOnline = otherUser?.isOnline ?? false;
@@ -185,6 +187,12 @@ class PremiumChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
+        const ConnectivityIndicator(
+          showInAppBar: true,
+          showText: false,
+          compact: true,
+        ),
+        const SizedBox(width: 8),
         IconButton(
           icon: Container(
             padding: const EdgeInsets.all(6),

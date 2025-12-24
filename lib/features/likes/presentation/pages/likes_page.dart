@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/widgets/connectivity_app_bar.dart';
 import '../providers/likes_provider.dart';
 import '../widgets/likes_error_state.dart';
 import '../widgets/likes_grid_view.dart';
@@ -50,36 +51,22 @@ class _LikesPageState extends ConsumerState<LikesPage>
 
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
+      appBar: ConnectivityAppBar(
+        title: 'HeartLink',
+        showConnectivityIndicator: true,
+        onRefresh: () async {
+          ref.read(likesProvider.notifier).loadAllLikes();
+        },
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: 12.h),
-            _buildHeader(),
             SizedBox(height: 20.h),
             _buildTinderTabBar(likesState, isDarkMode),
             SizedBox(height: 10.h),
             Expanded(child: _buildContent(likesState)),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'HeartLink',
-            style: appStyle(
-              24.sp,
-              const Color(0xFFFE3C72),
-              FontWeight.w900,
-            ).copyWith(letterSpacing: -0.5),
-          ),
-        ],
       ),
     );
   }

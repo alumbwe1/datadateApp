@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/widgets/connectivity_app_bar.dart';
 import '../../../interactions/presentation/providers/matches_provider.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_empty_state.dart';
@@ -86,7 +87,16 @@ class _ChatPageState extends ConsumerState<ChatPage>
 
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
-      appBar: _buildModernAppBar(rooms.length, matches.length),
+      appBar: ConnectivityAppBar(
+        title: 'HeartLink',
+        showConnectivityIndicator: true,
+        onRefresh: () async {
+          await Future.wait([
+            ref.read(chatRoomsProvider.notifier).loadChatRooms(),
+            ref.read(matchesProvider.notifier).loadMatches(),
+          ]);
+        },
+      ),
       body: chatRoomsState.isLoading && matchesState.isLoading
           ? const ChatPageShimmer()
           : chatRoomsState.error != null
@@ -171,44 +181,6 @@ class _ChatPageState extends ConsumerState<ChatPage>
           ),
         ],
       ),
-    );
-  }
-
-  PreferredSizeWidget _buildModernAppBar(int roomsCount, int matchesCount) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    return AppBar(
-      elevation: 0,
-      surfaceTintColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
-      centerTitle: false,
-      systemOverlayStyle: isDarkMode
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
-      title: Row(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 4.h),
-              ShaderMask(
-                shaderCallback: (bounds) =>
-                    AppColors.heartGradient.createShader(
-                      Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                    ),
-                child: Text(
-                  'HeartLink',
-                  style: appStyle(
-                    24.sp,
-                    Colors.white,
-                    FontWeight.w900,
-                  ).copyWith(letterSpacing: -0.5),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      actions: [],
     );
   }
 
