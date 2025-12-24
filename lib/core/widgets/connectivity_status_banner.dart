@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../constants/app_colors.dart';
 import '../constants/app_style.dart';
 import '../providers/connectivity_provider.dart';
 import '../services/connectivity_service.dart';

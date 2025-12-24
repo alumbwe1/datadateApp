@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 enum ConnectionStatus { none, slow, good, excellent }
 

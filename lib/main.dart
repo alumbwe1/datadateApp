@@ -13,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/constants/app_constants.dart';
 import 'core/network/api_client.dart';
 import 'core/providers/theme_provider.dart';
-import 'core/providers/connectivity_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/services/analytics_service.dart';
 import 'core/services/connectivity_service.dart';

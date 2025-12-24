@@ -88,7 +88,6 @@ class ConnectivityAppBar extends ConsumerWidget implements PreferredSizeWidget {
       return const SizedBox.shrink();
     }
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final statusText = _getStatusText(connection.status);
     final statusColor = _getStatusColor(connection.status);
 
