@@ -86,29 +86,6 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
     );
   }
 
-  Future<void> _handleSwipeOnCard(bool isLike) async {
-    // Call the API based on swipe direction
-    if (isLike) {
-      try {
-        final matchInfo = await ref
-            .read(encountersProvider.notifier)
-            .likeProfile(widget.profile.id.toString());
-
-        if (mounted && matchInfo != null && matchInfo['matched'] == true) {
-          // Handle match if needed
-          debugPrint('🎉 Match detected from card swipe!');
-        }
-      } catch (e) {
-        debugPrint('❌ Error liking from card swipe: $e');
-      }
-    } else {
-      // Skip/Pass
-      ref
-          .read(encountersProvider.notifier)
-          .skipProfile(widget.profile.id.toString());
-    }
-  }
-
   Future<void> _navigateToDetails() async {
     // Track profile view
     AnalyticsService.trackProfileView(
@@ -148,21 +125,6 @@ class _ProfileCardState extends ConsumerState<ProfileCard> {
 
     return GestureDetector(
       onDoubleTap: () => _showCrushBottomSheet(context),
-      onPanEnd: (details) {
-        // Handle swipe gestures on the card itself
-        final velocity = details.velocity.pixelsPerSecond;
-        const threshold = 500.0;
-
-        if (velocity.dx.abs() > threshold) {
-          if (velocity.dx > 0) {
-            // Swipe right - Like
-            _handleSwipeOnCard(true);
-          } else {
-            // Swipe left - Pass
-            _handleSwipeOnCard(false);
-          }
-        }
-      },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.r),
