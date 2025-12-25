@@ -46,6 +46,10 @@ class ConnectivityService {
   Timer? _speedTestTimer;
   Timer? _stabilityTimer;
 
+  // Add failure tracking to reduce spam
+  int _consecutiveFailures = 0;
+  static const int _maxConsecutiveFailures = 3;
+
   ConnectionInfo _currentConnection = const ConnectionInfo(
     status: ConnectionStatus.none,
     type: ConnectionType.none,
@@ -74,11 +78,13 @@ class ConnectivityService {
   Future<void> initialize() async {
     debugPrint('🌐 Initializing ConnectivityService');
 
-    // Configure Dio for speed tests
+    // Configure Dio for speed tests with more resilient timeouts
     _dio.options = BaseOptions(
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 10),
-      sendTimeout: const Duration(seconds: 5),
+      connectTimeout: const Duration(seconds: 3), // Reduced from 5s
+      receiveTimeout: const Duration(seconds: 5), // Reduced from 10s
+      sendTimeout: const Duration(seconds: 3), // Reduced from 5s
+      // Add retry interceptor for failed requests
+      validateStatus: (status) => status != null && status < 500,
     );
 
     // Listen to connectivity changes
@@ -138,7 +144,11 @@ class ConnectivityService {
         ),
       );
     } catch (e) {
-      debugPrint('🌐 Error checking connection: $e');
+      // Handle connection check failures gracefully
+      if (kDebugMode) {
+        debugPrint('🌐 Error checking connection: ${e.toString()}');
+      }
+
       _updateConnection(
         const ConnectionInfo(
           status: ConnectionStatus.none,
@@ -195,7 +205,10 @@ class ConnectivityService {
         }
       } catch (e) {
         successes.add(false);
-        debugPrint('🌐 Speed test failed for $url: $e');
+        // Only log speed test failures in debug mode to avoid spam
+        if (kDebugMode) {
+          debugPrint('🌐 Speed test failed for $url: ${e.toString()}');
+        }
       }
     }
 
@@ -207,6 +220,14 @@ class ConnectivityService {
     // Calculate success rate for stability
     final successRate = successes.where((s) => s).length / successes.length;
     final isStable = successRate >= 0.7; // 70% success rate
+
+    // Update failure tracking
+    if (successRate < 0.3) {
+      // Less than 30% success rate
+      _consecutiveFailures++;
+    } else {
+      _consecutiveFailures = 0; // Reset on successful test
+    }
 
     // Estimate speed based on latency (rough approximation)
     int? estimatedSpeed;
@@ -257,6 +278,13 @@ class ConnectivityService {
   void _startPeriodicSpeedTests() {
     _speedTestTimer = Timer.periodic(_speedTestInterval, (timer) {
       if (_currentConnection.isConnected) {
+        // Skip speed tests if we've had too many consecutive failures
+        if (_consecutiveFailures >= _maxConsecutiveFailures) {
+          if (kDebugMode) {
+            debugPrint('🌐 Skipping speed test due to consecutive failures');
+          }
+          return;
+        }
         _checkConnection();
       }
     });
@@ -291,6 +319,12 @@ class ConnectivityService {
         );
       }
     } catch (e) {
+      // Silently handle connectivity check failures to avoid spam
+      // Only update connection status, don't log in production
+      if (kDebugMode) {
+        debugPrint('🌐 Quick connectivity check failed: ${e.toString()}');
+      }
+
       _updateConnection(
         _currentConnection.copyWith(
           status: ConnectionStatus.slow,

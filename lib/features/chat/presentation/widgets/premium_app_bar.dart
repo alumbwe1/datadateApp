@@ -28,17 +28,24 @@ class PremiumChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
     final otherUser = room?.otherParticipant;
     final imageUrl = otherUser?.profilePhoto;
     final isOnline = otherUser?.isOnline ?? false;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       elevation: 0,
-      surfaceTintColor: Colors.white,
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      surfaceTintColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
+      systemOverlayStyle: isDarkMode
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       leadingWidth: 56,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
         child: IconButton(
-          icon: Icon(Icons.arrow_back, size: 20.sp, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            size: 20.sp,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
           onPressed: () {
             onBackPressed();
             HapticFeedback.lightImpact();
@@ -62,14 +69,23 @@ class PremiumChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [Colors.grey.shade100, Colors.grey.shade200],
+                        colors: isDarkMode
+                            ? [Colors.grey.shade700, Colors.grey.shade600]
+                            : [Colors.grey.shade100, Colors.grey.shade200],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      border: Border.all(color: Colors.grey.shade200, width: 2),
+                      border: Border.all(
+                        color: isDarkMode
+                            ? Colors.grey.shade600
+                            : Colors.grey.shade200,
+                        width: 2,
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
+                          color: Colors.black.withValues(
+                            alpha: isDarkMode ? 0.3 : 0.08,
+                          ),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -80,17 +96,24 @@ class PremiumChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           ? CachedNetworkImage(
                               imageUrl: imageUrl,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) =>
-                                  Container(color: Colors.grey[100]),
+                              placeholder: (context, url) => Container(
+                                color: isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.grey[100],
+                              ),
                               errorWidget: (context, url, error) => Container(
-                                color: Colors.grey[100],
+                                color: isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.grey[100],
                                 child: Center(
                                   child: Text(
                                     otherUser?.displayName[0].toUpperCase() ??
                                         '?',
                                     style: appStyle(
                                       16,
-                                      Colors.grey[700]!,
+                                      isDarkMode
+                                          ? Colors.grey[300]!
+                                          : Colors.grey[700]!,
                                       FontWeight.w600,
                                     ),
                                   ),
@@ -98,14 +121,18 @@ class PremiumChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
                               ),
                             )
                           : Container(
-                              color: Colors.grey[100],
+                              color: isDarkMode
+                                  ? Colors.grey[800]
+                                  : Colors.grey[100],
                               child: Center(
                                 child: Text(
                                   otherUser?.displayName[0].toUpperCase() ??
                                       '?',
                                   style: appStyle(
                                     16,
-                                    Colors.grey[700]!,
+                                    isDarkMode
+                                        ? Colors.grey[300]!
+                                        : Colors.grey[700]!,
                                     FontWeight.w600,
                                   ),
                                 ),
@@ -131,7 +158,9 @@ class PremiumChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
                                 color: Colors.green,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Colors.white,
+                                  color: isDarkMode
+                                      ? const Color(0xFF1A1625)
+                                      : Colors.white,
                                   width: 2,
                                 ),
                                 boxShadow: [
@@ -160,7 +189,7 @@ class PremiumChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     otherUser?.displayName ?? 'Chat',
                     style: appStyle(
                       17,
-                      Colors.black,
+                      isDarkMode ? Colors.white : Colors.black,
                       FontWeight.w700,
                     ).copyWith(letterSpacing: -0.3),
                     maxLines: 1,
@@ -197,10 +226,14 @@ class PremiumChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
           icon: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.more_horiz, size: 20, color: Colors.black),
+            child: Icon(
+              Icons.more_horiz,
+              size: 20,
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
           ),
           onPressed: () {
             HapticFeedback.lightImpact();

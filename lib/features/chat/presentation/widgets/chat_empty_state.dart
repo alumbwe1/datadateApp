@@ -19,6 +19,7 @@ class ChatEmptyState extends StatelessWidget {
               'assets/lottie/Chat.json',
               width: 170.h,
               height: 170.h,
+              fit: BoxFit.contain,
             ),
 
             Text(

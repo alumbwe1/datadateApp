@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/widgets/connectivity_app_bar.dart';
+import '../../../../core/widgets/network_error_boundary.dart';
 import '../../../interactions/presentation/providers/matches_provider.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_empty_state.dart';
@@ -85,65 +86,144 @@ class _ChatPageState extends ConsumerState<ChatPage>
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
-      appBar: ConnectivityAppBar(
-        title: 'HeartLink',
-        showConnectivityIndicator: true,
-        onRefresh: () async {
-          await Future.wait([
-            ref.read(chatRoomsProvider.notifier).loadChatRooms(),
-            ref.read(matchesProvider.notifier).loadMatches(),
-          ]);
-        },
+    return NetworkErrorBoundary(
+      fallbackMessage: 'Chat data will sync when connection is restored.',
+      onRetry: () async {
+        await Future.wait([
+          ref.read(chatRoomsProvider.notifier).loadChatRooms(),
+          ref.read(matchesProvider.notifier).loadMatches(),
+        ]);
+      },
+      child: Scaffold(
+        backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
+        appBar: ConnectivityAppBar(
+          title: 'HeartLink',
+          showConnectivityIndicator: true,
+          onRefresh: () async {
+            await Future.wait([
+              ref.read(chatRoomsProvider.notifier).loadChatRooms(),
+              ref.read(matchesProvider.notifier).loadMatches(),
+            ]);
+          },
+        ),
+        body: _buildBody(
+          chatRoomsState,
+          matchesState,
+          conversations,
+          matches,
+          isDarkMode,
+        ),
       ),
-      body: chatRoomsState.isLoading && matchesState.isLoading
-          ? const ChatPageShimmer()
-          : chatRoomsState.error != null
-          ? ChatErrorState(
-              error: chatRoomsState.error!,
-              onRetry: () {
-                ref.read(chatRoomsProvider.notifier).loadChatRooms();
-              },
-            )
-          : RefreshIndicator(
-              onRefresh: () async {
-                HapticFeedback.lightImpact();
-                await Future.wait([
-                  ref.read(chatRoomsProvider.notifier).loadChatRooms(),
-                  ref.read(matchesProvider.notifier).loadMatches(),
-                ]);
-              },
-              color: AppColors.secondaryLight,
-              backgroundColor: isDarkMode
-                  ? const Color(0xFF2A1F35)
-                  : Colors.white,
-              strokeWidth: 2.5,
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: ChatSearchBar(
-                      controller: _searchController,
-                      isSearching: _isSearching,
-                      onTap: () => setState(() => _isSearching = true),
-                      onChanged: (value) => setState(() {}),
-                      onClear: () => setState(() {}),
-                    ),
+    );
+  }
+
+  Widget _buildBody(
+    ChatRoomsState chatRoomsState,
+    MatchesState matchesState,
+    List conversations,
+    List matches,
+    bool isDarkMode,
+  ) {
+    // Show shimmer only when loading AND we have no cached data
+    final showShimmer =
+        chatRoomsState.isLoading && !chatRoomsState.shouldShowCachedData;
+
+    if (showShimmer) {
+      return const ChatPageShimmer();
+    }
+
+    // Show error only if we have an error AND no cached data to show
+    if (chatRoomsState.error != null && !chatRoomsState.shouldShowCachedData) {
+      return ChatErrorState(
+        error: chatRoomsState.error!,
+        onRetry: () {
+          ref.read(chatRoomsProvider.notifier).forceRefresh();
+        },
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        HapticFeedback.lightImpact();
+        await Future.wait([
+          ref.read(chatRoomsProvider.notifier).refreshChatRooms(),
+          ref.read(matchesProvider.notifier).refreshMatches(),
+        ]);
+      },
+      color: AppColors.secondaryLight,
+      backgroundColor: isDarkMode ? const Color(0xFF2A1F35) : Colors.white,
+      strokeWidth: 2.5,
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // Show cache indicator if using stale cache
+          if (chatRoomsState.shouldShowCachedData &&
+              chatRoomsState.isCacheStale)
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: isDarkMode
+                      ? Colors.orange.shade900.withOpacity(0.3)
+                      : Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDarkMode
+                        ? Colors.orange.shade700
+                        : Colors.orange.shade200,
                   ),
-                  SliverToBoxAdapter(child: MatchesSection(matches: matches)),
-                  if (conversations.isNotEmpty) ...[
-                    SliverToBoxAdapter(
-                      child: _buildMessagesTitle(conversations.length),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.cached,
+                      size: 16,
+                      color: isDarkMode
+                          ? Colors.orange.shade300
+                          : Colors.orange.shade700,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Showing cached data • Pull to refresh',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDarkMode
+                              ? Colors.orange.shade300
+                              : Colors.orange.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ],
-                  if (conversations.isEmpty && matches.isEmpty)
-                    const SliverFillRemaining(child: ChatEmptyState())
-                  else
-                    _buildConversationsList(conversations),
-                ],
+                ),
               ),
             ),
+          SliverToBoxAdapter(
+            child: ChatSearchBar(
+              controller: _searchController,
+              isSearching: _isSearching,
+              onTap: () => setState(() => _isSearching = true),
+              onChanged: (value) => setState(() {}),
+              onClear: () => setState(() {}),
+            ),
+          ),
+          SliverToBoxAdapter(child: MatchesSection(matches: matches)),
+          if (conversations.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: _buildMessagesTitle(conversations.length),
+            ),
+          ],
+          if (conversations.isEmpty && matches.isEmpty)
+            const SliverFillRemaining(child: ChatEmptyState())
+          else
+            _buildConversationsList(conversations),
+        ],
+      ),
     );
   }
 

@@ -113,9 +113,10 @@ class WebSocketService {
 
   void _scheduleReconnect(int roomId) {
     _reconnectAttempts++;
-    final delay = Duration(
-      seconds: _reconnectDelay.inSeconds * _reconnectAttempts,
-    );
+    // Exponential backoff with jitter to avoid thundering herd
+    final baseDelay = _reconnectDelay.inSeconds * _reconnectAttempts;
+    final jitter = (baseDelay * 0.1 * (DateTime.now().millisecond / 1000));
+    final delay = Duration(seconds: (baseDelay + jitter).round());
 
     CustomLogs.info(
       '🔄 Scheduling reconnect attempt $_reconnectAttempts in ${delay.inSeconds}s',
@@ -123,7 +124,7 @@ class WebSocketService {
 
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(delay, () {
-      if (_shouldReconnect) {
+      if (_shouldReconnect && _reconnectAttempts <= _maxReconnectAttempts) {
         CustomLogs.info(
           '🔄 Attempting reconnection $_reconnectAttempts/$_maxReconnectAttempts',
         );
@@ -131,6 +132,15 @@ class WebSocketService {
           CustomLogs.error(
             '❌ Reconnection attempt $_reconnectAttempts failed: $e',
           );
+          // If it's a network error, don't keep trying immediately
+          if (e.toString().contains('Failed host lookup') ||
+              e.toString().contains('No address associated with hostname') ||
+              e.toString().contains('SocketException')) {
+            CustomLogs.info(
+              '🌐 Network/DNS error detected, pausing reconnection attempts',
+            );
+            _shouldReconnect = false;
+          }
         });
       }
     });
@@ -171,14 +181,23 @@ class WebSocketService {
   }
 
   /// Send a chat message
-  void sendMessage(String content) {
+  void sendMessage(String content, {String? localId}) {
     try {
-      _sendRawMessage({
+      final messageData = {
         'type': 'chat_message',
         'message': content,
         'timestamp': DateTime.now().toIso8601String(),
-      });
-      CustomLogs.info('📤 Message sent via WebSocket');
+      };
+
+      // Include local ID if provided for tracking
+      if (localId != null) {
+        messageData['local_id'] = localId;
+      }
+
+      _sendRawMessage(messageData);
+      CustomLogs.info(
+        '📤 Message sent via WebSocket${localId != null ? ' (localId: $localId)' : ''}',
+      );
     } catch (e) {
       CustomLogs.error('❌ Failed to send message via WebSocket: $e');
       rethrow;

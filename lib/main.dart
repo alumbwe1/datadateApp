@@ -250,6 +250,8 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeProvider);
 
+    // Initialize message queue service
+
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,

@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/widgets/connectivity_app_bar.dart';
+import '../../../../core/widgets/network_error_boundary.dart';
 import '../providers/likes_provider.dart';
 import '../widgets/likes_error_state.dart';
 import '../widgets/likes_grid_view.dart';
@@ -49,23 +50,30 @@ class _LikesPageState extends ConsumerState<LikesPage>
     final likesState = ref.watch(likesProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
-      appBar: ConnectivityAppBar(
-        title: 'HeartLink',
-        showConnectivityIndicator: true,
-        onRefresh: () async {
-          ref.read(likesProvider.notifier).loadAllLikes();
-        },
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: 20.h),
-            _buildTinderTabBar(likesState, isDarkMode),
-            SizedBox(height: 10.h),
-            Expanded(child: _buildContent(likesState)),
-          ],
+    return NetworkErrorBoundary(
+      fallbackMessage:
+          'Likes data is cached and will sync when you\'re back online. You can still view your likes and matches.',
+      onRetry: () async {
+        await ref.read(likesProvider.notifier).loadAllLikes();
+      },
+      child: Scaffold(
+        backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
+        appBar: ConnectivityAppBar(
+          title: 'HeartLink',
+          showConnectivityIndicator: true,
+          onRefresh: () async {
+            ref.read(likesProvider.notifier).loadAllLikes();
+          },
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: 20.h),
+              _buildTinderTabBar(likesState, isDarkMode),
+              SizedBox(height: 10.h),
+              Expanded(child: _buildContent(likesState)),
+            ],
+          ),
         ),
       ),
     );

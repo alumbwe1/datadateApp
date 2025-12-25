@@ -8,6 +8,7 @@ class ChatLocalStorageService {
   static const String _messagesKeyPrefix = 'cached_messages_';
   static const String _lastUpdateKey = 'chat_last_update';
 
+  // Chat rooms caching
   static Future<void> saveChatRooms(List<ChatRoomModel> rooms) async {
     final prefs = await SharedPreferences.getInstance();
     final roomsJson = rooms.map((room) => room.toJson()).toList();
@@ -24,6 +25,7 @@ class ChatLocalStorageService {
     return roomsList.map((json) => ChatRoomModel.fromJson(json)).toList();
   }
 
+  // Messages caching
   static Future<void> saveMessages(
     int roomId,
     List<MessageModel> messages,
@@ -45,6 +47,35 @@ class ChatLocalStorageService {
     return messagesList.map((json) => MessageModel.fromJson(json)).toList();
   }
 
+  // Add or update a single message in cache
+  static Future<void> addMessageToCache(
+    int roomId,
+    MessageModel message,
+  ) async {
+    final messages = await getCachedMessages(roomId);
+
+    // Check if message already exists (by ID)
+    final existingIndex = messages.indexWhere((msg) => msg.id == message.id);
+
+    if (existingIndex != -1) {
+      // Update existing message
+      messages[existingIndex] = message;
+    } else {
+      // Add new message and sort by creation time
+      messages.add(message);
+      messages.sort(
+        (a, b) =>
+            DateTime.parse(a.createdAt).compareTo(DateTime.parse(b.createdAt)),
+      );
+    }
+
+    await saveMessages(roomId, messages);
+
+    // Update room's last message
+    await updateRoomLastMessage(roomId, message);
+  }
+
+  // Update room's last message
   static Future<void> updateRoomLastMessage(
     int roomId,
     MessageModel message,
@@ -59,22 +90,7 @@ class ChatLocalStorageService {
     }
   }
 
-  static Future<void> addMessageToCache(
-    int roomId,
-    MessageModel message,
-  ) async {
-    final messages = await getCachedMessages(roomId);
-
-    // Check if message already exists
-    if (!messages.any((msg) => msg.id == message.id)) {
-      messages.insert(0, message); // Add to beginning (newest first in cache)
-      await saveMessages(roomId, messages);
-    }
-
-    // Update room's last message
-    await updateRoomLastMessage(roomId, message);
-  }
-
+  // Cache metadata
   static Future<DateTime?> getLastUpdateTime() async {
     final prefs = await SharedPreferences.getInstance();
     final timestamp = prefs.getInt(_lastUpdateKey);
@@ -83,6 +99,7 @@ class ChatLocalStorageService {
         : null;
   }
 
+  // Cache management
   static Future<void> clearCache() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs
@@ -98,5 +115,38 @@ class ChatLocalStorageService {
     for (final key in keys) {
       await prefs.remove(key);
     }
+  }
+
+  // Clear messages cache for a specific room
+  static Future<void> clearMessagesCache(int roomId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('$_messagesKeyPrefix$roomId');
+  }
+
+  // Get cache size information
+  static Future<Map<String, int>> getCacheInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys();
+
+    int roomsCount = 0;
+    int messagesCount = 0;
+
+    for (final key in keys) {
+      if (key == _chatRoomsKey) {
+        final roomsJson = prefs.getString(key);
+        if (roomsJson != null) {
+          final List<dynamic> roomsList = jsonDecode(roomsJson);
+          roomsCount = roomsList.length;
+        }
+      } else if (key.startsWith(_messagesKeyPrefix)) {
+        final messagesJson = prefs.getString(key);
+        if (messagesJson != null) {
+          final List<dynamic> messagesList = jsonDecode(messagesJson);
+          messagesCount += messagesList.length;
+        }
+      }
+    }
+
+    return {'rooms': roomsCount, 'messages': messagesCount};
   }
 }

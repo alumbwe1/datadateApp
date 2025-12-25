@@ -2,6 +2,7 @@ import 'package:datadate/core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/utils/date_time_utils.dart';
@@ -13,6 +14,7 @@ import '../widgets/chat_error_banner.dart';
 import '../widgets/chat_options_sheet.dart';
 import '../widgets/message_options_sheet.dart';
 import '../widgets/premium_app_bar.dart';
+import '../widgets/premium_bottom_sheet.dart';
 import '../widgets/premium_dialog.dart';
 import '../widgets/premium_empty_state.dart';
 import '../widgets/premium_message_bubble.dart';
@@ -29,7 +31,7 @@ class ChatDetailPage extends ConsumerStatefulWidget {
 }
 
 class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
@@ -40,6 +42,9 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
   @override
   void initState() {
     super.initState();
+
+    // Add lifecycle observer
+    WidgetsBinding.instance.addObserver(this);
 
     _fabController = AnimationController(
       duration: const Duration(milliseconds: 200),
@@ -64,6 +69,22 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(chatDetailProvider(widget.roomId).notifier).loadMessages();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // When app becomes active, refresh messages
+    if (state == AppLifecycleState.resumed) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          ref
+              .read(chatDetailProvider(widget.roomId).notifier)
+              .refreshMessages();
+        }
+      });
+    }
   }
 
   void _scrollToBottom() {
@@ -108,10 +129,24 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
         }
       }
     } else {
-      ref.read(chatDetailProvider(widget.roomId).notifier).sendMessage(content);
-      _messageController.clear();
-      _scrollToBottom();
-      HapticFeedback.lightImpact();
+      // Send message directly
+      try {
+        await ref
+            .read(chatDetailProvider(widget.roomId).notifier)
+            .sendMessage(content);
+        _messageController.clear();
+        _scrollToBottom();
+        HapticFeedback.lightImpact();
+      } catch (e) {
+        if (mounted) {
+          CustomSnackbar.show(
+            context,
+            message: 'Failed to send message',
+            type: SnackbarType.error,
+            duration: const Duration(seconds: 2),
+          );
+        }
+      }
     }
   }
 
@@ -207,91 +242,90 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
   }
 
   void _confirmBlockUser() {
-    PremiumDialog.show(
+    PremiumBottomSheet.show(
       context: context,
-      icon: Icons.block_outlined,
-      iconColor: Colors.white,
       title: 'Block User',
-      message:
+      subtitle:
           'Are you sure you want to block this user? They won\'t be able to message you.',
-      confirmText: 'Block',
-      confirmColor: Colors.orange,
-      onConfirm: () {
-        HapticFeedback.mediumImpact();
-        CustomSnackbar.show(
-          context,
-          message: 'User blocked',
-          type: SnackbarType.info,
-          duration: const Duration(seconds: 2),
-        );
-      },
+      options: [
+        BottomSheetOption(
+          icon: Icons.block_outlined,
+          title: 'Block User',
+          isDestructive: true,
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            CustomSnackbar.show(
+              context,
+              message: 'User blocked',
+              type: SnackbarType.info,
+              duration: const Duration(seconds: 2),
+            );
+          },
+        ),
+        BottomSheetOption(
+          icon: Icons.close,
+          title: 'Cancel',
+          onTap: () {
+            // Just closes the bottom sheet
+          },
+        ),
+      ],
     );
   }
 
   void _showReportDialog() {
-    showDialog(
+    PremiumBottomSheet.show(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Report User',
-          style: appStyle(18, Colors.black, FontWeight.w700),
+      title: 'Block and report this person',
+      subtitle:
+          'We want to protect our community and make sure you feel safe. Don\'t worry, your feedback is anonymous and they won\'t know that you\'ve blocked or reported them.',
+      options: [
+        BottomSheetOption(
+          icon: Icons.camera_alt_outlined,
+          title: 'Fake profile',
+          onTap: () => _handleReport('Fake profile'),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Why are you reporting this user?',
-              style: appStyle(14, Colors.grey[700]!, FontWeight.w400),
-            ),
-            const SizedBox(height: 16),
-            _buildReportOption('Inappropriate messages'),
-            _buildReportOption('Spam or scam'),
-            _buildReportOption('Harassment'),
-            _buildReportOption('Fake profile'),
-            _buildReportOption('Other'),
-          ],
+        BottomSheetOption(
+          icon: Iconsax.warning_2_copy,
+          title: 'Inappropriate content',
+          onTap: () => _handleReport('Inappropriate content'),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: appStyle(15, Colors.grey[600]!, FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
+        BottomSheetOption(
+          icon: Iconsax.message_2_copy,
+          title: 'Scam or commercial',
+          onTap: () => _handleReport('Scam or commercial'),
+        ),
+        BottomSheetOption(
+          icon: Iconsax.user_copy,
+          title: 'Identity-based hate',
+          onTap: () => _handleReport('Identity-based hate'),
+        ),
+        BottomSheetOption(
+          icon: Icons.block_outlined,
+          title: 'Off HeartLink behavior',
+          onTap: () => _handleReport('Off HeartLink behavior'),
+        ),
+        BottomSheetOption(
+          icon: Icons.cake_outlined,
+          title: 'Underage',
+          onTap: () => _handleReport('Underage'),
+        ),
+        BottomSheetOption(
+          icon: Icons.sentiment_dissatisfied_outlined,
+          title: 'I\'m just not interested',
+          onTap: () => _handleReport('Not interested'),
+        ),
+      ],
     );
   }
 
-  Widget _buildReportOption(String reason) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        HapticFeedback.lightImpact();
-        CustomSnackbar.show(
-          context,
-          message: 'Report submitted. We\'ll review it shortly.',
-          type: SnackbarType.info,
-          duration: const Duration(seconds: 3),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              Icons.report_problem_outlined,
-              size: 20,
-              color: Colors.grey[600],
-            ),
-            const SizedBox(width: 12),
-            Text(reason, style: appStyle(15, Colors.black, FontWeight.w500)),
-          ],
-        ),
-      ),
+  void _handleReport(String reason) {
+    HapticFeedback.lightImpact();
+    CustomSnackbar.show(
+      context,
+      message: 'Report submitted. We\'ll review it shortly.',
+      type: SnackbarType.info,
+      duration: const Duration(seconds: 3),
     );
   }
 
@@ -309,6 +343,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _messageController.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
@@ -365,7 +400,13 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                 HapticFeedback.selectionClick();
               },
               child: chatState.messages.isEmpty
-                  ? const PremiumEmptyState()
+                  ? PremiumEmptyState(
+                      room: room,
+                      onSuggestionTap: (suggestion) {
+                        _messageController.text = suggestion;
+                        _focusNode.requestFocus();
+                      },
+                    )
                   : ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.symmetric(
@@ -408,7 +449,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                                     message.sender);
 
                         return PremiumMessageBubble(
-                          key: ValueKey('message_${message.id}'),
+                          key: ValueKey('message_${message.uniqueId}'),
                           message: message,
                           isSent: isSent,
                           showAvatar: showAvatar,

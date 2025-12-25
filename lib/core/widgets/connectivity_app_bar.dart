@@ -1,3 +1,4 @@
+import 'package:datadate/core/widgets/app_text_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -39,14 +40,7 @@ class ConnectivityAppBar extends ConsumerWidget implements PreferredSizeWidget {
     return AppBar(
       title: Column(
         children: [
-          Text(
-            title,
-            style: appStyle(
-              18.sp,
-              foregroundColor ?? (isDarkMode ? Colors.white : Colors.black),
-              FontWeight.w700,
-            ),
-          ),
+         const AppTextLogo(),
           if (showConnectivityIndicator)
             connectionAsync.when(
               data: (connection) =>

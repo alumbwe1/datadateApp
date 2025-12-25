@@ -10,6 +10,7 @@ import '../../../../core/constants/app_style.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
+import '../../../../core/widgets/network_error_boundary.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/encounters_provider.dart';
 import '../widgets/animated_action_button.dart';
@@ -149,185 +150,200 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
     final profiles = encountersState.profiles;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(55.h),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-            child: Row(
-              children: [
-                // HeartLink Logo with Gradient
-                ShaderMask(
-                  shaderCallback: (bounds) =>
-                      AppColors.heartGradient.createShader(
-                        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                      ),
-                  child: Text(
-                    'HeartLink',
-                    style: appStyle(
-                      24.sp,
-                      Colors.white,
-                      FontWeight.w800,
-                    ).copyWith(letterSpacing: -0.5, height: 1),
-                  ),
-                ),
-                const Spacer(),
-
-                // Filter Icon Button - Modern Style
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.primaryLight.withValues(alpha: 0.3),
-                      width: 1.w,
+    return NetworkErrorBoundary(
+      fallbackMessage:
+          'Profile data is cached and will sync when you\'re back online. You can still swipe through cached profiles.',
+      onRetry: () async {
+        await ref
+            .read(encountersProvider.notifier)
+            .initializeWithUserPreference();
+      },
+      child: Scaffold(
+        backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(55.h),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+              child: Row(
+                children: [
+                  // HeartLink Logo with Gradient
+                  ShaderMask(
+                    shaderCallback: (bounds) =>
+                        AppColors.heartGradient.createShader(
+                          Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                        ),
+                    child: Text(
+                      'HeartLink',
+                      style: appStyle(
+                        24.sp,
+                        Colors.white,
+                        FontWeight.w800,
+                      ).copyWith(letterSpacing: -0.5, height: 1),
                     ),
-                    borderRadius: BorderRadius.circular(20.r),
                   ),
-                  child: IconButton(
-                    icon: Icon(IconlyLight.filter, size: 20.sp),
-                    color: AppColors.primaryLight,
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
+                  const Spacer(),
 
-                      // Track filter usage
-                      AnalyticsService.trackFeatureUsage(
-                        featureName: 'filter_button',
-                        parameters: {'source': 'encounters_page'},
-                      );
+                  // Filter Icon Button - Modern Style
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: AppColors.primaryLight.withValues(alpha: 0.3),
+                        width: 1.w,
+                      ),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: IconButton(
+                      icon: Icon(IconlyLight.filter, size: 20.sp),
+                      color: AppColors.primaryLight,
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
 
-                      _showFilterBottomSheet();
-                    },
-                    splashRadius: 24,
-                    padding: EdgeInsets.zero,
+                        // Track filter usage
+                        AnalyticsService.trackFeatureUsage(
+                          featureName: 'filter_button',
+                          parameters: {'source': 'encounters_page'},
+                        );
+
+                        _showFilterBottomSheet();
+                      },
+                      splashRadius: 24,
+                      padding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
 
-                // Reels Toggle Button
-                // Container(
-                //   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                //   decoration: BoxDecoration(
-                //     border: Border.all(
-                //       color: AppColors.primaryLight.withValues(alpha: 0.3),
-                //       width: 1.w,
-                //     ),
-                //     borderRadius: BorderRadius.circular(20.r),
-                //   ),
-                //   child: IconButton(
-                //     icon: Icon(Icons.play_circle_outline_rounded, size: 20.sp),
-                //     color: AppColors.primaryLight,
-                //     onPressed: () {
-                //       HapticFeedback.lightImpact();
-                //       Navigator.of(context).push(
-                //         MaterialPageRoute(
-                //           builder: (context) => const ReelsPage(),
-                //           fullscreenDialog: true,
-                //         ),
-                //       );
-                //     },
-                //     splashRadius: 24,
-                //     padding: EdgeInsets.zero,
-                //   ),
-                // ),
+                  // Reels Toggle Button
+                  // Container(
+                  //   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                  //   decoration: BoxDecoration(
+                  //     border: Border.all(
+                  //       color: AppColors.primaryLight.withValues(alpha: 0.3),
+                  //       width: 1.w,
+                  //     ),
+                  //     borderRadius: BorderRadius.circular(20.r),
+                  //   ),
+                  //   child: IconButton(
+                  //     icon: Icon(Icons.play_circle_outline_rounded, size: 20.sp),
+                  //     color: AppColors.primaryLight,
+                  //     onPressed: () {
+                  //       HapticFeedback.lightImpact();
+                  //       Navigator.of(context).push(
+                  //         MaterialPageRoute(
+                  //           builder: (context) => const ReelsPage(),
+                  //           fullscreenDialog: true,
+                  //         ),
+                  //       );
+                  //     },
+                  //     splashRadius: 24,
+                  //     padding: EdgeInsets.zero,
+                  //   ),
+                  // ),
 
-                //const SizedBox(width: 8),
+                  //const SizedBox(width: 8),
 
-                // // Boost Button - Premium Style with Gradient
-                // Container(
-                //   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                //   decoration: BoxDecoration(
-                //     gradient: LinearGradient(
-                //       colors: [
-                //         AppColors.accentLight,
-                //         AppColors.accentLight.withValues(alpha: 0.8),
-                //       ],
-                //       begin: Alignment.topLeft,
-                //       end: Alignment.bottomRight,
-                //     ),
-                //     borderRadius: BorderRadius.circular(20.sp),
-                //     boxShadow: [
-                //       BoxShadow(
-                //         color: AppColors.accentLight.withValues(alpha: 0.3),
-                //         blurRadius: 8,
-                //         offset: const Offset(0, 2),
-                //       ),
-                //     ],
-                //   ),
-                //   child: IconButton(
-                //     icon: Icon(
-                //       Icons.bolt_rounded,
-                //       size: 20.sp,
-                //       color: Colors.black,
-                //     ),
-                //     color: Colors.white,
-                //     onPressed: () {
-                //       HapticFeedback.mediumImpact();
-                //       _showBoostBottomSheet();
-                //     },
-                //     splashRadius: 24,
-                //     padding: EdgeInsets.zero,
-                //   ),
-                // ),
-              ],
+                  // // Boost Button - Premium Style with Gradient
+                  // Container(
+                  //   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                  //   decoration: BoxDecoration(
+                  //     gradient: LinearGradient(
+                  //       colors: [
+                  //         AppColors.accentLight,
+                  //         AppColors.accentLight.withValues(alpha: 0.8),
+                  //       ],
+                  //       begin: Alignment.topLeft,
+                  //       end: Alignment.bottomRight,
+                  //     ),
+                  //     borderRadius: BorderRadius.circular(20.sp),
+                  //     boxShadow: [
+                  //       BoxShadow(
+                  //         color: AppColors.accentLight.withValues(alpha: 0.3),
+                  //         blurRadius: 8,
+                  //         offset: const Offset(0, 2),
+                  //       ),
+                  //     ],
+                  //   ),
+                  //   child: IconButton(
+                  //     icon: Icon(
+                  //       Icons.bolt_rounded,
+                  //       size: 20.sp,
+                  //       color: Colors.black,
+                  //     ),
+                  //     color: Colors.white,
+                  //     onPressed: () {
+                  //       HapticFeedback.mediumImpact();
+                  //       _showBoostBottomSheet();
+                  //     },
+                  //     splashRadius: 24,
+                  //     padding: EdgeInsets.zero,
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      body: encountersState.isLoading
-          ? const Center(child: ProfileCardShimmer())
-          : encountersState.error != null
-          ? _buildErrorState(encountersState.error!)
-          : profiles.isEmpty
-          ? _buildEmptyState(encountersState.activeFilterCount > 0)
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
-                child: Stack(
-                  children: [
-                    CardSwiper(
-                      controller: _controller,
-                      cardsCount: profiles.length,
-                      numberOfCardsDisplayed: 1,
-                      backCardOffset: const Offset(0, -20),
-                      padding: EdgeInsets.zero,
-                      duration: const Duration(milliseconds: 200),
-                      onSwipe: (previousIndex, currentIndex, direction) {
-                        final profile = profiles[previousIndex];
+        body: encountersState.isLoading
+            ? const Center(child: ProfileCardShimmer())
+            : encountersState.error != null
+            ? _buildErrorState(encountersState.error!)
+            : profiles.isEmpty
+            ? _buildEmptyState(encountersState.activeFilterCount > 0)
+            : SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 6,
+                  ),
+                  child: Stack(
+                    children: [
+                      CardSwiper(
+                        controller: _controller,
+                        cardsCount: profiles.length,
+                        numberOfCardsDisplayed: 1,
+                        backCardOffset: const Offset(0, -20),
+                        padding: EdgeInsets.zero,
+                        duration: const Duration(milliseconds: 200),
+                        onSwipe: (previousIndex, currentIndex, direction) {
+                          final profile = profiles[previousIndex];
 
-                        if (direction == CardSwiperDirection.right) {
-                          _animateSwipeFeedback(true);
-                        } else if (direction == CardSwiperDirection.left) {
-                          _animateSwipeFeedback(false);
-                        }
+                          if (direction == CardSwiperDirection.right) {
+                            _animateSwipeFeedback(true);
+                          } else if (direction == CardSwiperDirection.left) {
+                            _animateSwipeFeedback(false);
+                          }
 
-                        // Safe check for photos
-                        final profilePhoto = profile.photos.isNotEmpty
-                            ? profile.photos.first
-                            : '';
+                          // Safe check for photos
+                          final profilePhoto = profile.photos.isNotEmpty
+                              ? profile.photos.first
+                              : '';
 
-                        _handleSwipe(
-                          direction,
-                          profile.id.toString(),
-                          profile.displayName,
-                          profilePhoto,
-                        );
-                        return true;
-                      },
-                      cardBuilder: (context, index, x, y) {
-                        return ProfileCard(profile: profiles[index]);
-                      },
-                    ),
-                    Positioned(
-                      bottom: 2.h,
-                      left: 0,
-                      right: 0,
-                      child: _buildActionButtons(),
-                    ),
-                  ],
+                          _handleSwipe(
+                            direction,
+                            profile.id.toString(),
+                            profile.displayName,
+                            profilePhoto,
+                          );
+                          return true;
+                        },
+                        cardBuilder: (context, index, x, y) {
+                          return ProfileCard(profile: profiles[index]);
+                        },
+                      ),
+                      Positioned(
+                        bottom: 2.h,
+                        left: 0,
+                        right: 0,
+                        child: _buildActionButtons(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 
@@ -571,20 +587,6 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 parameters: {'source': 'encounters_page'},
               );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Rewound last swipe',
-                    style: appStyle(14, Colors.white, FontWeight.w600),
-                  ),
-                  backgroundColor: Colors.black,
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
             },
           ),
           SizedBox(width: buttonSpacing),
@@ -666,7 +668,7 @@ class _EncountersPageState extends ConsumerState<EncountersPage>
                 message: 'You can only text if it\'s a match',
                 type: SnackbarType.info,
                 duration: const Duration(seconds: 2),
-              );            
+              );
             },
           ),
         ],

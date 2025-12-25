@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/utils/date_time_utils.dart';
+import '../../data/models/message_model.dart';
 
 class PremiumMessageBubble extends StatefulWidget {
   final dynamic message;
@@ -130,33 +131,14 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: Container(
-              height: 1,
-              color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              DateTimeUtils.formatDateSeparator(widget.message.createdAt),
-              style: appStyle(
-                12.sp,
-                isDarkMode ? Colors.grey[300]! : Colors.grey[600]!,
-                FontWeight.w600,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              height: 1,
-              color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
+          Text(
+            DateTimeUtils.formatDateSeparator(widget.message.createdAt),
+            style: appStyle(
+              12.sp,
+              isDarkMode ? Colors.grey[300]! : Colors.grey[600]!,
+              FontWeight.w500,
             ),
           ),
         ],
@@ -312,7 +294,56 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
         ),
         if (widget.isSent) ...[
           const SizedBox(width: 6),
-          TweenAnimationBuilder<double>(
+          _buildMessageStatusIcon(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMessageStatusIcon() {
+    // Check if message has status property (new MessageModel)
+    final hasStatus =
+        widget.message.runtimeType.toString().contains('MessageModel') &&
+        widget.message.status != null;
+
+    if (hasStatus) {
+      switch (widget.message.status) {
+        case MessageStatus.pending:
+          return TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 800),
+            builder: (context, value, child) {
+              return Transform.rotate(
+                angle: value * 2 * 3.14159,
+                child: Icon(
+                  Icons.schedule,
+                  size: 12,
+                  color: Colors.white.withValues(alpha: 0.6),
+                ),
+              );
+            },
+          );
+
+        
+        case MessageStatus.failed:
+          return TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 300),
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Icon(
+                  Icons.error_outline,
+                  size: 12,
+                  color: Colors.redAccent.withValues(alpha: 0.8),
+                ),
+              );
+            },
+          );
+
+        case MessageStatus.sent:
+        default:
+          return TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.0, end: 1.0),
             duration: const Duration(milliseconds: 500),
             builder: (context, value, child) {
@@ -327,10 +358,27 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
                 ),
               );
             },
-          ),
-        ],
-      ],
-    );
+          );
+      }
+    } else {
+      // Fallback for old message format
+      return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 500),
+        builder: (context, value, child) {
+          return Transform.scale(
+            scale: value,
+            child: Icon(
+              widget.message.isRead ? Icons.done_all : Icons.check,
+              size: 14,
+              color: widget.message.isRead
+                  ? Colors.lightBlueAccent
+                  : Colors.white.withValues(alpha: 0.75),
+            ),
+          );
+        },
+      );
+    }
   }
 
   Widget _buildAvatar() {

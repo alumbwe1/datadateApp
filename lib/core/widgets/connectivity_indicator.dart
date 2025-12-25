@@ -127,16 +127,8 @@ class ConnectivityIndicator extends ConsumerWidget {
   Widget _buildLoadingIndicator(bool isDarkMode) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      child: SizedBox(
-        width: 12.w,
-        height: 12.h,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            isDarkMode ? Colors.white70 : Colors.black54,
-          ),
-        ),
-      ),
+      child: const SizedBox.shrink(),
+      
     );
   }
 

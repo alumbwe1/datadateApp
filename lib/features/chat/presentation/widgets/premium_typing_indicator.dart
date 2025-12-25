@@ -1,7 +1,7 @@
+import 'package:datadate/features/chat/presentation/providers/chat_detail_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_style.dart';
-import '../providers/chat_detail_provider.dart';
 
 class PremiumTypingIndicator extends ConsumerStatefulWidget {
   final int roomId;

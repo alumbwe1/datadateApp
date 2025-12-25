@@ -98,9 +98,7 @@ class ChatErrorBanner extends ConsumerWidget {
   }
 
   Color _getErrorColor(String error) {
-    if (error.contains('queued') || error.contains('offline')) {
-      return Colors.orange;
-    } else if (error.contains('timeout') || error.contains('connection')) {
+    if (error.contains('timeout') || error.contains('connection')) {
       return Colors.amber;
     } else if (error.contains('failed') || error.contains('error')) {
       return Colors.red;
@@ -110,9 +108,7 @@ class ChatErrorBanner extends ConsumerWidget {
   }
 
   IconData _getErrorIcon(String error) {
-    if (error.contains('queued') || error.contains('offline')) {
-      return Icons.schedule;
-    } else if (error.contains('timeout')) {
+    if (error.contains('timeout')) {
       return Icons.access_time;
     } else if (error.contains('connection')) {
       return Icons.signal_wifi_bad;
@@ -124,12 +120,8 @@ class ChatErrorBanner extends ConsumerWidget {
   }
 
   String _getErrorTitle(String error) {
-    if (error.contains('queued')) {
-      return 'Message Queued';
-    } else if (error.contains('timeout')) {
+    if (error.contains('timeout')) {
       return 'Connection Timeout';
-    } else if (error.contains('offline')) {
-      return 'Offline Mode';
     } else if (error.contains('failed')) {
       return 'Action Failed';
     } else {
@@ -138,12 +130,8 @@ class ChatErrorBanner extends ConsumerWidget {
   }
 
   String? _getErrorDescription(String error) {
-    if (error.contains('queued')) {
-      return 'Will be sent when connection is restored';
-    } else if (error.contains('timeout')) {
+    if (error.contains('timeout')) {
       return 'Please check your internet connection';
-    } else if (error.contains('offline')) {
-      return 'Messages will be queued until you\'re back online';
     } else if (error.contains('session expired') || error.contains('401')) {
       return 'Please log in again';
     }
@@ -151,15 +139,11 @@ class ChatErrorBanner extends ConsumerWidget {
   }
 
   bool _shouldShowRetryButton(String error) {
-    return error.contains('failed') ||
-        error.contains('timeout') ||
-        (error.contains('queued') && !error.contains('will be sent'));
+    return error.contains('failed') || error.contains('timeout');
   }
 
   String _getRetryButtonText(String error) {
-    if (error.contains('queued')) {
-      return 'Retry Now';
-    } else if (error.contains('timeout')) {
+    if (error.contains('timeout')) {
       return 'Retry';
     } else {
       return 'Try Again';
@@ -169,9 +153,7 @@ class ChatErrorBanner extends ConsumerWidget {
   void _handleRetry(BuildContext context, WidgetRef ref, String error) {
     final notifier = ref.read(chatDetailProvider(roomId).notifier);
 
-    if (error.contains('queued')) {
-      notifier.retryQueuedMessages();
-    } else if (error.contains('timeout') || error.contains('failed')) {
+    if (error.contains('timeout') || error.contains('failed')) {
       // Retry loading messages
       notifier.loadMessages();
     }

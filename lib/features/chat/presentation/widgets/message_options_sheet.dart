@@ -16,7 +16,7 @@ class MessageOptionsSheet {
       BottomSheetOption(
         icon: Iconsax.copy_copy,
         title: 'Copy Message',
-        color: Colors.blue,
+
         onTap: () {
           Clipboard.setData(ClipboardData(text: message.content));
           CustomSnackbar.show(
@@ -31,13 +31,12 @@ class MessageOptionsSheet {
         BottomSheetOption(
           icon: Icons.edit_outlined,
           title: 'Edit Message',
-          color: Colors.orange,
+
           onTap: () => onEdit(message),
         ),
         BottomSheetOption(
           icon: Icons.delete_outline,
           title: 'Delete Message',
-          color: Colors.red,
           isDestructive: true,
           onTap: () => onDelete(message),
         ),

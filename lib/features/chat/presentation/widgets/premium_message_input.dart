@@ -105,11 +105,7 @@ class _PremiumMessageInputState extends ConsumerState<PremiumMessageInput>
             // Show editing banner if editing
             if (widget.editingMessageId != null) _buildEditingBanner(),
 
-            // Show queued messages banner if any
-            if (chatState.hasQueuedMessages)
-              _buildQueuedMessagesBanner(chatState),
-
-            // Connection status banner
+            // Connection status banner (only show if offline)
             connectionAsync.when(
               data: (connection) => _buildConnectionBanner(connection),
               loading: () => const SizedBox.shrink(),
@@ -153,61 +149,6 @@ class _PremiumMessageInputState extends ConsumerState<PremiumMessageInput>
             onTap: widget.onCancelEditing,
             child: const Icon(Icons.close, size: 16, color: Colors.blue),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQueuedMessagesBanner(ChatDetailState chatState) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          if (chatState.isSendingQueued)
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
-              ),
-            )
-          else
-            const Icon(Icons.schedule, size: 16, color: Colors.orange),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              chatState.isSendingQueued
-                  ? 'Sending queued messages...'
-                  : '${chatState.queuedMessages.length} message${chatState.queuedMessages.length == 1 ? '' : 's'} queued',
-              style: appStyle(12.sp, Colors.orange, FontWeight.w600),
-            ),
-          ),
-          if (!chatState.isSendingQueued && chatState.isOnline)
-            GestureDetector(
-              onTap: () {
-                ref
-                    .read(chatDetailProvider(widget.roomId).notifier)
-                    .retryQueuedMessages();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'Retry',
-                  style: appStyle(10.sp, Colors.white, FontWeight.w600),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -363,33 +304,11 @@ class _PremiumMessageInputState extends ConsumerState<PremiumMessageInput>
                   ),
                 );
               },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    widget.editingMessageId != null
-                        ? Icons.check
-                        : IconlyBold.send,
-                    key: ValueKey(widget.editingMessageId != null),
-                    color: canSend ? Colors.white : Colors.grey[500],
-                    size: 20,
-                  ),
-                  // Show queue indicator if offline
-                  if (!chatState.isOnline && canSend)
-                    Positioned(
-                      top: 2,
-                      right: 2,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.orange, width: 1),
-                        ),
-                      ),
-                    ),
-                ],
+              child: Icon(
+                widget.editingMessageId != null ? Icons.check : IconlyBold.send,
+                key: ValueKey(widget.editingMessageId != null),
+                color: canSend ? Colors.white : Colors.grey[500],
+                size: 20,
               ),
             ),
           ),

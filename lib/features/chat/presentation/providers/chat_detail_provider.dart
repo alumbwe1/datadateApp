@@ -1,87 +1,35 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:datadate/core/utils/custom_logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/network/websocket_service.dart';
+import '../../../../core/providers/api_providers.dart';
 import '../../../../core/providers/connectivity_provider.dart';
-import '../../../../core/services/connectivity_service.dart'
-    show ConnectionInfo;
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/models/chat_room_model.dart';
 import '../../data/models/message_model.dart';
 import '../../data/services/chat_local_storage_service.dart';
 import '../../domain/repositories/chat_repository.dart';
 import 'chat_provider.dart';
 
-// Queued message for offline sending
-class QueuedMessage {
-  final String tempId;
-  final String content;
-  final DateTime timestamp;
-  final int retryCount;
-
-  QueuedMessage({
-    required this.tempId,
-    required this.content,
-    required this.timestamp,
-    this.retryCount = 0,
-  });
-
-  QueuedMessage copyWith({
-    String? tempId,
-    String? content,
-    DateTime? timestamp,
-    int? retryCount,
-  }) {
-    return QueuedMessage(
-      tempId: tempId ?? this.tempId,
-      content: content ?? this.content,
-      timestamp: timestamp ?? this.timestamp,
-      retryCount: retryCount ?? this.retryCount,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'tempId': tempId,
-      'content': content,
-      'timestamp': timestamp.toIso8601String(),
-      'retryCount': retryCount,
-    };
-  }
-
-  factory QueuedMessage.fromJson(Map<String, dynamic> json) {
-    return QueuedMessage(
-      tempId: json['tempId'],
-      content: json['content'],
-      timestamp: DateTime.parse(json['timestamp']),
-      retryCount: json['retryCount'] ?? 0,
-    );
-  }
-}
-
 // Chat detail state
 class ChatDetailState {
   final ChatRoomModel? room;
   final List<MessageModel> messages;
-  final List<QueuedMessage> queuedMessages;
   final bool isLoading;
   final bool isLoadingMore;
   final bool hasMore;
   final int currentPage;
   final String? error;
-  final bool isTyping; // Simplified - just one user typing
+  final bool isTyping;
   final bool isConnected;
   final bool isOnline;
-  final bool isSendingQueued;
   final DateTime? lastTypingTime;
 
   ChatDetailState({
     this.room,
     this.messages = const [],
-    this.queuedMessages = const [],
     this.isLoading = false,
     this.isLoadingMore = false,
     this.hasMore = true,
@@ -90,14 +38,12 @@ class ChatDetailState {
     this.isTyping = false,
     this.isConnected = false,
     this.isOnline = true,
-    this.isSendingQueued = false,
     this.lastTypingTime,
   });
 
   ChatDetailState copyWith({
     ChatRoomModel? room,
     List<MessageModel>? messages,
-    List<QueuedMessage>? queuedMessages,
     bool? isLoading,
     bool? isLoadingMore,
     bool? hasMore,
@@ -106,13 +52,11 @@ class ChatDetailState {
     bool? isTyping,
     bool? isConnected,
     bool? isOnline,
-    bool? isSendingQueued,
     DateTime? lastTypingTime,
   }) {
     return ChatDetailState(
       room: room ?? this.room,
       messages: messages ?? this.messages,
-      queuedMessages: queuedMessages ?? this.queuedMessages,
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       hasMore: hasMore ?? this.hasMore,
@@ -121,12 +65,9 @@ class ChatDetailState {
       isTyping: isTyping ?? this.isTyping,
       isConnected: isConnected ?? this.isConnected,
       isOnline: isOnline ?? this.isOnline,
-      isSendingQueued: isSendingQueued ?? this.isSendingQueued,
       lastTypingTime: lastTypingTime ?? this.lastTypingTime,
     );
   }
-
-  bool get hasQueuedMessages => queuedMessages.isNotEmpty;
 }
 
 // Chat detail notifier
@@ -137,9 +78,8 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
   final int roomId;
   StreamSubscription? _wsSubscription;
   Timer? _typingTimer;
-  Timer? _queueRetryTimer;
   Timer? _typingIndicatorTimer;
-  SharedPreferences? _prefs;
+  Timer? _refreshTimer;
 
   ChatDetailNotifier(
     this._repository,
@@ -150,219 +90,123 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
     _initialize();
   }
 
-  Future<void> _initialize() async {
-    _prefs = await SharedPreferences.getInstance();
-    await _loadQueuedMessages();
-    await loadRoomDetails();
-    await loadMessages();
+  void _initialize() {
+    _loadCachedData();
+    _connectWebSocket();
     _listenToConnectivity();
-    await _connectWebSocket();
+    _startPeriodicRefresh();
+  }
+
+  void _startPeriodicRefresh() {
+    _refreshTimer?.cancel();
+    // Reduced frequency to avoid too many API calls - only refresh every 30 seconds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _refreshMessages();
+    });
+  }
+
+  Future<void> _refreshMessages() async {
+    try {
+      // Only refresh if we're online and have an established connection
+      final connectionInfo = await _ref.read(connectionInfoProvider.future);
+      if (!connectionInfo.isConnected) {
+        return; // Don't refresh if offline
+      }
+
+      // Load fresh messages from server silently (without affecting UI loading states)
+      loadMessages(silent: true);
+    } catch (e) {
+      CustomLogs.error('Failed to refresh messages: $e');
+    }
+  }
+
+  Future<void> _loadCachedData() async {
+    try {
+      // Load cached room data
+      final cachedRooms = await ChatLocalStorageService.getCachedChatRooms();
+      final room = cachedRooms.where((r) => r.id == roomId).firstOrNull;
+
+      // Load cached messages only if we don't have messages yet
+      if (state.messages.isEmpty) {
+        final cachedMessages = await ChatLocalStorageService.getCachedMessages(
+          roomId,
+        );
+
+        state = state.copyWith(
+          room: room,
+          messages: cachedMessages,
+          isLoading: false,
+        );
+
+        CustomLogs.info(
+          '💬 Loaded ${cachedMessages.length} cached messages for room $roomId',
+        );
+      } else {
+        // Just update the room if we already have messages
+        state = state.copyWith(room: room);
+      }
+    } catch (e) {
+      CustomLogs.error('Failed to load cached chat data: $e');
+    }
   }
 
   void _listenToConnectivity() {
-    // Listen to connectivity changes using ref.listen
-    _ref.listen<AsyncValue<ConnectionInfo>>(connectionInfoProvider, (
-      previous,
-      next,
-    ) {
-      next.whenData((connection) {
-        final wasOnline = state.isOnline;
-        final isNowOnline = connection.isConnected;
+    _ref.listen(connectionInfoProvider, (previous, next) {
+      next.whenData((connectionInfo) {
+        final wasOffline = !state.isOnline;
+        state = state.copyWith(isOnline: connectionInfo.isConnected);
 
-        state = state.copyWith(isOnline: isNowOnline);
+        if (connectionInfo.isConnected && wasOffline) {
+          CustomLogs.info('💬 Connection restored, refreshing messages');
 
-        CustomLogs.info(
-          '🌐 Connectivity changed: $isNowOnline (was: $wasOnline)',
-        );
-
-        // If we just came back online, try to send queued messages
-        if (!wasOnline && isNowOnline && state.hasQueuedMessages) {
-          CustomLogs.info(
-            '📤 Back online! Sending ${state.queuedMessages.length} queued messages',
-          );
-          _sendQueuedMessages();
-        }
-
-        // Reconnect WebSocket if needed
-        if (isNowOnline && !state.isConnected) {
-          _connectWebSocket();
+          // Refresh messages when connection is restored
+          _refreshMessages();
         }
       });
     });
   }
 
-  Future<void> _loadQueuedMessages() async {
+  void _connectWebSocket() {
     try {
-      final queuedJson = _prefs?.getString('queued_messages_$roomId');
-      if (queuedJson != null) {
-        final List<dynamic> queuedList = jsonDecode(queuedJson);
-        final queuedMessages = queuedList
-            .map((json) => QueuedMessage.fromJson(json))
-            .toList();
+      _wsSubscription?.cancel();
 
-        state = state.copyWith(queuedMessages: queuedMessages);
-        CustomLogs.info(
-          '📥 Loaded ${queuedMessages.length} queued messages from storage',
-        );
-      }
-    } catch (e) {
-      CustomLogs.error('❌ Error loading queued messages: $e');
-    }
-  }
+      // Connect to WebSocket
+      _webSocketService
+          .connect(roomId)
+          .then((_) {
+            state = state.copyWith(isConnected: true);
+            CustomLogs.info('💬 WebSocket connected for room $roomId');
+          })
+          .catchError((error) {
+            CustomLogs.error('Failed to connect WebSocket: $error');
+            state = state.copyWith(isConnected: false);
+          });
 
-  Future<void> _saveQueuedMessages() async {
-    try {
-      final queuedJson = jsonEncode(
-        state.queuedMessages.map((msg) => msg.toJson()).toList(),
-      );
-      await _prefs?.setString('queued_messages_$roomId', queuedJson);
-    } catch (e) {
-      CustomLogs.error('❌ Error saving queued messages: $e');
-    }
-  }
-
-  Future<void> loadRoomDetails() async {
-    try {
-      final room = await _repository.getChatRoomDetail(roomId);
-      state = state.copyWith(room: room);
-    } catch (e) {
-      // Continue even if room details fail
-      CustomLogs.info('⚠️ Failed to load room details: $e');
-    }
-  }
-
-  Future<void> loadMessages({bool isLoadMore = false}) async {
-    CustomLogs.info(
-      '📥 loadMessages called for room $roomId (isLoadMore: $isLoadMore)',
-    );
-
-    if (isLoadMore) {
-      if (!state.hasMore || state.isLoadingMore) return;
-      state = state.copyWith(isLoadingMore: true);
-    } else {
-      state = state.copyWith(isLoading: true, error: null);
-
-      // Load cached messages first for instant display
-      final cachedMessages = await ChatLocalStorageService.getCachedMessages(
-        roomId,
-      );
-      if (cachedMessages.isNotEmpty) {
-        // Sort messages: oldest first (for proper display order)
-        cachedMessages.sort(
-          (a, b) => DateTime.parse(
-            a.createdAt,
-          ).compareTo(DateTime.parse(b.createdAt)),
-        );
-        state = state.copyWith(messages: cachedMessages);
-        CustomLogs.info('📱 Loaded ${cachedMessages.length} cached messages');
-      }
-    }
-
-    try {
-      // Check connectivity before making request
-      if (!state.isOnline) {
-        throw Exception('No internet connection');
-      }
-
-      CustomLogs.info('   🌐 Fetching messages from API...');
-      final result = await _repository.getMessages(
-        roomId: roomId,
-        page: isLoadMore ? state.currentPage + 1 : 1,
-        pageSize: 50,
-      );
-
-      final newMessages = result['messages'] as List<MessageModel>;
-      final hasMore = result['next'] != null;
-
-      CustomLogs.info('   ✅ Received ${newMessages.length} messages from API');
-      CustomLogs.info('   📊 Has more pages: $hasMore');
-
-      // Sort messages: oldest first for proper display
-      newMessages.sort(
-        (a, b) =>
-            DateTime.parse(a.createdAt).compareTo(DateTime.parse(b.createdAt)),
-      );
-
-      if (isLoadMore) {
-        // For load more, add older messages to the beginning
-        final combinedMessages = [...newMessages, ...state.messages];
-        state = state.copyWith(
-          messages: combinedMessages,
-          isLoadingMore: false,
-          hasMore: hasMore,
-          currentPage: state.currentPage + 1,
-        );
-        CustomLogs.info(
-          '   ✅ Added to existing messages. Total: ${combinedMessages.length}',
-        );
-      } else {
-        state = state.copyWith(
-          messages: newMessages,
-          isLoading: false,
-          hasMore: hasMore,
-          currentPage: 1,
-        );
-        CustomLogs.info('   ✅ Set messages. Total: ${newMessages.length}');
-
-        // Cache the messages
-        await ChatLocalStorageService.saveMessages(roomId, newMessages);
-      }
-    } catch (e) {
-      CustomLogs.info('   ❌ Error loading messages: $e');
-      String errorMessage = e.toString().replaceAll('Exception: ', '');
-
-      // Provide user-friendly error messages
-      if (errorMessage.contains('No internet connection')) {
-        errorMessage = 'No internet connection. Showing cached messages.';
-      } else if (errorMessage.contains('timeout')) {
-        errorMessage =
-            'Connection timeout. Please check your internet and try again.';
-      } else if (errorMessage.contains('401')) {
-        errorMessage = 'Session expired. Please log in again.';
-      } else {
-        errorMessage = 'Failed to load messages. Pull down to retry.';
-      }
-
-      state = state.copyWith(
-        isLoading: false,
-        isLoadingMore: false,
-        error: errorMessage,
-      );
-    }
-  }
-
-  Future<void> _connectWebSocket() async {
-    if (!state.isOnline) {
-      CustomLogs.info('🔌 Skipping WebSocket connection - offline');
-      return;
-    }
-
-    CustomLogs.info('🔌 Attempting to connect WebSocket for room $roomId...');
-    try {
-      await _webSocketService.connect(roomId);
-      state = state.copyWith(isConnected: true);
-      CustomLogs.info('✅ WebSocket connected successfully');
-
+      // Listen to messages
       _wsSubscription = _webSocketService.messages.listen(
         (data) {
-          CustomLogs.info('📨 WebSocket message received: $data');
           _handleWebSocketMessage(data);
         },
         onError: (error) {
-          CustomLogs.error('❌ WebSocket error: $error');
+          CustomLogs.error('WebSocket error: $error');
           state = state.copyWith(isConnected: false);
-          _scheduleReconnect();
+
+          // Don't schedule reconnect immediately on error
+          Timer(const Duration(seconds: 10), () {
+            if (state.isOnline && !state.isConnected) {
+              _scheduleReconnect();
+            }
+          });
         },
         onDone: () {
-          CustomLogs.info('🔌 WebSocket connection closed');
+          CustomLogs.info('WebSocket connection closed');
           state = state.copyWith(isConnected: false);
           _scheduleReconnect();
         },
       );
     } catch (e) {
-      CustomLogs.info('❌ WebSocket connection failed: $e');
+      CustomLogs.error('Failed to connect WebSocket: $e');
       state = state.copyWith(isConnected: false);
-      _scheduleReconnect();
     }
   }
 
@@ -371,424 +215,290 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
 
     Timer(const Duration(seconds: 5), () {
       if (!state.isConnected && state.isOnline) {
-        CustomLogs.info('🔄 Attempting WebSocket reconnection...');
+        CustomLogs.info('💬 Attempting WebSocket reconnection...');
         _connectWebSocket();
       }
     });
   }
 
   void _handleWebSocketMessage(Map<String, dynamic> data) {
-    final type = data['type'] as String?;
-    CustomLogs.info('🔄 Handling WebSocket message type: $type');
+    try {
+      final type = data['type'] as String;
 
-    switch (type) {
-      case 'chat_message':
-        CustomLogs.info('   💬 New chat message received');
-        final messageData = data['message'] as Map<String, dynamic>;
-        final message = MessageModel.fromJson(messageData);
-        CustomLogs.info('   Adding message to UI: ${message.content}');
-        _addNewMessage(message);
-        break;
-
-      case 'typing':
-        final isTyping = data['is_typing'] as bool? ?? false;
-        CustomLogs.info('   ⌨️ Typing indicator: $isTyping');
-        state = state.copyWith(isTyping: isTyping);
-
-        // Auto-clear typing indicator after 5 seconds
-        if (isTyping) {
-          Timer(const Duration(seconds: 5), () {
-            if (mounted) {
-              state = state.copyWith(isTyping: false);
-            }
-          });
-        }
-        break;
-
-      case 'message_read':
-        final messageId = data['message_id'] as int;
-        CustomLogs.info('   ✓✓ Message $messageId marked as read');
-        _markMessageAsRead(messageId);
-        break;
-
-      case 'user_status_change':
-        final userId = data['user_id']?.toString() ?? '';
-        final isOnline = data['is_online'] as bool? ?? false;
-        CustomLogs.info(
-          '   👤 User $userId status changed: ${isOnline ? 'online' : 'offline'}',
-        );
-        // Update room participant status if needed
-        break;
-
-      default:
-        CustomLogs.info('   ⚠️ Unknown message type: $type');
+      switch (type) {
+        case 'new_message':
+          final message = MessageModel.fromJson(data['message']);
+          _addNewMessage(message);
+          break;
+        case 'message_sent':
+          // Handle confirmation that our message was sent
+          final message = MessageModel.fromJson(data['message']);
+          _addNewMessage(message);
+          break;
+        case 'message_updated':
+          final message = MessageModel.fromJson(data['message']);
+          _updateMessage(message);
+          break;
+        case 'message_deleted':
+          final messageId = data['message_id'] as int;
+          _removeMessage(messageId);
+          break;
+        case 'typing_start':
+          _handleTypingStart();
+          break;
+        case 'typing_stop':
+          _handleTypingStop();
+          break;
+      }
+    } catch (e) {
+      CustomLogs.error('Failed to handle WebSocket message: $e');
     }
   }
 
   void _addNewMessage(MessageModel message) {
-    // Check if message already exists (prevent duplicates from WebSocket echo)
-    final exists = state.messages.any((msg) => msg.id == message.id);
-    if (exists) {
-      CustomLogs.info(
-        '   ⚠️ Message ${message.id} already exists, skipping duplicate',
+    final messages = List<MessageModel>.from(state.messages);
+
+    // Check if message already exists
+    if (!messages.any((msg) => msg.id == message.id)) {
+      messages.add(message);
+      messages.sort(
+        (a, b) =>
+            DateTime.parse(a.createdAt).compareTo(DateTime.parse(b.createdAt)),
       );
-      return;
-    }
 
-    // Add new message to the end (newest messages at bottom)
-    final updatedMessages = [...state.messages, message];
-    state = state.copyWith(messages: updatedMessages);
-    CustomLogs.info(
-      '   ✅ Message added to UI (total: ${updatedMessages.length})',
-    );
+      state = state.copyWith(messages: messages);
 
-    // Cache the new message
-    ChatLocalStorageService.addMessageToCache(roomId, message);
-
-    // Notify chat list to update
-    _ref
-        .read(chatRoomsProvider.notifier)
-        .updateRoomWithNewMessage(roomId, message);
-  }
-
-  void _markMessageAsRead(int messageId) {
-    final updatedMessages = state.messages.map((msg) {
-      if (msg.id == messageId) {
-        return msg.copyWith(isRead: true);
-      }
-      return msg;
-    }).toList();
-    state = state.copyWith(messages: updatedMessages);
-  }
-
-  Future<void> sendMessage(String content) async {
-    if (content.trim().isEmpty) return;
-
-    CustomLogs.info('🟢 ChatDetailNotifier.sendMessage called');
-    CustomLogs.info('   Content: "$content"');
-    CustomLogs.info('   Room ID: $roomId');
-    CustomLogs.info('   Online: ${state.isOnline}');
-    CustomLogs.info('   WebSocket connected: ${state.isConnected}');
-
-    // If offline, queue the message
-    if (!state.isOnline) {
-      CustomLogs.info('   📴 Offline - queuing message');
-      await _queueMessage(content);
-      return;
-    }
-
-    try {
-      // Always send via HTTP to ensure message is saved and appears in UI
-      CustomLogs.info('   📤 Sending message via HTTP...');
-      final message = await _repository
-          .sendMessage(roomId: roomId, content: content)
-          .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () {
-              throw Exception(
-                'Message sending timed out. Please check your connection.',
-              );
-            },
-          );
-
-      CustomLogs.info('   ✅ HTTP send successful, adding to UI');
-      _addNewMessage(message);
-
-      // Also send via WebSocket if connected for real-time delivery to other user
-      if (state.isConnected) {
-        CustomLogs.info('   📡 Also sending via WebSocket for real-time...');
-        try {
-          _webSocketService.sendMessage(content);
-        } catch (wsError) {
-          CustomLogs.info(
-            '   ⚠️ WebSocket send failed (non-critical): $wsError',
-          );
-          // Non-critical error, message already sent via HTTP
-        }
-      }
-    } catch (e) {
-      CustomLogs.info('   ❌ Error sending message: $e');
-
-      // If it's a network error, queue the message
-      if (e.toString().contains('timeout') ||
-          e.toString().contains('network') ||
-          e.toString().contains('connection')) {
-        CustomLogs.info('   📴 Network error - queuing message');
-        await _queueMessage(content);
-      } else {
-        // Show error to user for other types of errors
-        String errorMessage = e.toString().replaceAll('Exception: ', '');
-        if (errorMessage.contains('timeout')) {
-          errorMessage =
-              'Message sending timed out. It has been queued and will be sent when connection improves.';
-          await _queueMessage(content);
-        } else {
-          errorMessage = 'Failed to send message: $errorMessage';
-        }
-        state = state.copyWith(error: errorMessage);
-      }
+      // Cache the new message
+      ChatLocalStorageService.addMessageToCache(roomId, message);
     }
   }
 
-  Future<void> _queueMessage(String content) async {
-    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
-    final queuedMessage = QueuedMessage(
-      tempId: tempId,
-      content: content,
-      timestamp: DateTime.now(),
-    );
+  void _updateMessage(MessageModel message) {
+    final messages = List<MessageModel>.from(state.messages);
+    final index = messages.indexWhere((msg) => msg.id == message.id);
 
-    final updatedQueue = [...state.queuedMessages, queuedMessage];
-    state = state.copyWith(queuedMessages: updatedQueue);
+    if (index != -1) {
+      messages[index] = message;
+      state = state.copyWith(messages: messages);
 
-    await _saveQueuedMessages();
+      // Update cache
+      ChatLocalStorageService.addMessageToCache(roomId, message);
+    }
+  }
 
-    CustomLogs.info('📥 Message queued (${updatedQueue.length} total)');
+  void _removeMessage(int messageId) {
+    final messages = state.messages
+        .where((msg) => msg.id != messageId)
+        .toList();
+    state = state.copyWith(messages: messages);
 
-    // Show user feedback
-    state = state.copyWith(
-      error: 'Message queued. Will be sent when connection is restored.',
-    );
+    // Update cache
+    ChatLocalStorageService.saveMessages(roomId, messages);
+  }
 
-    // Clear error after 3 seconds
-    Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        state = state.copyWith(error: null);
-      }
+  void _handleTypingStart() {
+    state = state.copyWith(isTyping: true, lastTypingTime: DateTime.now());
+
+    _typingIndicatorTimer?.cancel();
+    _typingIndicatorTimer = Timer(const Duration(seconds: 3), () {
+      state = state.copyWith(isTyping: false);
     });
   }
 
-  Future<void> _sendQueuedMessages() async {
-    if (state.queuedMessages.isEmpty ||
-        state.isSendingQueued ||
-        !state.isOnline) {
-      return;
-    }
-
-    state = state.copyWith(isSendingQueued: true);
-    CustomLogs.info(
-      '📤 Sending ${state.queuedMessages.length} queued messages',
-    );
-
-    final messagesToSend = List<QueuedMessage>.from(state.queuedMessages);
-    final successfulMessages = <QueuedMessage>[];
-
-    for (final queuedMessage in messagesToSend) {
-      try {
-        CustomLogs.info(
-          '   📤 Sending queued message: ${queuedMessage.content}',
-        );
-
-        final message = await _repository
-            .sendMessage(roomId: roomId, content: queuedMessage.content)
-            .timeout(
-              const Duration(seconds: 10),
-              onTimeout: () {
-                throw Exception('Timeout sending queued message');
-              },
-            );
-
-        _addNewMessage(message);
-        successfulMessages.add(queuedMessage);
-
-        CustomLogs.info('   ✅ Queued message sent successfully');
-
-        // Small delay between messages to avoid overwhelming the server
-        await Future.delayed(const Duration(milliseconds: 500));
-      } catch (e) {
-        CustomLogs.info('   ❌ Failed to send queued message: $e');
-
-        // Increment retry count
-        final updatedMessage = queuedMessage.copyWith(
-          retryCount: queuedMessage.retryCount + 1,
-        );
-
-        // Remove message if it has failed too many times
-        if (updatedMessage.retryCount >= 3) {
-          CustomLogs.info('   🗑️ Removing message after 3 failed attempts');
-          successfulMessages.add(queuedMessage); // Mark for removal
-        }
-
-        break; // Stop sending if one fails
-      }
-    }
-
-    // Remove successfully sent messages from queue
-    final remainingMessages = state.queuedMessages
-        .where((msg) => !successfulMessages.contains(msg))
-        .toList();
-
-    state = state.copyWith(
-      queuedMessages: remainingMessages,
-      isSendingQueued: false,
-    );
-
-    await _saveQueuedMessages();
-
-    if (successfulMessages.isNotEmpty) {
-      CustomLogs.info('✅ Sent ${successfulMessages.length} queued messages');
-    }
-
-    if (remainingMessages.isNotEmpty) {
-      CustomLogs.info(
-        '⚠️ ${remainingMessages.length} messages remain in queue',
-      );
-      // Schedule retry in 30 seconds
-      _queueRetryTimer?.cancel();
-      _queueRetryTimer = Timer(const Duration(seconds: 30), () {
-        if (state.isOnline && remainingMessages.isNotEmpty) {
-          _sendQueuedMessages();
-        }
-      });
-    }
-  }
-
-  void sendTypingIndicator(bool isTyping) {
-    CustomLogs.info('⌨️ Sending typing indicator: $isTyping');
-
-    // Only send if we have a connection
-    if (state.isConnected && state.isOnline) {
-      try {
-        _webSocketService.sendTypingIndicator(isTyping);
-        CustomLogs.info('   ✅ Typing indicator sent via WebSocket');
-      } catch (e) {
-        CustomLogs.info('   ❌ Failed to send typing indicator: $e');
-      }
-    } else {
-      CustomLogs.info('   ⚠️ Skipping typing indicator - not connected');
-    }
-
-    // Update local state
-    state = state.copyWith(lastTypingTime: isTyping ? DateTime.now() : null);
-
-    // Auto-stop typing after 3 seconds
+  void _handleTypingStop() {
+    state = state.copyWith(isTyping: false);
     _typingIndicatorTimer?.cancel();
-    if (isTyping) {
-      _typingIndicatorTimer = Timer(const Duration(seconds: 3), () {
-        sendTypingIndicator(false);
-      });
-    }
   }
 
-  Future<void> markAsRead(int messageId) async {
+  // Load messages from server
+  Future<void> loadMessages({
+    bool isLoadMore = false,
+    bool silent = false,
+  }) async {
+    if (!silent) {
+      state = state.copyWith(
+        isLoading: !isLoadMore,
+        isLoadingMore: isLoadMore,
+        error: null,
+      );
+    }
+
     try {
-      if (state.isConnected && state.isOnline) {
-        _webSocketService.markAsRead(messageId);
-      } else if (state.isOnline) {
-        await _repository.markMessageAsRead(messageId);
+      final page = isLoadMore ? state.currentPage + 1 : 1;
+      final response = await _repository.getMessages(
+        roomId: roomId,
+        page: page,
+      );
+
+      // The response is a Map<String, dynamic> with 'messages' key containing List<MessageModel>
+      final newMessages = response['messages'] as List<MessageModel>;
+
+      List<MessageModel> allMessages;
+      if (isLoadMore) {
+        // Add older messages to the beginning
+        allMessages = [...newMessages, ...state.messages];
+      } else {
+        // Replace with fresh messages
+        allMessages = newMessages;
       }
-      _markMessageAsRead(messageId);
+
+      // Remove duplicates and sort
+      final uniqueMessages = <String, MessageModel>{};
+      for (final message in allMessages) {
+        uniqueMessages[message.uniqueId] = message;
+      }
+
+      final sortedMessages = uniqueMessages.values.toList();
+      sortedMessages.sort(
+        (a, b) =>
+            DateTime.parse(a.createdAt).compareTo(DateTime.parse(b.createdAt)),
+      );
+
+      state = state.copyWith(
+        messages: sortedMessages,
+        isLoading: false,
+        isLoadingMore: false,
+        hasMore: response['next'] != null,
+        currentPage: page,
+      );
+
+      // Cache the messages
+      await ChatLocalStorageService.saveMessages(roomId, sortedMessages);
+
+      // Load room data if not available
+      if (state.room == null) {
+        await _loadRoomData();
+      }
     } catch (e) {
-      CustomLogs.info('⚠️ Failed to mark message as read: $e');
-      // Silent fail - not critical
+      CustomLogs.error('Failed to load messages: $e');
+      if (!silent) {
+        state = state.copyWith(
+          isLoading: false,
+          isLoadingMore: false,
+          error: 'Failed to load messages',
+        );
+      }
     }
   }
 
-  Future<void> editMessage(int messageId, String content) async {
+  Future<void> _loadRoomData() async {
+    try {
+      final rooms = await _repository.getChatRooms();
+      final room = rooms.where((r) => r.id == roomId).firstOrNull;
+      if (room != null) {
+        state = state.copyWith(room: room);
+      }
+    } catch (e) {
+      CustomLogs.error('Failed to load room data: $e');
+    }
+  }
+
+  // Send message directly
+  Future<void> sendMessage(String content) async {
     if (content.trim().isEmpty) return;
 
-    CustomLogs.info(
-      '📝 Editing message $messageId with new content: "$content"',
-    );
+    final currentUser = _ref.read(authProvider).user;
+    if (currentUser == null) return;
 
-    if (!state.isOnline) {
-      state = state.copyWith(error: 'Cannot edit messages while offline');
-      return;
-    }
+    final currentUserId = int.tryParse(currentUser.id);
+    if (currentUserId == null) return;
 
     try {
-      final updatedMessage = await _repository
-          .editMessage(messageId: messageId, content: content)
-          .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              throw Exception('Edit request timed out');
-            },
-          );
-
-      // Update the message in the local state
-      final updatedMessages = state.messages.map((msg) {
-        if (msg.id == messageId) {
-          return updatedMessage;
-        }
-        return msg;
-      }).toList();
-
-      state = state.copyWith(messages: updatedMessages);
-      CustomLogs.info('✅ Message updated successfully in UI');
-    } catch (e) {
-      CustomLogs.info('❌ Error editing message: $e');
-      String errorMessage = e.toString().replaceAll('Exception: ', '');
-      if (errorMessage.contains('timeout')) {
-        errorMessage = 'Edit request timed out. Please try again.';
+      // Try WebSocket first if connected
+      if (state.isConnected) {
+        _webSocketService.sendMessage(content.trim());
+        CustomLogs.info('💬 Message sent via WebSocket');
+        return;
       }
-      state = state.copyWith(error: 'Failed to edit message: $errorMessage');
+
+      // Fallback to HTTP API
+      final sentMessage = await _repository.sendMessage(
+        roomId: roomId,
+        content: content.trim(),
+      );
+
+      // Add to messages list
+      final messages = List<MessageModel>.from(state.messages);
+      messages.add(sentMessage);
+      messages.sort(
+        (a, b) =>
+            DateTime.parse(a.createdAt).compareTo(DateTime.parse(b.createdAt)),
+      );
+
+      state = state.copyWith(messages: messages);
+
+      // Cache the sent message
+      await ChatLocalStorageService.addMessageToCache(roomId, sentMessage);
+
+      CustomLogs.info('💬 Message sent via HTTP: ${sentMessage.id}');
+    } catch (e) {
+      CustomLogs.error('💬 Failed to send message: $e');
       rethrow;
     }
   }
 
+  // Edit message
+  Future<void> editMessage(int messageId, String newContent) async {
+    try {
+      final updatedMessage = await _repository.editMessage(
+        messageId: messageId,
+        content: newContent,
+      );
+      _updateMessage(updatedMessage);
+    } catch (e) {
+      CustomLogs.error('Failed to edit message: $e');
+      rethrow;
+    }
+  }
+
+  // Delete message
   Future<void> deleteMessage(int messageId) async {
-    CustomLogs.info('🗑️ Deleting message $messageId');
-
-    if (!state.isOnline) {
-      state = state.copyWith(error: 'Cannot delete messages while offline');
-      return;
-    }
-
     try {
-      await _repository
-          .deleteMessage(messageId)
-          .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              throw Exception('Delete request timed out');
-            },
-          );
-
-      // Remove the message from the local state
-      final updatedMessages = state.messages
-          .where((msg) => msg.id != messageId)
-          .toList();
-
-      state = state.copyWith(messages: updatedMessages);
-      CustomLogs.info('✅ Message deleted successfully from UI');
+      await _repository.deleteMessage(messageId);
+      _removeMessage(messageId);
     } catch (e) {
-      CustomLogs.info('❌ Error deleting message: $e');
-      String errorMessage = e.toString().replaceAll('Exception: ', '');
-      if (errorMessage.contains('timeout')) {
-        errorMessage = 'Delete request timed out. Please try again.';
-      }
-      state = state.copyWith(error: 'Failed to delete message: $errorMessage');
+      CustomLogs.error('Failed to delete message: $e');
       rethrow;
     }
   }
 
-  // Retry sending queued messages manually
-  Future<void> retryQueuedMessages() async {
-    if (state.hasQueuedMessages && state.isOnline) {
-      await _sendQueuedMessages();
+  // Send typing indicator
+  void sendTypingIndicator([bool? isTyping]) {
+    if (state.isConnected) {
+      _webSocketService.sendTypingIndicator(isTyping != false);
+
+      if (isTyping != false) {
+        _typingTimer?.cancel();
+        _typingTimer = Timer(const Duration(seconds: 2), () {
+          if (state.isConnected) {
+            _webSocketService.sendTypingIndicator(false);
+          }
+        });
+      }
     }
   }
 
-  // Clear all queued messages
-  Future<void> clearQueuedMessages() async {
-    state = state.copyWith(queuedMessages: []);
-    await _saveQueuedMessages();
-    CustomLogs.info('🗑️ Cleared all queued messages');
+  // Retry failed messages (simplified - just refresh)
+  Future<void> retryFailedMessages() async {
+    await _refreshMessages();
   }
 
-  // Clear error message
+  // Clear error
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  // Public method to refresh messages (called from UI)
+  Future<void> refreshMessages() async {
+    await _refreshMessages();
   }
 
   @override
   void dispose() {
     _wsSubscription?.cancel();
     _typingTimer?.cancel();
-    _queueRetryTimer?.cancel();
     _typingIndicatorTimer?.cancel();
-    _webSocketService.disconnect();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 }
@@ -800,7 +510,7 @@ final chatDetailProvider =
       roomId,
     ) {
       final repository = ref.watch(chatRepositoryProvider);
-      final webSocketService = WebSocketService();
+      final webSocketService = ref.watch(webSocketServiceProvider);
 
       return ChatDetailNotifier(repository, webSocketService, ref, roomId);
     });
