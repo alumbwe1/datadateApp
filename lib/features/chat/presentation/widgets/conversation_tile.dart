@@ -4,10 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/utils/date_time_utils.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../pages/chat_detail_page.dart';
 import '../providers/chat_provider.dart';
@@ -221,10 +221,7 @@ class ConversationTile extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        timeago.format(
-          DateTime.parse(lastMessage.createdAt),
-          locale: 'en_short',
-        ),
+        DateTimeUtils.formatChatListTime(lastMessage.createdAt),
         style: appStyle(
           11,
           hasUnread ? AppColors.secondaryLight : Colors.grey[600]!,

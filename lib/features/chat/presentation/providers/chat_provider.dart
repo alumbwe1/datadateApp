@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/chat_remote_datasource.dart';
 import '../../data/models/chat_room_model.dart';
+import '../../data/models/message_model.dart';
 import '../../data/repositories/chat_repository_impl.dart';
+import '../../data/services/chat_local_storage_service.dart';
 import '../../domain/repositories/chat_repository.dart';
 
 // Repository provider
@@ -39,9 +41,19 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState> {
 
   Future<void> loadChatRooms() async {
     state = state.copyWith(isLoading: true, error: null);
+
+    // Load cached rooms first for instant display
+    final cachedRooms = await ChatLocalStorageService.getCachedChatRooms();
+    if (cachedRooms.isNotEmpty) {
+      state = state.copyWith(rooms: cachedRooms);
+    }
+
     try {
       final rooms = await _repository.getChatRooms();
       state = state.copyWith(rooms: rooms, isLoading: false);
+
+      // Cache the rooms
+      await ChatLocalStorageService.saveChatRooms(rooms);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -54,20 +66,22 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState> {
     try {
       final rooms = await _repository.getChatRooms();
       state = state.copyWith(rooms: rooms);
+
+      // Cache the updated rooms
+      await ChatLocalStorageService.saveChatRooms(rooms);
     } catch (e) {
       // Silent fail on refresh
     }
   }
 
-  void updateRoomWithNewMessage(
-    int roomId,
-    String lastMessage,
-    int unreadCount,
-  ) {
+  void updateRoomWithNewMessage(int roomId, MessageModel message) {
     final updatedRooms = state.rooms.map((room) {
       if (room.id == roomId) {
-        // Move room to top and update last message
-        return room;
+        // Update room with new last message
+        return room.copyWith(
+          lastMessage: message,
+          unreadCount: room.unreadCount + 1,
+        );
       }
       return room;
     }).toList();
@@ -76,10 +90,20 @@ class ChatRoomsNotifier extends StateNotifier<ChatRoomsState> {
     updatedRooms.sort((a, b) {
       if (a.id == roomId) return -1;
       if (b.id == roomId) return 1;
+
+      // Compare by last message time
+      if (a.lastMessage != null && b.lastMessage != null) {
+        return DateTime.parse(
+          b.lastMessage!.createdAt,
+        ).compareTo(DateTime.parse(a.lastMessage!.createdAt));
+      }
       return 0;
     });
 
     state = state.copyWith(rooms: updatedRooms);
+
+    // Update cache
+    ChatLocalStorageService.saveChatRooms(updatedRooms);
   }
 }
 

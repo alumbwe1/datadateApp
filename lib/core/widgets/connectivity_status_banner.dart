@@ -41,7 +41,6 @@ class ConnectivityStatusBanner extends ConsumerWidget {
     final color = _getConnectionColor(connection.status);
     final icon = _getConnectionIcon(connection.status, connection.type);
     final text = _getConnectionText(connection);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: margin ?? EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),

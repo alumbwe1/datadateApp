@@ -54,6 +54,28 @@ class ChatRoomModel {
       'created_at': createdAt,
     };
   }
+
+  ChatRoomModel copyWith({
+    int? id,
+    ParticipantInfo? participant1,
+    ParticipantInfo? participant2,
+    int? matchId,
+    ParticipantInfo? otherParticipant,
+    MessageModel? lastMessage,
+    int? unreadCount,
+    String? createdAt,
+  }) {
+    return ChatRoomModel(
+      id: id ?? this.id,
+      participant1: participant1 ?? this.participant1,
+      participant2: participant2 ?? this.participant2,
+      matchId: matchId ?? this.matchId,
+      otherParticipant: otherParticipant ?? this.otherParticipant,
+      lastMessage: lastMessage ?? this.lastMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
 
 class ParticipantInfo {

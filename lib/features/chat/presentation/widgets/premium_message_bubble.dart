@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/utils/date_time_utils.dart';
 
 class PremiumMessageBubble extends StatefulWidget {
   final dynamic message;
@@ -14,6 +14,7 @@ class PremiumMessageBubble extends StatefulWidget {
   final String? senderName;
   final VoidCallback onLongPress;
   final bool isAudioMessage;
+  final bool showDateSeparator;
 
   const PremiumMessageBubble({
     super.key,
@@ -24,6 +25,7 @@ class PremiumMessageBubble extends StatefulWidget {
     this.senderName,
     required this.onLongPress,
     this.isAudioMessage = false,
+    this.showDateSeparator = false,
   });
 
   @override
@@ -71,45 +73,93 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          alignment: widget.isSent
-              ? Alignment.centerRight
-              : Alignment.centerLeft,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: widget.showAvatar ? 16 : 4,
-              left: widget.isSent ? 50 : 0,
-              right: widget.isSent ? 0 : 50,
-              top: 4,
-            ),
-            child: Row(
-              mainAxisAlignment: widget.isSent
-                  ? MainAxisAlignment.end
-                  : MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (!widget.isSent && widget.showAvatar)
-                  _buildAvatar()
-                else if (!widget.isSent)
-                  const SizedBox(width: 40),
-                Flexible(
-                  child: GestureDetector(
-                    onLongPress: () {
-                      HapticFeedback.mediumImpact();
-                      widget.onLongPress();
-                    },
-                    child: _buildMessageContent(),
-                  ),
+    return Column(
+      children: [
+        // Date separator
+        if (widget.showDateSeparator) _buildDateSeparator(context),
+
+        // Message bubble
+        FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              alignment: widget.isSent
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: widget.showAvatar ? 16 : 4,
+                  left: widget.isSent ? 50 : 0,
+                  right: widget.isSent ? 0 : 50,
+                  top: 4,
                 ),
-              ],
+                child: Row(
+                  mainAxisAlignment: widget.isSent
+                      ? MainAxisAlignment.end
+                      : MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (!widget.isSent && widget.showAvatar)
+                      _buildAvatar()
+                    else if (!widget.isSent)
+                      const SizedBox(width: 40),
+                    Flexible(
+                      child: GestureDetector(
+                        onLongPress: () {
+                          HapticFeedback.mediumImpact();
+                          widget.onLongPress();
+                        },
+                        child: _buildMessageContent(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildDateSeparator(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 1,
+              color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              DateTimeUtils.formatDateSeparator(widget.message.createdAt),
+              style: appStyle(
+                12.sp,
+                isDarkMode ? Colors.grey[300]! : Colors.grey[600]!,
+                FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -251,11 +301,7 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          timeago.format(
-            DateTime.parse(widget.message.createdAt),
-            locale: 'en_short',
-            allowFromNow: true,
-          ),
+          DateTimeUtils.formatMessageBubbleTime(widget.message.createdAt),
           style: appStyle(
             9.sp,
             widget.isSent
@@ -275,7 +321,9 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
                 child: Icon(
                   widget.message.isRead ? Icons.done_all : Icons.check,
                   size: 14,
-                  color: Colors.white.withValues(alpha: 0.75),
+                  color: widget.message.isRead
+                      ? Colors.lightBlueAccent
+                      : Colors.white.withValues(alpha: 0.75),
                 ),
               );
             },

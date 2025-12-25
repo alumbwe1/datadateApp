@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_style.dart';
+import '../providers/chat_detail_provider.dart';
 
-class PremiumTypingIndicator extends StatefulWidget {
-  const PremiumTypingIndicator({super.key});
+class PremiumTypingIndicator extends ConsumerStatefulWidget {
+  final int roomId;
+
+  const PremiumTypingIndicator({super.key, required this.roomId});
 
   @override
-  State<PremiumTypingIndicator> createState() => _PremiumTypingIndicatorState();
+  ConsumerState<PremiumTypingIndicator> createState() =>
+      _PremiumTypingIndicatorState();
 }
 
-class _PremiumTypingIndicatorState extends State<PremiumTypingIndicator>
+class _PremiumTypingIndicatorState extends ConsumerState<PremiumTypingIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -29,6 +34,19 @@ class _PremiumTypingIndicatorState extends State<PremiumTypingIndicator>
 
   @override
   Widget build(BuildContext context) {
+    final chatState = ref.watch(chatDetailProvider(widget.roomId));
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Don't show if no one is typing
+    if (!chatState.isTyping) {
+      return const SizedBox.shrink();
+    }
+
+    final otherParticipant = chatState.room?.otherParticipant;
+    final firstName =
+        otherParticipant?.displayName.split(' ').first ?? 'Someone';
+    final typingText = '$firstName is typing';
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 300),
@@ -41,17 +59,18 @@ class _PremiumTypingIndicatorState extends State<PremiumTypingIndicator>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.grey[50]!, Colors.grey[100]!],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: isDarkMode ? const Color(0xFF2A1F35) : Colors.grey[50],
                 border: Border(
-                  bottom: BorderSide(color: Colors.grey[200]!, width: 1),
+                  bottom: BorderSide(
+                    color: isDarkMode ? Colors.grey[700]! : Colors.grey[200]!,
+                    width: 1,
+                  ),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
+                    color: Colors.black.withValues(
+                      alpha: isDarkMode ? 0.1 : 0.02,
+                    ),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -65,14 +84,12 @@ class _PremiumTypingIndicatorState extends State<PremiumTypingIndicator>
                     margin: const EdgeInsets.only(right: 10),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [Colors.grey[200]!, Colors.grey[300]!],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: isDarkMode ? Colors.grey[700] : Colors.grey[200],
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
+                          color: Colors.black.withValues(
+                            alpha: isDarkMode ? 0.2 : 0.05,
+                          ),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -87,23 +104,28 @@ class _PremiumTypingIndicatorState extends State<PremiumTypingIndicator>
                             child: Icon(
                               Icons.more_horiz,
                               size: 16,
-                              color: Colors.grey[600],
+                              color: isDarkMode
+                                  ? Colors.grey[300]
+                                  : Colors.grey[600],
                             ),
                           );
                         },
                       ),
                     ),
                   ),
-                  Text(
-                    'typing',
-                    style: appStyle(
-                      13,
-                      Colors.grey[600]!,
-                      FontWeight.w500,
-                    ).copyWith(fontStyle: FontStyle.italic),
+                  Expanded(
+                    child: Text(
+                      typingText,
+                      style: appStyle(
+                        13,
+                        isDarkMode ? Colors.grey[300]! : Colors.grey[600]!,
+                        FontWeight.w500,
+                      ).copyWith(fontStyle: FontStyle.italic),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(width: 4),
-                  _buildTypingDots(),
+                  _buildTypingDots(isDarkMode),
                 ],
               ),
             ),
@@ -113,7 +135,7 @@ class _PremiumTypingIndicatorState extends State<PremiumTypingIndicator>
     );
   }
 
-  Widget _buildTypingDots() {
+  Widget _buildTypingDots(bool isDarkMode) {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -125,16 +147,18 @@ class _PremiumTypingIndicatorState extends State<PremiumTypingIndicator>
             final opacity =
                 0.3 + (0.7 * (animValue > 0.5 ? 1 - animValue : animValue) * 2);
 
+            final dotColor = isDarkMode ? Colors.grey[300]! : Colors.grey[600]!;
+
             return Container(
               width: 4,
               height: 4,
               margin: const EdgeInsets.only(right: 3),
               decoration: BoxDecoration(
-                color: Colors.grey[600]!.withValues(alpha: opacity),
+                color: dotColor.withValues(alpha: opacity),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey[600]!.withValues(alpha: opacity * 0.3),
+                    color: dotColor.withValues(alpha: opacity * 0.3),
                     blurRadius: 2,
                     spreadRadius: 0.5,
                   ),

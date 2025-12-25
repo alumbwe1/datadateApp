@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_style.dart';
+import '../../../../core/utils/date_time_utils.dart';
 import '../../../../core/widgets/connectivity_status_banner.dart';
 import '../../../../core/widgets/custom_snackbar.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/chat_detail_provider.dart';
+import '../widgets/chat_error_banner.dart';
 import '../widgets/chat_options_sheet.dart';
 import '../widgets/message_options_sheet.dart';
 import '../widgets/premium_app_bar.dart';
@@ -51,8 +53,8 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     });
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      // Load more when scrolling to the top (older messages)
+      if (_scrollController.position.pixels == 0) {
         ref
             .read(chatDetailProvider(widget.roomId).notifier)
             .loadMessages(isLoadMore: true);
@@ -67,7 +69,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
-        0,
+        _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
@@ -293,6 +295,18 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     );
   }
 
+  bool _shouldShowDateSeparator(int index, List messages) {
+    if (index == 0) return true; // Always show for first message
+
+    final currentMessage = messages[index];
+    final previousMessage = messages[index - 1];
+
+    return DateTimeUtils.shouldShowDateSeparator(
+      currentMessage.createdAt,
+      previousMessage.createdAt,
+    );
+  }
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -329,10 +343,6 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
       );
     }
 
-    final currentUserId = currentUser != null
-        ? int.tryParse(currentUser.id)
-        : null;
-
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
       appBar: PremiumChatAppBar(
@@ -346,7 +356,8 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
       body: Column(
         children: [
           const ConnectivityStatusBanner(showOnlyWhenPoor: true),
-          if (chatState.isTyping) const PremiumTypingIndicator(),
+          ChatErrorBanner(roomId: widget.roomId),
+          if (chatState.isTyping) PremiumTypingIndicator(roomId: widget.roomId),
           Expanded(
             child: GestureDetector(
               onTap: () {
@@ -362,12 +373,14 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                         vertical: 20,
                       ),
                       physics: const BouncingScrollPhysics(),
-                      reverse: true,
+                      reverse:
+                          false, // Changed to false - newest messages at bottom
                       itemCount:
                           chatState.messages.length +
                           (chatState.isLoadingMore ? 1 : 0),
                       itemBuilder: (context, index) {
-                        if (index == chatState.messages.length) {
+                        // Show loading indicator at the top when loading more
+                        if (chatState.isLoadingMore && index == 0) {
                           return const Center(
                             child: Padding(
                               padding: EdgeInsets.all(16.0),
@@ -376,14 +389,23 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                           );
                         }
 
-                        final message = chatState.messages[index];
+                        final messageIndex = chatState.isLoadingMore
+                            ? index - 1
+                            : index;
+                        final message = chatState.messages[messageIndex];
+                        final currentUserId = currentUser != null
+                            ? int.tryParse(currentUser.id)
+                            : null;
                         final isSent =
                             currentUserId != null &&
                             message.sender == currentUserId;
+
+                        // Check if we should show avatar (first message from sender in a group)
                         final showAvatar =
-                            index == 0 ||
-                            chatState.messages[index - 1].sender !=
-                                message.sender;
+                            messageIndex == chatState.messages.length - 1 ||
+                            (messageIndex < chatState.messages.length - 1 &&
+                                chatState.messages[messageIndex + 1].sender !=
+                                    message.sender);
 
                         return PremiumMessageBubble(
                           key: ValueKey('message_${message.id}'),
@@ -394,6 +416,10 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
                           senderName: room?.otherParticipant.displayName,
                           onLongPress: () =>
                               _showMessageOptions(message, isSent),
+                          showDateSeparator: _shouldShowDateSeparator(
+                            messageIndex,
+                            chatState.messages,
+                          ),
                         );
                       },
                     ),
@@ -403,6 +429,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
             controller: _messageController,
             focusNode: _focusNode,
             onSend: _sendMessage,
+            roomId: widget.roomId,
             editingMessageId: _editingMessageId,
             editingOriginalContent: _editingOriginalContent,
             onCancelEditing: _cancelEditing,
