@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/api_providers.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/services/logout_service.dart';
+import '../../../../core/utils/custom_logs.dart';
 import '../../data/datasources/auth_local_datasource.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -96,7 +98,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await _authRepository.logout();
+    try {
+      // First try to logout from server
+      await _authRepository.logout();
+    } catch (e) {
+      // Even if server logout fails, we should still clear local data
+      CustomLogs.error('Server logout failed: $e');
+    }
+
+    // Always clear all local data
+    await LogoutService.performLogout();
+
+    // Reset auth state
     state = AuthState();
   }
 

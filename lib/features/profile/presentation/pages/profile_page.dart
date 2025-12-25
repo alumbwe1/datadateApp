@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/constants/app_style.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/services/logout_service.dart';
 import '../../../../core/widgets/error_widget.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
-import '../widgets/profile_dialogs.dart';
 import '../widgets/profile_settings_bottom_sheet.dart';
 import 'edit_profile_page.dart';
 
@@ -485,6 +487,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
         SizedBox(
@@ -500,8 +504,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
+              backgroundColor: isDarkMode ? Colors.white : Colors.black,
+              foregroundColor: isDarkMode ? Colors.black : Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(40.r),
@@ -511,11 +515,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.edit_outlined, size: 20),
+                Icon(
+                  Icons.edit_outlined,
+                  size: 20,
+                  color: isDarkMode ? Colors.black : Colors.white,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Edit Profile',
-                  style: appStyle(16, Colors.white, FontWeight.w600),
+                  style: appStyle(
+                    16,
+                    isDarkMode ? Colors.black : Colors.white,
+                    FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -525,7 +537,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () => ProfileDialogs.showLogoutDialog(context, ref),
+            onPressed: () => _showLogoutDialog(context, ref),
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.h),
               side: BorderSide(color: Colors.red, width: 1.0.w),
@@ -548,6 +560,49 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  // Use comprehensive logout service
+                  await LogoutService.performLogout();
+                  // Also clear auth state
+                  await ref.read(authProvider.notifier).logout();
+                  if (context.mounted) {
+                    // Navigate to login using GoRouter
+                    context.go('/login');
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Logout failed: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -68,6 +68,10 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(chatDetailProvider(widget.roomId).notifier).loadMessages();
+      // Auto-scroll to bottom after messages are loaded
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _scrollToBottom();
+      });
     });
   }
 
@@ -75,13 +79,17 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    // When app becomes active, refresh messages
+    // When app becomes active, refresh messages and scroll to bottom
     if (state == AppLifecycleState.resumed) {
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           ref
               .read(chatDetailProvider(widget.roomId).notifier)
               .refreshMessages();
+          // Auto-scroll to bottom after refresh
+          Future.delayed(const Duration(milliseconds: 300), () {
+            _scrollToBottom();
+          });
         }
       });
     }
@@ -94,6 +102,17 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
+    } else {
+      // If scroll controller is not ready, try again after a short delay
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
     }
   }
 
@@ -358,6 +377,18 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage>
     final currentUser = ref.watch(authProvider).user;
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Auto-scroll to bottom when messages change (new message received/sent)
+    ref.listen(chatDetailProvider(widget.roomId), (previous, next) {
+      if (previous != null &&
+          previous.messages.length < next.messages.length &&
+          !next.isLoadingMore) {
+        // New message added, scroll to bottom
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _scrollToBottom();
+        });
+      }
+    });
 
     if (chatState.isLoading && room == null) {
       return Scaffold(

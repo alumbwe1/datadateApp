@@ -361,6 +361,7 @@ POST /api/v1.0/chat/health-check/
 }
 ```
 
+
 ```json
 {
   "type": "pong",

@@ -393,7 +393,7 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
     }
   }
 
-  // Send message directly
+  // Send message directly to server
   Future<void> sendMessage(String content) async {
     if (content.trim().isEmpty) return;
 
@@ -404,14 +404,7 @@ class ChatDetailNotifier extends StateNotifier<ChatDetailState> {
     if (currentUserId == null) return;
 
     try {
-      // Try WebSocket first if connected
-      if (state.isConnected) {
-        _webSocketService.sendMessage(content.trim());
-        CustomLogs.info('💬 Message sent via WebSocket');
-        return;
-      }
-
-      // Fallback to HTTP API
+      // Send directly to server via HTTP API
       final sentMessage = await _repository.sendMessage(
         roomId: roomId,
         content: content.trim(),

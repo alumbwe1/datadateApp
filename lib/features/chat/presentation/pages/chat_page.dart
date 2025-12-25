@@ -82,7 +82,23 @@ class _ChatPageState extends ConsumerState<ChatPage>
             );
           }).toList();
 
-    final conversations = filteredRooms;
+    // Sort conversations by most recent message (newest first)
+    final sortedConversations = List.from(filteredRooms);
+    sortedConversations.sort((a, b) {
+      // If both have last messages, compare by timestamp
+      if (a.lastMessage != null && b.lastMessage != null) {
+        return DateTime.parse(
+          b.lastMessage!.createdAt,
+        ).compareTo(DateTime.parse(a.lastMessage!.createdAt));
+      }
+      // If only one has a last message, prioritize it
+      if (a.lastMessage != null && b.lastMessage == null) return -1;
+      if (a.lastMessage == null && b.lastMessage != null) return 1;
+      // If neither has a last message, sort by room creation date
+      return DateTime.parse(b.createdAt).compareTo(DateTime.parse(a.createdAt));
+    });
+
+    final conversations = sortedConversations;
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -168,7 +184,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
                 ),
                 decoration: BoxDecoration(
                   color: isDarkMode
-                      ? Colors.orange.shade900.withOpacity(0.3)
+                      ? Colors.orange.shade900.withValues(alpha: 0.3)
                       : Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
@@ -214,9 +230,7 @@ class _ChatPageState extends ConsumerState<ChatPage>
           ),
           SliverToBoxAdapter(child: MatchesSection(matches: matches)),
           if (conversations.isNotEmpty) ...[
-            SliverToBoxAdapter(
-              child: _buildMessagesTitle(conversations.length),
-            ),
+            SliverToBoxAdapter(child: _buildMessagesTitle(conversations)),
           ],
           if (conversations.isEmpty && matches.isEmpty)
             const SliverFillRemaining(child: ChatEmptyState())
@@ -227,8 +241,14 @@ class _ChatPageState extends ConsumerState<ChatPage>
     );
   }
 
-  Widget _buildMessagesTitle(int count) {
+  Widget _buildMessagesTitle(List conversations) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Calculate total unread messages across all conversations
+    final totalUnreadCount = conversations.fold<int>(
+      0,
+      (sum, room) => sum + ((room.unreadCount ?? 0) as int),
+    );
 
     return Container(
       color: isDarkMode ? const Color(0xFF1A1625) : Colors.white,
@@ -244,21 +264,39 @@ class _ChatPageState extends ConsumerState<ChatPage>
             ).copyWith(letterSpacing: -0.3, height: 1.2),
           ),
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isDarkMode ? Colors.grey[800] : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
+          if (totalUnreadCount > 0) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$totalUnreadCount',
+                style: appStyle(
+                  11.sp,
+                  Colors.white,
+                  FontWeight.w700,
+                ).copyWith(letterSpacing: -0.3),
+              ),
             ),
-            child: Text(
-              '$count',
-              style: appStyle(
-                11.sp,
-                isDarkMode ? Colors.grey[300]! : Colors.grey.shade600,
-                FontWeight.w700,
-              ).copyWith(letterSpacing: -0.3),
+          ] else ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.grey[800] : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${conversations.length}',
+                style: appStyle(
+                  11.sp,
+                  isDarkMode ? Colors.grey[300]! : Colors.grey.shade600,
+                  FontWeight.w700,
+                ).copyWith(letterSpacing: -0.3),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

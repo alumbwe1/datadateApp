@@ -324,7 +324,8 @@ class _PremiumMessageBubbleState extends State<PremiumMessageBubble>
             },
           );
 
-        
+      
+
         case MessageStatus.failed:
           return TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.0, end: 1.0),

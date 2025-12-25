@@ -47,16 +47,25 @@ class WebSocketService {
 
       final String base = 'wss://heartlink-production.up.railway.app';
       final uri = Uri.parse(
-        '$base${ApiEndpoints.chatWebSocket(roomId)}?token=$token',
-      );
+        '$base${ApiEndpoints.chatWebSocket(roomId)}',
+      ).replace(queryParameters: {'token': token});
 
       CustomLogs.info('🔌 Connecting to WebSocket: $uri');
 
       _channel = WebSocketChannel.connect(uri);
 
+      // Add connection timeout
+      final connectionTimeout = Timer(const Duration(seconds: 10), () {
+        if (_isConnecting) {
+          CustomLogs.error('❌ WebSocket connection timeout');
+          _handleConnectionError(roomId);
+        }
+      });
+
       // Listen to incoming messages
       _channel!.stream.listen(
         (data) {
+          connectionTimeout.cancel(); // Cancel timeout on successful connection
           try {
             final message = jsonDecode(data as String) as Map<String, dynamic>;
             _messageController.add(message);
@@ -66,10 +75,12 @@ class WebSocketService {
           }
         },
         onError: (error) {
+          connectionTimeout.cancel();
           CustomLogs.error('❌ WebSocket error: $error');
           _handleConnectionError(roomId);
         },
         onDone: () {
+          connectionTimeout.cancel();
           CustomLogs.info('🔌 WebSocket connection closed');
           _handleConnectionClosed(roomId);
         },
@@ -98,6 +109,8 @@ class WebSocketService {
       _messageController.addError(
         'Connection failed after $_maxReconnectAttempts attempts',
       );
+      // Stop trying to reconnect to prevent crashes
+      _shouldReconnect = false;
     }
   }
 
